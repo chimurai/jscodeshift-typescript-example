@@ -1,0 +1,19 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "recreateClosed": true
+  },
+  "pinVersions": false,
+  "groupName": "all",
+  "masterIssue": true,
+  "stabilityDays": 7,
+  "prCreation": "not-pending",
+  "separateMajorMinor": "true",
+  "rebaseStalePrs": true,
+  "schedule": ["every weekend"],
+  "timezone": "Europe/Amsterdam"
+}
+
