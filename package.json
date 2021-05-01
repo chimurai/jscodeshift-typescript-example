@@ -8,7 +8,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "jscodeshift": "^0.11.0"
+    "jscodeshift": "^0.12.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.19",
