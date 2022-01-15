@@ -59,7 +59,12 @@ Use `@babel/parser` in [https://astexplorer.net](https://astexplorer.net) when w
 
 ## Resources & Inspiration
 
-- https://github.com/facebook/jscodeshift/tree/master/sample
-- https://github.com/facebook/jscodeshift/blob/master/recipes/retain-first-comment.md
-- https://github.com/elliottsj/jscodeshift-typescript-example
-- https://astexplorer.net
+- <https://github.com/facebook/jscodeshift/tree/master/sample>
+- <https://github.com/facebook/jscodeshift/blob/master/recipes/retain-first-comment.md>
+- <https://github.com/elliottsj/jscodeshift-typescript-example>
+- <https://astexplorer.net>
+
+## Awesome lists
+
+- <https://github.com/rajasegar/awesome-codemods>
+- <https://github.com/sejoker/awesome-jscodeshift>
