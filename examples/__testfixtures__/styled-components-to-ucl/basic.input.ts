@@ -10,22 +10,10 @@ export const SpreadContentContainer = styled.div`
   text-align: left;
 `;
 
-export const Heading = styled.h1`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-align: left;
-`;
-
-const textStyles = css`
+export const Heading = styled.h2`
+  font-size: 1.1rem;
+  text-align: center;
   margin: 0;
-  text-transform: ${Styles.textTransform.headlines};
-  font: ${brandFont.headerThree};
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-
-  ${Styles.desktop`
-    letter-spacing: 1px;
-  `}
+  padding: 0;
+  margin-bottom: 1rem;
 `;

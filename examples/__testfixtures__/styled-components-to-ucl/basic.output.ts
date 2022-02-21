@@ -1,19 +1,12 @@
-import { Box } from '@rbilabs/universal-components';
+import { Box, Header } from '@rbilabs/universal-components';
 
 /**
  * Spreads children horizontally and centers them vertically
  */
-export const SpreadContentContainer = 1;
+export const SpreadContentContainer = Box.withConfig({
+  foo: 'bar'
+});
 
-const textStyles = css`
-  margin: 0;
-  text-transform: ${Styles.textTransform.headlines};
-  font: ${brandFont.headerThree};
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-
-  ${Styles.desktop`
-    letter-spacing: 1px;
-  `}
-`;
+export const Heading = Header.withConfig({
+  foo: 'bar'
+});

@@ -1,20 +1,34 @@
 import { API, FileInfo, JSCodeshift } from 'jscodeshift';
+import * as _ from 'lodash';
 
-const mappings = {
+interface IMapping {
+  component: string;
+}
+
+const mappings: Record<string, IMapping> = {
   'div': {
-    import: 'Box',
+    component: 'Box',
   },
   'h1': {
-    import: 'Header'
+    component: 'Header'
+  },
+  'h2': {
+    component: 'Header'
   }
 };
 
-const styledToUCL = (j: JSCodeshift, element: string, template: string) => {
-  const found = mappings[element];
+
+const getMapping = (el: string) => {
+  const found = mappings[el];
 
   if (!found) {
-    throw new Error('element not found: ' + element);
+    throw new Error('element not found: ' + el);
   }
+  return found;
+}
+
+const styledToUCL = (j: JSCodeshift, mapping, template: string) => {
+  const Component = mapping.component;
 
   // Check for props
   // Check media queries
@@ -29,27 +43,16 @@ const styledToUCL = (j: JSCodeshift, element: string, template: string) => {
   // return j.callExpression(j.memberExpression(asObject, j.identifier('fn')), []);
   return j.callExpression(
     j.memberExpression(
-      j.identifier('Box'),
+      j.identifier(Component),
       j.identifier('withConfig'),
     ), [asObject]);
-  //   j.objectExpression([
-  //     j.property(
-  //       'init',
-  //       j.identifier('foo'),
-  //       j.literal('bar')
-  //     )
-  //   ]),
-  // ));
-
-  // ('init'), j.identifier('fo'), j.literal('bar'));
-  // return j.callExpression(j.memberExpression(j.identifier('jest'), j.identifier('fn')), []);
-
 }
 
 export default function transformer(fileInfo: FileInfo, api: API) {
   const j = api.jscodeshift;
 
   const root = j(fileInfo.source);
+  const uclImports = [];
 
   const styledImport = root
     .find(j.ImportDeclaration, {
@@ -80,68 +83,53 @@ export default function transformer(fileInfo: FileInfo, api: API) {
 
   console.log(`>>> styledLocal: `, styledLocal);
 
-  // Imports
-  // -------
-  // Remove the styled import
-  styledImport.remove();
-
-  // Replace Import with UCL
-  styledImport.insertBefore(j.importDeclaration(
-    [
-      j.importSpecifier(
-        j.identifier('Box'),
-      )
-    ],
-    j.stringLiteral("@rbilabs/universal-components")
-
-  ))
-
-  const callSite = root.find(j.MemberExpression, {
+  root.find(j.MemberExpression, {
     object: {
       name: styledLocal,
     },
   })
-    // .forEach((nodePath) => {
-    //   const { node } = nodePath;
-    //   console.log(`node: `, node);
-    //   // styled.XXX
-    //   // @ts-ignore
-    //   const htmlElement = node.property.name;
-    //   // // do the mapping
-    //   const obj = styledToUCL(j, htmlElement, ``);
-    //   // console.log(`>>> HTML element: `, obj);
-
-
-    // })
     .closest(j.TaggedTemplateExpression)
     .replaceWith(nodePath => {
       const { node } = nodePath;
-      console.log(`node: `, node);
+      // @ts-ignore
+      // console.log(`-----: `, node.quasi.quasis[0].value.cooked);
+      console.log(`-----: `, node.tag.property.name);
+
+      // @ts-ignore
+      const propName = node.tag.property.name;
       // styled.XXX
       // @ts-ignore
       // const htmlElement = node.property.name;
-      const htmlElement = 'div';
+      const mapping = getMapping(propName);
+      console.log(`>>> mapping: `, mapping);
+      if (mapping?.component)
+        uclImports.push(mapping.component)
       // // do the mapping
-      const obj = styledToUCL(j, htmlElement, ``);
+      const obj = styledToUCL(j, mapping, ``);
 
       return obj;
     });
 
-  return root.find(j.MemberExpression, {
-    object: {
-      name: styledLocal,
-    },
-    property: {
-      name: 'circleArea',
-    },
-  }).replaceWith(nodePath => {
-    // get the underlying Node
-    const { node } = nodePath;
+  console.log(`>>> uclImports: `, uclImports);
+  // Imports
+  // -------
+  // Remove the 'styled-components' import
+  styledImport.remove();
 
-    // change to our new prop
-    // @ts-ignore
-    node.property.name = 'getCircleArea';
-    // replaceWith should return a Node, not a NodePath
-    return node;
-  }).toSource({ quote: 'single' });
+  // Replace Import with UCL
+  styledImport.insertBefore(j.importDeclaration(
+    // All imports on the page
+    _(uclImports)
+      // dedupe
+      .uniq()
+      // sort
+      .orderBy()
+      .map(name =>
+        j.importSpecifier(
+          j.identifier(name),
+        )).value(),
+    j.stringLiteral("@rbilabs/universal-components")
+  ))
+
+  return root.toSource({ quote: 'single' });
 };
