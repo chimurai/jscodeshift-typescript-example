@@ -5,7 +5,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest --watch"
   },
   "dependencies": {
     "jscodeshift": "^0.13.0"
