@@ -10,3 +10,7 @@ export const SpreadContentContainer = Box.withConfig({
 export const Heading = Header.withConfig({
   foo: 'bar'
 });
+
+export const Another = Box.withConfig({
+  foo: 'bar'
+});

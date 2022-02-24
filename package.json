@@ -5,12 +5,15 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "jest --watch"
+    "test": "jest"
   },
   "dependencies": {
     "@types/lodash": "^4.14.178",
+    "css-to-react-native": "^3.0.0",
     "jscodeshift": "^0.13.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "postcss": "^8.4.6",
+    "postcss-js": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.0",

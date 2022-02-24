@@ -5,6 +5,11 @@ interface IMapping {
   component: string;
 }
 
+export const SpreadContentContainer = `
+  font-size: 1.1rem;
+  text-align: center;
+`;
+
 const mappings: Record<string, IMapping> = {
   'div': {
     component: 'Box',
@@ -15,6 +20,12 @@ const mappings: Record<string, IMapping> = {
   'h2': {
     component: 'Header'
   }
+};
+
+const tagTypes = {
+  Identifier: node => node,
+  CallExpression: node => node.callee,
+  MemberExpression: node => node.object,
 };
 
 
@@ -41,6 +52,7 @@ const styledToUCL = (j: JSCodeshift, mapping, template: string) => {
     )
   ]);
   // return j.callExpression(j.memberExpression(asObject, j.identifier('fn')), []);
+  // return toRN(SpreadContentContainer);
   return j.callExpression(
     j.memberExpression(
       j.identifier(Component),
@@ -68,7 +80,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     .map(p => p.imported.name);
 
 
-  console.log(`>>> otherImports: `, otherImports);
+  // console.log(`>>> otherImports: `, otherImports);
   if (otherImports.length) {
 
   }
@@ -81,7 +93,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   // check to see if we are importing css
   let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
 
-  console.log(`>>> styledLocal: `, styledLocal);
+  // console.log(`>>> styledLocal: `, styledLocal);
 
   root.find(j.MemberExpression, {
     object: {
@@ -91,9 +103,15 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     .closest(j.TaggedTemplateExpression)
     .replaceWith(nodePath => {
       const { node } = nodePath;
+      // const text = node.quasi.quasis[0].value.raw;
+
       // @ts-ignore
-      // console.log(`-----: `, node.quasi.quasis[0].value.cooked);
-      console.log(`-----: `, node.tag.property.name);
+      // console.log(`-----: `, node.quasi.quasis.map(v => v));
+      // console.log(`-----: `, node);
+      // console.log(`-----: `, text);
+      // console.log(`-----: `, node.template);
+      // console.log(`-----: `, text);
+      // console.log(`-----: `, node.tag.property.name);
 
       // @ts-ignore
       const propName = node.tag.property.name;
@@ -101,7 +119,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       // @ts-ignore
       // const htmlElement = node.property.name;
       const mapping = getMapping(propName);
-      console.log(`>>> mapping: `, mapping);
+      // console.log(`>>> mapping: `, mapping);
       if (mapping?.component)
         uclImports.push(mapping.component)
       // // do the mapping
@@ -110,7 +128,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       return obj;
     });
 
-  console.log(`>>> uclImports: `, uclImports);
+  // console.log(`>>> uclImports: `, uclImports);
   // Imports
   // -------
   // Remove the 'styled-components' import
