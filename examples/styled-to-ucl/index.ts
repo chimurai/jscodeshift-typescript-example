@@ -83,11 +83,11 @@ export default function transformer(file: FileInfo, api: API) {
       let value;
 
       if (foundExpression) {
-        const parsed = parseExpression(foundExpression);
+        const parsed = parseExpression(j, foundExpression);
         value = parsed.value;
         // These are variables that are used in Arrow functions
-        if (parsed.vars.length) {
-          localVars.push(parsed.vars);
+        if (parsed.vars?.length) {
+          localVars = _.merge(localVars, parsed.vars);
         }
         // replace Styles
       } else {
@@ -102,8 +102,14 @@ export default function transformer(file: FileInfo, api: API) {
     })(_.keys(obj));
 
     let asObjectOrFunction;
+    console.log(`loclaVars.length: `, localVars.length);
     if (localVars.length) {
-      asObjectOrFunction = j.objectExpression(properties);
+      asObjectOrFunction = j.arrowFunctionExpression(
+        [j.identifier('p')],
+        j.parenthesizedExpression(j.objectExpression(properties)),
+        false,
+        // properties
+      );
     } else {
       asObjectOrFunction = j.objectExpression(properties);
     }
@@ -112,7 +118,26 @@ export default function transformer(file: FileInfo, api: API) {
       j.memberExpression(
         j.identifier('Box'),
         j.identifier('withConfig'),
-      ), [asObjectOrFunction]);
+      ),
+      [asObjectOrFunction],
+    );
+
+    // Map Types
+    if (localVars.length) {
+      // Add types
+      // @ts-ignore
+      exprs.typeArguments = j.tsTypeParameterInstantiation([
+        j.tsTypeLiteral(
+          localVars.map(v => j.tsPropertySignature(
+            j.identifier(v.name),
+            j.tsTypeAnnotation(v.type),
+          ))
+        ),
+      ]);
+    }
+
+    console.log(`exprs: `, exprs);
+
     j(path).replaceWith(exprs);
   });
 
