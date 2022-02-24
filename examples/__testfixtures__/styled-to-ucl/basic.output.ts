@@ -3,18 +3,14 @@ import styled, { css } from 'styled-components';
 /**
  * Spreads children horizontally and centers them vertically
  */
-export const SpreadContentContainer = Box.withConfig({
+export const SpreadContentContainer = Box.withConfig((props) => ({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  textAlign: "left"
-});
-
-export const Heading = Box.withConfig({
-  fontSize: "1.1rem",
+  textAlign: "left",
   color: Styles.color.black,
-  textAlign: "center"
-});
+  backgroundColor: props.backgroundColor
+}));
 
 export const Another = Box.withConfig({
   display: "flex",

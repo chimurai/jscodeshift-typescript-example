@@ -8,12 +8,8 @@ export const SpreadContentContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   text-align: left;
-`;
-
-export const Heading = styled.h2`
-  font-size: 1.1rem;
   color: ${Styles.color.black};
-  text-align: center;
+  background-color: ${props => props.backgroundColor};
 `;
 
 export const Another = styled.div`

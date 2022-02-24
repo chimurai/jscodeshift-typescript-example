@@ -2,6 +2,8 @@ import * as _ from 'lodash/fp';
 import * as postcss from "postcss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
+import { API, FileInfo } from 'jscodeshift';
+import { parseExpression } from './utils';
 
 const tagTypes = {
   Identifier: node => node,
@@ -11,15 +13,10 @@ const tagTypes = {
 
 const importSpecifiers = ['ImportDefaultSpecifier', 'ImportSpecifier'];
 
-import { API, FileInfo } from 'jscodeshift';
 
 export default function transformer(file: FileInfo, api: API) {
   const j = api.jscodeshift;
   const ast = j(file.source);
-
-  const templateElement = _.curry((tail, raw) => (
-    j.templateElement({ cooked: JSON.stringify(raw).slice(1, -1), raw }, tail)
-  ));
 
   ast.find(j.TaggedTemplateExpression).forEach((path) => {
     const { quasi, tag } = path.node;
@@ -41,7 +38,7 @@ export default function transformer(file: FileInfo, api: API) {
     const { quasis, expressions } = quasi;
     // Substitute all ${interpolations} with arbitrary test that we can find later
     // This is so we can shove it in postCSS
-    const substitutionNames = expressions.map((value, index) => `/*__${index}substitution__*/`);
+    const substitutionNames = expressions.map((_value, index) => `/*__${index}substitution__*/`);
     let cssText =
       quasis[0].value.cooked +
       substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
@@ -75,12 +72,28 @@ export default function transformer(file: FileInfo, api: API) {
 
     const obj = postcssJs.objectify(root);
     // console.log('obj: ', obj);
+    let localVars = [];
     const properties = _.map((key: string) => {
       const initialValue = obj[key];
       const convertedObj = toRN([[key, initialValue]]);
       const property = _.keys(convertedObj)[0];
+
+      // If the value is is an expression
       const foundExpression = substitutionMap[initialValue];
-      const value = foundExpression || j.literal(convertedObj[property] as string);
+      let value;
+
+      if (foundExpression) {
+        const parsed = parseExpression(foundExpression);
+        value = parsed.value;
+        // These are variables that are used in Arrow functions
+        if (parsed.vars.length) {
+          localVars.push(parsed.vars);
+        }
+        // replace Styles
+      } else {
+        value = j.literal(convertedObj[property] as string);
+      }
+
       return j.property(
         'init',
         j.identifier(key as string),
@@ -88,13 +101,18 @@ export default function transformer(file: FileInfo, api: API) {
       );
     })(_.keys(obj));
 
-    const asObject = j.objectExpression(properties);
+    let asObjectOrFunction;
+    if (localVars.length) {
+      asObjectOrFunction = j.objectExpression(properties);
+    } else {
+      asObjectOrFunction = j.objectExpression(properties);
+    }
 
     const exprs = j.callExpression(
       j.memberExpression(
         j.identifier('Box'),
         j.identifier('withConfig'),
-      ), [asObject]);
+      ), [asObjectOrFunction]);
     j(path).replaceWith(exprs);
   });
 
