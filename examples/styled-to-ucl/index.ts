@@ -87,7 +87,8 @@ export default function transformer(file: FileInfo, api: API) {
         value = parsed.value;
         // These are variables that are used in Arrow functions
         if (parsed.vars?.length) {
-          localVars = _.merge(localVars, parsed.vars);
+          localVars.push(parsed.vars);
+          console.log(`>>>>>>> localVars: `, localVars);
         }
         // replace Styles
       } else {
@@ -128,15 +129,19 @@ export default function transformer(file: FileInfo, api: API) {
       // @ts-ignore
       exprs.typeArguments = j.tsTypeParameterInstantiation([
         j.tsTypeLiteral(
-          localVars.map(v => j.tsPropertySignature(
-            j.identifier(v.name),
-            j.tsTypeAnnotation(v.type),
-          ))
+          _.flow(
+            _.flatten,
+            _.uniqBy('name'),
+            _.map((v: any) => j.tsPropertySignature(
+              j.identifier(v.name),
+              j.tsTypeAnnotation(v.type),
+            ))
+          )(localVars)
         ),
       ]);
     }
 
-    console.log(`exprs: `, exprs);
+    // console.log(`exprs: `, exprs);
 
     j(path).replaceWith(exprs);
   });

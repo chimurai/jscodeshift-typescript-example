@@ -3,8 +3,12 @@ import { Expression, JSCodeshift } from 'jscodeshift';
 const expressionTypes = {
   MemberExpression: (j: JSCodeshift, expression) => {
     // remove Styles
+    let v = expression;
+    if (expression.object?.object?.name === 'Styles') {
+      v = stylesToValue(j, expression.object.property.name, expression.property.name);
+    }
     return {
-      value: expression,
+      value: v,
       tag: '',
       vars: null,
     }
@@ -33,6 +37,24 @@ const expressionTypes = {
       ],
     }
   },
+};
+
+const styleColorMap = {
+  'black': 'black',
+}
+
+const stylesToValue = (j: JSCodeshift, group, value) => {
+
+  console.log(`group: `, group);
+  console.log(`value: `, value);
+  switch (group) {
+    case 'color':
+      return j.stringLiteral(styleColorMap[value]);
+
+    default:
+      break;
+  }
+  return;
 };
 
 export const parseExpression = (j: JSCodeshift, expression: Expression) => {

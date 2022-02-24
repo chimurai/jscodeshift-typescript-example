@@ -19,6 +19,6 @@ export const Another = Box.withConfig({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  color: Styles.color.black,
+  color: "black",
   textAlign: "left"
 });
