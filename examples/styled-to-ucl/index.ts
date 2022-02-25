@@ -85,12 +85,10 @@ export default function transformer(file: FileInfo, api: API) {
       if (foundExpression) {
         const parsed = parseExpression(j, foundExpression);
 
-        console.log(`>>>>>>>>> parsed: `, parsed);
         value = parsed.value;
         // These are variables that are used in Arrow functions
         if (parsed.vars?.length) {
           localVars.push(parsed.vars);
-          console.log(`>>>>>>> localVars: `, localVars);
         }
       } else {
         value = j.literal(convertedObj[property] as string);
@@ -104,7 +102,7 @@ export default function transformer(file: FileInfo, api: API) {
     })(_.keys(obj));
 
     let asObjectOrFunction;
-    console.log(`loclaVars.length: `, localVars.length);
+
     if (localVars.length) {
       asObjectOrFunction = j.arrowFunctionExpression(
         [j.identifier('p')],
@@ -141,8 +139,6 @@ export default function transformer(file: FileInfo, api: API) {
         ),
       ]);
     }
-
-    // console.log(`exprs: `, exprs);
 
     j(path).replaceWith(exprs);
   });

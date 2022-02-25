@@ -1,26 +1,15 @@
-import { API, FileInfo, JSCodeshift } from 'jscodeshift';
-import * as _ from 'lodash';
-
-interface IMapping {
-  component: string;
-}
+import { API, FileInfo } from 'jscodeshift';
+import { parseExpression, getElementMapping } from '../styled-to-ucl/utils';
+import * as _ from 'lodash/fp';
+import * as postcss from "postcss";
+import * as postcssJs from "postcss-js";
+import toRN from "css-to-react-native";
 
 export const SpreadContentContainer = `
   font-size: 1.1rem;
   text-align: center;
 `;
 
-const mappings: Record<string, IMapping> = {
-  'div': {
-    component: 'Box',
-  },
-  'h1': {
-    component: 'Header'
-  },
-  'h2': {
-    component: 'Header'
-  }
-};
 
 const tagTypes = {
   Identifier: node => node,
@@ -28,37 +17,7 @@ const tagTypes = {
   MemberExpression: node => node.object,
 };
 
-
-const getMapping = (el: string) => {
-  const found = mappings[el];
-
-  if (!found) {
-    throw new Error('element not found: ' + el);
-  }
-  return found;
-}
-
-const styledToUCL = (j: JSCodeshift, mapping, template: string) => {
-  const Component = mapping.component;
-
-  // Check for props
-  // Check media queries
-  // Map to NB/RN
-  const asObject = j.objectExpression([
-    j.property(
-      'init',
-      j.identifier('foo'),
-      j.literal('bar')
-    )
-  ]);
-  // return j.callExpression(j.memberExpression(asObject, j.identifier('fn')), []);
-  // return toRN(SpreadContentContainer);
-  return j.callExpression(
-    j.memberExpression(
-      j.identifier(Component),
-      j.identifier('withConfig'),
-    ), [asObject]);
-}
+const importSpecifiers = ['ImportDefaultSpecifier', 'ImportSpecifier'];
 
 export default function transformer(fileInfo: FileInfo, api: API) {
   const j = api.jscodeshift;
@@ -80,7 +39,6 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     .map(p => p.imported.name);
 
 
-  // console.log(`>>> otherImports: `, otherImports);
   if (otherImports.length) {
 
   }
@@ -93,42 +51,142 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   // check to see if we are importing css
   let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
 
-  // console.log(`>>> styledLocal: `, styledLocal);
-
   root.find(j.MemberExpression, {
     object: {
       name: styledLocal,
     },
   })
     .closest(j.TaggedTemplateExpression)
-    .replaceWith(nodePath => {
+    .forEach(nodePath => {
       const { node } = nodePath;
-      // const text = node.quasi.quasis[0].value.raw;
+      const { quasi, tag } = nodePath.node
+      if (!(tag.type in tagTypes)) return;
+
+      // Get the identifier for styled in either styled.View`...` or styled(View)`...`
+      // Note we aren't checking the name of the callee
+      const callee = tagTypes[tag.type](tag);
+      if (callee.type !== 'Identifier') return;
 
       // @ts-ignore
-      // console.log(`-----: `, node.quasi.quasis.map(v => v));
-      // console.log(`-----: `, node);
-      // console.log(`-----: `, text);
-      // console.log(`-----: `, node.template);
-      // console.log(`-----: `, text);
-      // console.log(`-----: `, node.tag.property.name);
-
-      // @ts-ignore
-      const propName = node.tag.property.name;
+      const elementPropName = node.tag.property.name;
       // styled.XXX
       // @ts-ignore
-      // const htmlElement = node.property.name;
-      const mapping = getMapping(propName);
+      const activeElement = getElementMapping(elementPropName);
       // console.log(`>>> mapping: `, mapping);
-      if (mapping?.component)
-        uclImports.push(mapping.component)
-      // // do the mapping
-      const obj = styledToUCL(j, mapping, ``);
+      if (activeElement?.component)
+        uclImports.push(activeElement.component)
+      // const obj = styledToUCL(j, mapping, ``);
 
-      return obj;
+      const { quasis, expressions } = quasi;
+      // Substitute all ${interpolations} with arbitrary test that we can find later
+      // This is so we can shove it in postCSS
+      const substitutionNames = expressions.map((_value, index) => `/*__${index}substitution__*/`);
+      let cssText =
+        quasis[0].value.cooked +
+        substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
+      let substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
+
+      // Replace mixin interpolations as comments, but as ids if in properties
+      let root = postcss.parse(cssText);
+      const notInPropertiesIndexes = {};
+      root.walkComments((comment) => {
+        const index = substitutionNames.indexOf(`/*${comment.text}*/`);
+        if (index >= 0) notInPropertiesIndexes[index] = true;
+      });
+
+      substitutionNames.forEach((name, index) => {
+        if (!notInPropertiesIndexes[index]) substitutionNames[index] = name.replace(/^\/\*(.+)\*\/$/, '$1');
+      });
+      cssText =
+        quasis[0].value.cooked +
+        substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
+      substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
+
+      root = postcss.parse(cssText);
+      // root.walkDecls((decl) => {
+      //   // const testProp = decl.prop.replace(/-/g, '').toLowerCase();
+      //   const obj = toRN([[decl.prop, decl.value]]);
+      //   // @ts-ignore
+      //   // decl.prop = _.keys(obj)[0];
+      //   const prop = _.keys(obj)[0];
+      //   decl.value = obj[prop] as string;
+      // });
+
+      const obj = postcssJs.objectify(root);
+      // console.log('obj: ', obj);
+      let localVars = [];
+      const properties = _.map((key: string) => {
+        const initialValue = obj[key];
+        const convertedObj = toRN([[key, initialValue]]);
+        const property = _.keys(convertedObj)[0];
+
+        // If the value is is an expression
+        const foundExpression = substitutionMap[initialValue];
+        let value;
+
+        if (foundExpression) {
+          const parsed = parseExpression(j, foundExpression);
+
+          value = parsed.value;
+          // These are variables that are used in Arrow functions
+          if (parsed.vars?.length) {
+            localVars.push(parsed.vars);
+          }
+        } else {
+          value = j.literal(convertedObj[property] as string);
+        }
+
+        return j.property(
+          'init',
+          j.identifier(key as string),
+          value || j.stringLiteral('error!!'),
+        );
+      })(_.keys(obj));
+
+      let asObjectOrFunction;
+
+      if (localVars.length) {
+        asObjectOrFunction = j.arrowFunctionExpression(
+          [j.identifier('p')],
+          j.parenthesizedExpression(j.objectExpression(properties)),
+          false,
+          // properties
+        );
+      } else {
+        asObjectOrFunction = j.objectExpression(properties);
+      }
+
+      const exprs = j.callExpression(
+        j.memberExpression(
+          j.identifier(activeElement.component),
+          j.identifier('withConfig'),
+        ),
+        [asObjectOrFunction],
+      );
+
+      // Map Types
+      if (localVars.length) {
+        // Add types
+        // @ts-ignore
+        exprs.typeArguments = j.tsTypeParameterInstantiation([
+          j.tsTypeLiteral(
+            _.flow(
+              _.flatten,
+              _.uniqBy('name'),
+              _.map((v: any) => j.tsPropertySignature(
+                j.identifier(v.name),
+                j.tsTypeAnnotation(v.type),
+              ))
+            )(localVars)
+          ),
+        ]);
+      }
+
+      j(nodePath).replaceWith(exprs);
+
+      return;
     });
 
-  // console.log(`>>> uclImports: `, uclImports);
   // Imports
   // -------
   // Remove the 'styled-components' import
@@ -137,15 +195,14 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   // Replace Import with UCL
   styledImport.insertBefore(j.importDeclaration(
     // All imports on the page
-    _(uclImports)
-      // dedupe
-      .uniq()
-      // sort
-      .orderBy()
-      .map(name =>
-        j.importSpecifier(
-          j.identifier(name),
-        )).value(),
+    _.flow(
+      _.uniq,
+      _.map((name: string) => j.importSpecifier(
+        j.identifier(name),
+      )),
+      _.values,
+    )(uclImports),
+    // dedupe
     j.stringLiteral("@rbilabs/universal-components")
   ))
 

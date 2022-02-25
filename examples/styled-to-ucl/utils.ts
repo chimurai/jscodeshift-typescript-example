@@ -33,6 +33,32 @@ const valueToType = (j: JSCodeshift, value) => {
   }
 }
 
+
+interface IMapping {
+  component: string;
+}
+
+const elementMap: Record<string, IMapping> = {
+  'div': {
+    component: 'Box',
+  },
+  'h1': {
+    component: 'Header'
+  },
+  'h2': {
+    component: 'Header'
+  }
+};
+
+export const getElementMapping = (el: string) => {
+  const found = elementMap[el];
+
+  if (!found) {
+    throw new Error('element not found: ' + el);
+  }
+  return found;
+}
+
 export const parseExpression = (j: JSCodeshift, expression) => {
   const finalVars = [];
   let finalValue;
