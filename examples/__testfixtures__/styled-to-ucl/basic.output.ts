@@ -3,9 +3,9 @@ import styled, { css } from 'styled-components';
 /**
  * Spreads children horizontally and centers them vertically
  */
-export const SpreadContentContainer = Box.withConfig<{
-  backgroundColor: string,
-  color: string
+export const Basic = Box.withConfig<{
+  color: string,
+  backgroundColor: string
 }>(p => ({
   display: "flex",
   justifyContent: "space-between",
@@ -15,10 +15,15 @@ export const SpreadContentContainer = Box.withConfig<{
   backgroundColor: p.backgroundColor
 }));
 
-export const Another = Box.withConfig({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  color: "black",
-  textAlign: "left"
+export const Tokens = Box.withConfig({
+  color: "__legacyToken.text-reversed",
+  backgroundColor: "__legacyToken.background-pattern"
 });
+
+
+export const Conditional = Box.withConfig<{
+  reversed: boolean
+}>(p => ({
+  color: p.reversed ? "__legacyToken.text-reversed" : "__legacyToken.text-default",
+  backgroundColor: p.reversed ? Styles.color.white : "__legacyToken.text-default"
+}));

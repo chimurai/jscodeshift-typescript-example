@@ -9,10 +9,10 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": [
-          "--inspect-brk",
-          "${workspaceRoot}/node_modules/jest/bin/jest.js",
-          "--runInBand",
-          "--testPathPattern=${fileBasenameNoExtension}"
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        // "--testPathPattern=${fileBasenameNoExtension}"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",

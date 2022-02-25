@@ -84,13 +84,14 @@ export default function transformer(file: FileInfo, api: API) {
 
       if (foundExpression) {
         const parsed = parseExpression(j, foundExpression);
+
+        console.log(`>>>>>>>>> parsed: `, parsed);
         value = parsed.value;
         // These are variables that are used in Arrow functions
         if (parsed.vars?.length) {
           localVars.push(parsed.vars);
           console.log(`>>>>>>> localVars: `, localVars);
         }
-        // replace Styles
       } else {
         value = j.literal(convertedObj[property] as string);
       }
@@ -98,7 +99,7 @@ export default function transformer(file: FileInfo, api: API) {
       return j.property(
         'init',
         j.identifier(key as string),
-        value,
+        value || j.stringLiteral('error!!'),
       );
     })(_.keys(obj));
 
