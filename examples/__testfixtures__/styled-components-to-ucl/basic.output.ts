@@ -1,4 +1,5 @@
 import { Box, Header } from '@rbilabs/universal-components';
+import Modal from './modal';
 
 /**
  * Spreads children horizontally and centers them vertically
@@ -30,3 +31,7 @@ export const Conditional = Box.withConfig<{
   color: p.reversed ? '__legacyToken.text-reversed' : '__legacyToken.text-default',
   backgroundColor: p.reversed ? Styles.color.white : '__legacyToken.text-default'
 }));
+
+export const ModalExtended = Modal.withConfig({
+  backgroundColor: '__legacyToken.background-pattern'
+});

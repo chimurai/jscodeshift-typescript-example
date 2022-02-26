@@ -42,12 +42,14 @@ const elementMap: Record<string, IMapping> = {
   'div': {
     component: 'Box',
   },
-  'h1': {
-    component: 'Header'
-  },
-  'h2': {
-    component: 'Header'
-  }
+  'h1': { component: 'Header' },
+  'h2': { component: 'Header' },
+  'h3': { component: 'Header' },
+  'h4': { component: 'Header' },
+  'h5': { component: 'Header' },
+  'h6': { component: 'Header' },
+  'p': { component: 'Text' },
+  'label': { component: 'Text' },
 };
 
 export const getElementMapping = (el: string) => {
@@ -67,13 +69,11 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     // TODO maps styles or maybe more this to a separate code mod
     // remove Styles
     let isAGlobal = false;
-    console.log(`expression: `, expression);
     if (expression?.object?.object?.name === 'Styles') {
       isAGlobal = true;
       // v = stylesToValue(j, expression.object.property.name, expression.property.name);
     }
     const propertyName = expression?.property?.name;
-    console.log(`propertyName: `, propertyName);
     finalValue = expression;
     let vars;
     if (propertyName && !isAGlobal) {
@@ -138,7 +138,6 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       // on all other call expressions we want the name of the property so that we can
       // add it to the types
       const propertyName = expression?.property?.name;
-      console.log(`propertyName: `, propertyName);
       return {
         value: expression,
         vars: [{
