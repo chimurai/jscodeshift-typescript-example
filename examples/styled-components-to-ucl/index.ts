@@ -1,7 +1,7 @@
 import { API, FileInfo, JSCodeshift, ASTPath } from 'jscodeshift';
 import { parseExpression, getElementMapping } from '../styled-to-ucl/utils';
 import * as _ from 'lodash/fp';
-import * as postcss from "postcss";
+import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
 
@@ -79,8 +79,10 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   })
     .closest(j.TaggedTemplateExpression)
     .forEach(nodePath => {
-      console.log(`nodePath: `, nodePath);
-      processFile(j, nodePath, { component: 'Modal' }, false, uclImports);
+      const { node } = nodePath;
+      // @ts-ignore
+      const nameOfArg = node.tag?.arguments[0]?.name;
+      processFile(j, nodePath, { component: nameOfArg }, false, uclImports);
     });
 
   // Imports
@@ -92,13 +94,13 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   styledImport.insertBefore(j.importDeclaration(
     // All imports on the page
     _.flow(
+      // dedupe
       _.uniq,
       _.map((name: string) => j.importSpecifier(
         j.identifier(name),
       )),
       _.values,
     )(uclImports),
-    // dedupe
     j.stringLiteral("@rbilabs/universal-components")
   ))
 
@@ -112,7 +114,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   // Get the identifier for styled in either styled.View`...` or styled(View)`...`
   // Note we aren't checking the name of the callee
   const callee = tagTypes[tag.type](tag);
-  console.log(`tag.type: `, tag.type);
+
   if (callee.type !== 'Identifier') return;
 
   // console.log(`>>> mapping: `, mapping);
@@ -130,9 +132,17 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   let substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
 
   // Replace mixin interpolations as comments, but as ids if in properties
-  let root = postcss.parse(cssText);
+  console.log(`>>>>>>>>> cssText: `, cssText);
+  let root = postcss.parse(cssText, {
+    // @ts-ignore
+    // parser: scss,
+    map: { annotation: false }
+  });
+
+  const comments = [];
   const notInPropertiesIndexes = {};
-  root.walkComments((comment) => {
+  root.walkComments((comment, position) => {
+    comments.push({ text: comment.text, position });
     const index = substitutionNames.indexOf(`/*${comment.text}*/`);
     if (index >= 0) notInPropertiesIndexes[index] = true;
   });
@@ -147,17 +157,19 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
 
   root = postcss.parse(cssText);
-  // root.walkDecls((decl) => {
-  //   // const testProp = decl.prop.replace(/-/g, '').toLowerCase();
-  //   const obj = toRN([[decl.prop, decl.value]]);
-  //   // @ts-ignore
-  //   // decl.prop = _.keys(obj)[0];
-  //   const prop = _.keys(obj)[0];
-  //   decl.value = obj[prop] as string;
-  // });
+  root.walkDecls((decl) => {
+    // console.log(`decl.prop: `, decl.prop);
+    // console.log(`decl.value: `, decl.value);
+    // const testProp = decl.prop.replace(/-/g, '').toLowerCase();
+    // const obj = toRN([[decl.prop, decl.value]]);
+    // @ts-ignore
+    // decl.prop = _.keys(obj)[0];
+    // const prop = _.keys(obj)[0];
+    // decl.value = obj[prop] as string;
+  });
 
   const obj = postcssJs.objectify(root);
-  // console.log('obj: ', obj);
+  console.log('obj: ', obj);
   let localVars = [];
   const properties = _.map((key: string) => {
     const initialValue = obj[key];
@@ -180,15 +192,40 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       value = j.literal(convertedObj[property] as string);
     }
 
-    return j.property(
+    const p = j.property(
       'init',
       j.identifier(key as string),
-      value || j.stringLiteral('error!!'),
+      value,
     );
+    return p;
   })(_.keys(obj));
 
   let asObjectOrFunction;
-
+  if (comments.length) {
+    console.log(`properties: `, properties.length);
+    console.log(`comments: `, comments);
+    comments.forEach((c, i) => {
+      // Get the position adjusted for the fact that
+      // comments have been removed from the `properties` array
+      console.log(`c.position: `, c.position);
+      console.log(`i: `, i);
+      const position = c.position - i;
+      // @ts-ignore
+      // @ts-ignore
+      // Check to see if there is a comment at this lin
+      const p = properties[position];
+      console.log(`p: `, p);
+      let comment;
+      console.log(`>>> c.text: `, c.text);
+      console.log(`c.text.indexOf("\n") == -1: `, c.text.indexOf("\n") == -1);
+      if (c.text.indexOf("\n") >= 0) {
+        comment = j.commentBlock(' ' + c.text + '\n', true, true);
+      } else {
+        comment = j.commentLine(' ' + c.text, true);
+      }
+      p.comments = [comment];
+    })
+  }
   if (localVars.length) {
     asObjectOrFunction = j.arrowFunctionExpression(
       [j.identifier('p')],
