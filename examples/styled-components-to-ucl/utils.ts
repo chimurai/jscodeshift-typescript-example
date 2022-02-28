@@ -19,6 +19,17 @@ const primitiveMap = {
   '$spacing11': '$20'
 };
 
+const brandFontMap = {
+  'hero': 'hero',
+  'headerOne': 'headerOne',
+  'headerTwo': 'headerTwo',
+  'headerThree': 'headerThree',
+  'headerFour': 'headerFour',
+  'copyOne': 'copyOne',
+  'copyTwo': 'copyTwo',
+  'formUtility': 'formUtility',
+};
+
 
 const stylesToValue = (j: JSCodeshift, group, value) => {
   console.log(`group: `, group);
@@ -84,17 +95,22 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     let v = expression;
     // TODO maps styles or maybe more this to a separate code mod
     // remove Styles
-    let includeTypes = false;
+    let includeTypes = true;
 
     // Local variables
     if (expression?.object?.type === 'Identifier') {
-      includeTypes = false;
-
-      //
       if (expression.object.name === 'primitive') {
         const foundPrimitive = primitiveMap[expression.property.name]
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
+          includeTypes = false;
+        }
+      }
+      if (expression.object.name === 'brandFont') {
+        const foundPrimitive = brandFontMap[expression.property.name]
+        if (foundPrimitive) {
+          v = j.stringLiteral(foundPrimitive);
+          includeTypes = false;
         }
       }
     }
@@ -103,6 +119,7 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       if (expression?.object?.object?.name === 'Styles') {
         includeTypes = false;
         v = expression;
+        // TODO
         // v = stylesToValue(j, expression.object.property.name, expression.property.name);
       }
     }
