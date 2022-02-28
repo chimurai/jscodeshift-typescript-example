@@ -44,6 +44,11 @@ const _isUnsupported = (test, regex) =>
   _.some(re => re.test(test), regex);
 
 export const isSupported = (property: string, value: string) => {
+
+  if (property === 'display' && !['none', 'flex'].includes(value)) {
+    return false;
+  }
+
   // Broken stuff
   // -----------
   if (_isUnsupported(property, unsupportedProps)) {
@@ -117,7 +122,6 @@ export const parseExpression = (j: JSCodeshift, expression) => {
   const finalVars = [];
   let finalValue;
   if (expression.type === 'MemberExpression') {
-    console.log(`>>> expression?.object?.type: `, expression?.object?.type);
     let v = expression;
     // TODO maps styles or maybe more this to a separate code mod
     // remove Styles

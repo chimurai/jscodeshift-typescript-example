@@ -4,6 +4,7 @@ import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
+import { keys } from 'lodash';
 
 export const SpreadContentContainer = `
   font-size: 1.1rem;
@@ -169,7 +170,20 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   const properties = _.map((key: string) => {
     const initialValue = obj[key];
     const convertedObj = toRN([[key, initialValue]]);
-    let property = _.keys(convertedObj)[0];
+    console.log(`convertedObj: `, convertedObj);
+    console.log(`_.keys(): `, _.keys(convertedObj));
+    const keys = _.keys(convertedObj);
+    let property;
+
+    if (keys.length > 1) {
+      // Move through them
+      property = _.keys(convertedObj)[0];
+    } else {
+      property = _.keys(convertedObj)[0];
+    }
+
+    console.log(`property: `, property);
+
     let identifier = key;
 
 
