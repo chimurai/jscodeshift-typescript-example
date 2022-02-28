@@ -168,20 +168,15 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   let localVars = [];
   const properties = _.map((key: string) => {
     const initialValue = obj[key];
-    console.log(`>>>>>> key: `, key);
     const convertedObj = toRN([[key, initialValue]]);
-    console.log(`>>>>>> convertedObj: `, convertedObj);
-    const property = _.keys(convertedObj)[0];
+    let isUnsupported = false;
+    let property = _.keys(convertedObj)[0];
     let identifier = key;
-    if (key === 'font') {
-      identifier = 'variant';
-    }
 
 
     // If the value is is an expression
     const foundExpression = substitutionMap[initialValue];
     let value;
-    // console.log(`>>>>>> foundExpression: `, foundExpression);
 
     if (foundExpression) {
       const parsed = parseExpression(j, foundExpression);
@@ -192,14 +187,42 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
         localVars.push(parsed.vars);
       }
     } else {
-      value = j.literal(convertedObj[property] as string);
+      let lp = convertedObj[property] as string
+      value = j.literal(lp);
     }
 
+    // One-offs
+    // -------
+
+    if (key === 'font') {
+      // The correct variant is set in utils/parseExpression
+      identifier = 'variant';
+    }
+    // Broken stuff
+    // -----------
+
+    // @ts-ignore
+    if (_.includes('calc')(value.value)) {
+      isUnsupported = true;
+    }
+
+    // ------
+
+    // Comment out the unsupported
+    if (isUnsupported) {
+      identifier = '// ' + identifier;
+    }
     const p = j.property(
       'init',
       j.identifier(identifier as string),
       value,
     );
+
+    if (isUnsupported) {
+      // Add comment
+      p.comments = [j.commentLine(` TODO RN: unsupported CSS`, true)];
+    }
+
     return p;
   })(_.keys(obj));
 
@@ -217,9 +240,9 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       // console.log(`>> c: `, c);
       // console.log(`>> comment: `, comment);
       // console.log(`>> p: `, p);
-      // if (p?.comments) {
-      p.comments = [comment];
-      // }
+      if (p) {
+        p.comments = [comment];
+      }
     })
   }
   if (localVars.length) {

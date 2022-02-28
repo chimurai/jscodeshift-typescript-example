@@ -5,9 +5,16 @@ import { FIXED_STICKY_FOOTER_HEIGHT } from 'components/sticky-footer/constants';
 import { primitive } from 'styles/constants/primitives';
 
 export const ModalCloseButton = CloseButton.withConfig({
-  left: 'calc(1.25rem + env(safe-area-inset-left))',
+  paddingTop: '$20',
+
+  // TODO RN: unsupported CSS
+  // left: 'calc(1.25rem + env(safe-area-inset-left))',
+
   position: 'fixed',
-  top: 'calc(1rem + env(safe-area-inset-top))',
+
+  // TODO RN: unsupported CSS
+  // top: 'calc(1rem + env(safe-area-inset-top))',
+
   zIndex: Styles.zIndex.below,
   color: '__legacyToken.text-button-primary',
   background: 'transparent'
@@ -28,5 +35,5 @@ export const AllModalContent = Box.withConfig({
 });
 
 export const RewardCategoriesContainer = Box.withConfig({
-  paddingTop: primitive.$spacing11
+  paddingTop: '$20'
 });
