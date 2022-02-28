@@ -1,4 +1,5 @@
 import { JSCodeshift } from 'jscodeshift';
+import * as _ from 'lodash/fp';
 
 const styleColorMap = {
   'black': 'black',
@@ -30,6 +31,31 @@ const brandFontMap = {
   'formUtility': 'formUtility',
 };
 
+const unsupportedProps = [
+  /^objectFit$/,
+];
+
+const unsupportedValue = [
+  /^calc/,
+  /^relative$/,
+];
+
+const _isUnsupported = (test, regex) =>
+  _.some(re => re.test(test), regex);
+
+export const isSupported = (property: string, value: string) => {
+  // Broken stuff
+  // -----------
+  if (_isUnsupported(property, unsupportedProps)) {
+    return false;
+
+  }
+  if (_isUnsupported(value, unsupportedValue)) {
+    return false;
+
+  }
+  return true;
+}
 
 const stylesToValue = (j: JSCodeshift, group, value) => {
   console.log(`group: `, group);

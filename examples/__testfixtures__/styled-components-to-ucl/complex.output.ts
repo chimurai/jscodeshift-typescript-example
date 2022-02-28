@@ -21,7 +21,9 @@ export const ModalCloseButton = CloseButton.withConfig({
 });
 
 export const Background = Box.withConfig({
-  position: 'relative',
+  // TODO RN: unsupported CSS
+  // position: 'relative',
+
   background: '__legacyToken.background-pattern'
 });
 

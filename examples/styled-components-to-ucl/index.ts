@@ -1,5 +1,5 @@
 import { API, FileInfo, JSCodeshift } from 'jscodeshift';
-import { parseExpression, getElementMapping } from './utils';
+import { parseExpression, getElementMapping, isSupported } from './utils';
 import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
@@ -169,7 +169,6 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   const properties = _.map((key: string) => {
     const initialValue = obj[key];
     const convertedObj = toRN([[key, initialValue]]);
-    let isUnsupported = false;
     let property = _.keys(convertedObj)[0];
     let identifier = key;
 
@@ -198,18 +197,12 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       // The correct variant is set in utils/parseExpression
       identifier = 'variant';
     }
-    // Broken stuff
-    // -----------
-
-    // @ts-ignore
-    if (_.includes('calc')(value.value)) {
-      isUnsupported = true;
-    }
-
     // ------
 
+    const supported = isSupported(identifier, value?.value);
+
     // Comment out the unsupported
-    if (isUnsupported) {
+    if (!supported) {
       identifier = '// ' + identifier;
     }
     const p = j.property(
@@ -218,7 +211,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       value,
     );
 
-    if (isUnsupported) {
+    if (!supported) {
       // Add comment
       p.comments = [j.commentLine(` TODO RN: unsupported CSS`, true)];
     }
