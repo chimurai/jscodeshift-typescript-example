@@ -46,5 +46,21 @@ export default function transformer(file: FileInfo, api: API) {
       );
     });
 
+  // converts typedefs oor 'data-testid' to typedefs for 'testID'
+  // console.log(root.getAST()[0].value.program.body.);
+  root
+    .find(
+      j.TSPropertySignature
+      // node.key.type === "StringLiteral" && node.key.value === "data-testid"
+    )
+    .forEach((path) => {
+      path.replace(
+        j.tsPropertySignature.from({
+          ...path.node,
+          key: j.identifier("testID"),
+        })
+      );
+    });
+
   return root.toSource();
 }
