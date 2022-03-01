@@ -34,3 +34,12 @@ export const RewardCategoriesContainer = styled.div`
     padding-bottom: calc(env(safe-area-inset-bottom) + ${FIXED_STICKY_FOOTER_HEIGHT} + 2rem);
   `}
 `;
+
+export const StyledContainer = styled.div`
+  height: 88px;
+  width: 83px;
+  padding: 1rem 2rem;
+  margin: 56px;
+  object-fit: contain;
+  display: block;
+`;

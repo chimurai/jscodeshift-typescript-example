@@ -2,7 +2,7 @@ import { Box } from '@rbilabs/universal-components';
 
 const StyledContainer = Box.withConfig({
   // Inline comment
-  height: '32px',
+  height: '$8',
 
   // other inline
   width: '140px',
@@ -11,7 +11,7 @@ const StyledContainer = Box.withConfig({
       line
       comment
   */
-  background: 'black'
+  backgroundColor: 'black'
 });
 
 export default StyledContainer;

@@ -11,6 +11,7 @@ export const SpreadContentContainer = `
   text-align: center;
 `;
 
+const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
 
 const tagTypes = {
   Identifier: node => node,
@@ -168,8 +169,10 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
 
   const obj = postcssJs.objectify(root);
 
+  console.log(`>>>>>>> obj: `, obj);
   let localVars = [];
   const properties = []
+  let hasExpressionError = false;
 
   const addProperties = (property, initialValue) => {
     let identifier = property;
@@ -213,15 +216,24 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
 
     if (!supported) {
       // Add comment
-      builderProperty.comments = [j.commentLine(` TODO RN: unsupported CSS`, true)];
+      builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
     }
     properties.push(builderProperty);
   }
 
   _.map((key: string) => {
     const initialValue = obj[key];
+    console.log(`initialValue: `, initialValue);
+    // Nested objects are not supported
+    if (typeof initialValue === 'object') {
+      hasExpressionError = true;
+      return;
+    }
     const convertedObj = toRN([[key, initialValue]]);
-    _.keys(convertedObj).forEach((k) => addProperties(k, convertedObj[k]));
+    _.keys(convertedObj).forEach((k) => {
+      const v = convertedObj[k];
+      addProperties(k, v);
+    });
   })(_.keys(obj));
 
   let asObjectOrFunction;
@@ -257,6 +269,22 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
     ),
     [asObjectOrFunction],
   );
+
+  if (hasExpressionError) {
+
+    console.log(`_.keys(substitutionMap: `, _.keys(substitutionMap));
+    let ct = cssText;
+    _.map(((k: string) => {
+      const v = substitutionMap[k];
+      console.log(`k: `, k);
+      ct = ct.replace(k, '!EXPRESSION!')
+      console.log(`ct: `, ct);
+    }))(
+      _.keys(substitutionMap)
+    )
+
+    exprs.comments = [j.commentBlock('\n' + TODO_RN_COMMENT + '\nSome attributes couldn\'t be converted\n' + ct, false, true)];
+  }
 
   // Map Types
   if (localVars.length) {

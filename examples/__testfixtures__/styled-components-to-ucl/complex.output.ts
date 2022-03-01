@@ -17,14 +17,14 @@ export const ModalCloseButton = CloseButton.withConfig({
 
   zIndex: Styles.zIndex.below,
   color: '__legacyToken.text-button-primary',
-  background: 'transparent'
+  backgroundColor: 'transparent'
 });
 
 export const Background = Box.withConfig({
   // TODO RN: unsupported CSS
   // position: 'relative',
 
-  background: '__legacyToken.background-pattern'
+  backgroundColor: '__legacyToken.background-pattern'
 });
 
 export const AllModalContent = Box.withConfig({
@@ -38,4 +38,18 @@ export const AllModalContent = Box.withConfig({
 
 export const RewardCategoriesContainer = Box.withConfig({
   paddingTop: '$20'
+});
+
+export const StyledContainer = Box.withConfig({
+  height: '88px',
+  width: '83px',
+  paddingX: '$8',
+  paddingY: '$4',
+  margin: '$13.5',
+
+  // TODO RN: unsupported CSS
+  // objectFit: 'contain',
+
+  // TODO RN: unsupported CSS
+  // display: 'block'
 });
