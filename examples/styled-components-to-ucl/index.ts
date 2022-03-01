@@ -283,7 +283,13 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       _.keys(substitutionMap)
     )
 
-    exprs.comments = [j.commentBlock('\n' + TODO_RN_COMMENT + '\nSome attributes couldn\'t be converted\n' + ct, false, true)];
+    exprs.comments = [j.commentBlock(`
+${TODO_RN_COMMENT}
+
+Some attributes couldn't be converted
+Please use git history to get the exact values
+${ct}
+`, false, true)];
   }
 
   // Map Types
