@@ -1,9 +1,17 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 import CloseButton from 'components/close-button';
 import { FIXED_STICKY_FOOTER_HEIGHT } from 'components/sticky-footer/constants';
 import { primitive } from 'styles/constants/primitives';
 
+const k = keyframes`
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0
+  }
+`
 export const ModalCloseButton = styled(CloseButton)`
   padding-top: ${primitive.$spacing11};
   left: calc(1.25rem + env(safe-area-inset-left));
@@ -12,6 +20,8 @@ export const ModalCloseButton = styled(CloseButton)`
   z-index: ${Styles.zIndex.below};
   color: ${p => p.theme.token('text-button-primary')};
   background: transparent;
+  animation: ${k} 0.5s;
+  animation-fill-mode: both;
 `;
 
 export const Background = styled.div`

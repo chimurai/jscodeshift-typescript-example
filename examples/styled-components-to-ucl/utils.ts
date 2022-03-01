@@ -31,8 +31,13 @@ const brandFontMap = {
   'formUtility': 'formUtility',
 };
 
+const removeProps = [
+  /^animation/,
+];
+
 const unsupportedProps = [
   /^objectFit$/,
+  /^animation/,
 ];
 
 const unsupportedValue = [
@@ -46,20 +51,25 @@ const _isUnsupported = (test, regex) =>
 export const isSupported = (property: string, value: string) => {
 
   if (property === 'display' && !['none', 'flex'].includes(value)) {
-    return false;
+    return [false, false];
+  }
+
+  if (_isUnsupported(property, removeProps)) {
+    return [false, true];
+
   }
 
   // Broken stuff
   // -----------
   if (_isUnsupported(property, unsupportedProps)) {
-    return false;
+    return [false, false];
 
   }
   if (_isUnsupported(value, unsupportedValue)) {
-    return false;
+    return [false, false];
 
   }
-  return true;
+  return [true, false];
 }
 
 const stylesToValue = (j: JSCodeshift, group, value) => {

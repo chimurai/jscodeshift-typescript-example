@@ -4,7 +4,6 @@ import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
-import { keys } from 'lodash';
 
 export const SpreadContentContainer = `
   font-size: 1.1rem;
@@ -36,7 +35,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     });
 
   if (!styledImport.length) {
-    const msg = `doesn\'t contain styled-components`;
+    const msg = `NO_STYLED_COMPONENT_IMPORT`;
     throw new Error(msg);
   }
 
@@ -202,9 +201,14 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
     }
     // ------
 
-    const supported = isSupported(identifier, value?.value);
+    const [supported, shouldRemove] = isSupported(identifier, value?.value);
 
-    // Comment out the unsupported
+    // Things like `animation` we don't want to include at all
+    if (shouldRemove) {
+      return;
+    }
+
+    // Comment the others
     if (!supported) {
       identifier = '// ' + identifier;
     }
@@ -271,18 +275,12 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   );
 
   if (hasExpressionError) {
-
-    console.log(`_.keys(substitutionMap: `, _.keys(substitutionMap));
     let ct = cssText;
     _.map(((k: string) => {
-      const v = substitutionMap[k];
-      console.log(`k: `, k);
       ct = ct.replace(k, '!EXPRESSION!')
-      console.log(`ct: `, ct);
     }))(
       _.keys(substitutionMap)
     )
-
     exprs.comments = [j.commentBlock(`
 ${TODO_RN_COMMENT}
 
