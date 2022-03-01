@@ -2,10 +2,10 @@ import { Box } from '@rbilabs/universal-components';
 
 const StyledContainer = Box.withConfig({
   // Inline comment
-  height: 32,
+  height: '32px',
 
   // other inline
-  width: 140,
+  width: '140px',
 
   /* multi
       line

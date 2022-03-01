@@ -35,8 +35,8 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     });
 
   if (!styledImport.length) {
-    console.log(`${fileInfo.path}  doesn\'t contain styled-components`);
-    return;
+    const msg = `doesn\'t contain styled-components`;
+    throw new Error(msg);
   }
 
   // other imports from styled-components
@@ -92,18 +92,20 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   styledImport.remove();
 
   // Replace Import with UCL
-  styledImport.insertBefore(j.importDeclaration(
-    // All imports on the page
-    _.flow(
-      // dedupe
-      _.uniq,
-      _.map((name: string) => j.importSpecifier(
-        j.identifier(name),
-      )),
-      _.values,
-    )(uclImports),
-    j.stringLiteral("@rbilabs/universal-components")
-  ))
+  if (_.keys(uclImports).length) {
+    styledImport.insertBefore(j.importDeclaration(
+      // All imports on the page
+      _.flow(
+        // dedupe
+        _.uniq,
+        _.map((name: string) => j.importSpecifier(
+          j.identifier(name),
+        )),
+        _.values,
+      )(uclImports),
+      j.stringLiteral("@rbilabs/universal-components")
+    ))
+  }
 
   return root.toSource({ quote: 'single' });
 };
@@ -167,29 +169,14 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   const obj = postcssJs.objectify(root);
 
   let localVars = [];
-  const properties = _.map((key: string) => {
-    const initialValue = obj[key];
-    const convertedObj = toRN([[key, initialValue]]);
-    console.log(`convertedObj: `, convertedObj);
-    console.log(`_.keys(): `, _.keys(convertedObj));
-    const keys = _.keys(convertedObj);
-    let property;
+  const properties = []
 
-    if (keys.length > 1) {
-      // Move through them
-      property = _.keys(convertedObj)[0];
-    } else {
-      property = _.keys(convertedObj)[0];
-    }
-
-    console.log(`property: `, property);
-
-    let identifier = key;
-
+  const addProperties = (property, initialValue) => {
+    let identifier = property;
+    let value = initialValue;
 
     // If the value is is an expression
-    const foundExpression = substitutionMap[initialValue];
-    let value;
+    const foundExpression = substitutionMap[value];
 
     if (foundExpression) {
       const parsed = parseExpression(j, foundExpression);
@@ -200,14 +187,13 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
         localVars.push(parsed.vars);
       }
     } else {
-      let lp = convertedObj[property] as string
-      value = j.literal(lp);
+      value = j.literal(initialValue);
     }
 
     // One-offs
     // -------
 
-    if (key === 'font') {
+    if (identifier === 'font') {
       // The correct variant is set in utils/parseExpression
       identifier = 'variant';
     }
@@ -219,7 +205,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
     if (!supported) {
       identifier = '// ' + identifier;
     }
-    const p = j.property(
+    const builderProperty = j.property(
       'init',
       j.identifier(identifier as string),
       value,
@@ -227,10 +213,15 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
 
     if (!supported) {
       // Add comment
-      p.comments = [j.commentLine(` TODO RN: unsupported CSS`, true)];
+      builderProperty.comments = [j.commentLine(` TODO RN: unsupported CSS`, true)];
     }
+    properties.push(builderProperty);
+  }
 
-    return p;
+  _.map((key: string) => {
+    const initialValue = obj[key];
+    const convertedObj = toRN([[key, initialValue]]);
+    _.keys(convertedObj).forEach((k) => addProperties(k, convertedObj[k]));
   })(_.keys(obj));
 
   let asObjectOrFunction;
@@ -244,9 +235,6 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       const comment = c.text.indexOf("\n") >= 0
         ? j.commentBlock(' ' + c.text + '\n', true, true)
         : j.commentLine(' ' + c.text, true);
-      // console.log(`>> c: `, c);
-      // console.log(`>> comment: `, comment);
-      // console.log(`>> p: `, p);
       if (p) {
         p.comments = [comment];
       }

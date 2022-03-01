@@ -6,13 +6,18 @@ const parsed = JSON.parse(rawdata);
 let count = 0;
 
 parsed.forEach(f => {
-  if (count > 20) {
+  if (count > 30) {
     return;
   }
   try {
-    const res = execSync(`npx jscodeshift -t ./examples/styled-components-to-ucl/index.ts --extensions=ts --parser=ts /Users/rbikf004/dev/rbilabs/ctg-whitelabel-app/workspaces/frontend/src/${f} --print`);
-    console.log(`res: ${res}`, f);
+    const cmd = `npx jscodeshift --fail-on-error -t ./examples/styled-components-to-ucl/index.ts --extensions=ts --parser=ts /Users/rbikf004/dev/rbilabs/ctg-whitelabel-app/workspaces/frontend/src/${f}`;
+    // const res = execSync(cmd, { stdio: 'ignore' });
+    const res = execSync(cmd);
+    console.log(`res: `, res);
+    console.log(`file processed `, f);
+    count++
   } catch (error) {
     console.log(`error: ${error.message}`, f);
+    return;
   }
 })

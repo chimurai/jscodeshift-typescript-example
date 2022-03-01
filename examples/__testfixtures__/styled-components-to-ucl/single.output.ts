@@ -1,14 +1,8 @@
-import { Box, Text } from '@rbilabs/universal-components';
-import { brandFont } from 'components/layout/brand-font';
-import { primitive } from 'styles/constants/primitives';
+import { Box } from '@rbilabs/universal-components';
 
 export const RewardCategoriesContainer = Box.withConfig({
-  zIndex: Styles.zIndex.below,
-  paddingTop: '$20'
-});
-
-export const TierLabel = Text.withConfig({
-  variant: 'headerTwo',
-  fontFamily: Styles.fontFamily.alternative,
-  fontSize: '1rem'
+  paddingTop: '$3',
+  paddingRight: '$1',
+  paddingBottom: '$3',
+  paddingLeft: '1px'
 });

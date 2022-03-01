@@ -93,12 +93,14 @@ const valueToType = (j: JSCodeshift, value) => {
 
 interface IMapping {
   component: string;
+  notSupported?: string | boolean;
+  moveText?: boolean;
 }
 
 const elementMap: Record<string, IMapping> = {
-  'div': {
-    component: 'Box',
-  },
+  'div': { component: 'Box', notSupported: true },
+  'span': { component: 'Box' },
+  'section': { component: 'Box' },
   'h1': { component: 'Header' },
   'h2': { component: 'Header' },
   'h3': { component: 'Header' },
@@ -106,7 +108,17 @@ const elementMap: Record<string, IMapping> = {
   'h5': { component: 'Header' },
   'h6': { component: 'Header' },
   'p': { component: 'Text' },
-  'label': { component: 'Text' },
+  'label': { component: 'Text', notSupported: 'use InputLabel' },
+  'button': { component: 'Button' },
+  'ul': { component: 'Box', notSupported: 'use ScrollView' },
+  'li': { component: 'Box', notSupported: 'use ScrollView' },
+  'a': { component: 'Box', notSupported: 'use /component/link' },
+  'form': { component: 'Box', notSupported: true },
+  // 'svg': { component: 'Icon' },
+  'fieldset': { component: 'Box', notSupported: true },
+  'input': { component: 'Box', notSupported: true },
+  'legend': { component: 'Box', notSupported: true },
+  'hr': { component: 'Divider' },
 };
 
 export const getElementMapping = (el: string) => {
