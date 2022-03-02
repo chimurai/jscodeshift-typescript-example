@@ -211,7 +211,7 @@ export default function transformer(file: FileInfo, api: API) {
       }
     }
 
-    return root.toSource();
+    return root.toSource({ quote: 'single', trailingComma: true });
     // formatting for tests
     // return format(root.toSource(), {
     //   parser: "babel",
