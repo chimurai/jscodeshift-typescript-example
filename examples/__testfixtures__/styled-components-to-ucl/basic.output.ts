@@ -14,12 +14,19 @@ export const Basic = Box.withConfig<{
   alignItems: 'center',
   textAlign: 'left',
   color: p.color,
-  backgroundColor: p.backgroundColor
+  backgroundColor: p.backgroundColor,
+  borderTopWidth: 1,
+  borderTopColor: 'solid',
+  borderTopStyle: Styles.color.primary
 }));
 
 export const Tokens = Box.withConfig({
+  alignSelf: 'center',
   color: '__legacyToken.text-reversed',
-  backgroundColor: '__legacyToken.background-pattern'
+  backgroundColor: '__legacyToken.background-pattern',
+  borderWidth: 2,
+  borderColor: 'solid',
+  borderStyle: Styles.color.primary
 });
 
 export const SubHeader = Header.withConfig({

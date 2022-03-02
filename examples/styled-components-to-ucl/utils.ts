@@ -33,11 +33,11 @@ const brandFontMap = {
 
 const removeProps = [
   /^animation/,
+  /^transition/,
 ];
 
 const unsupportedProps = [
   /^objectFit$/,
-  /^animation/,
 ];
 
 const unsupportedValue = [
