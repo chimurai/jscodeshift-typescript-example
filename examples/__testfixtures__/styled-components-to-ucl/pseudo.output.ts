@@ -6,6 +6,6 @@ export const Component = Box.withConfig({
 
   _hover: {
     padding: '$6',
-    backgroundColor: '__legacyToken.background-button-primary-hover'
-  }
+    backgroundColor: '__legacyToken.background-button-primary-hover',
+  },
 });

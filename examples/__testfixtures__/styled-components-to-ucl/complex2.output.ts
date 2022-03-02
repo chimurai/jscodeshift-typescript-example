@@ -3,7 +3,9 @@ import { Box } from '@rbilabs/universal-components';
 export const CartItemEditContainer = Box.withConfig<{
   color: string
 }>(p => ({
-  color: p.color
+  _text: {
+    color: p.color,
+  },
 }))/*
 TODO RN: unsupported CSS
 

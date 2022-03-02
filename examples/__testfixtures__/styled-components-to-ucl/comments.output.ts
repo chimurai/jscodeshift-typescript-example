@@ -11,7 +11,7 @@ const StyledContainer = Box.withConfig({
       line
       comment
   */
-  backgroundColor: 'black'
+  backgroundColor: 'black',
 });
 
 export default StyledContainer;

@@ -11,5 +11,5 @@ export const StyledContainer = Box.withConfig({
   // objectFit: 'contain',
 
   // TODO RN: unsupported CSS
-  // display: 'block'
+  // display: 'block',
 });

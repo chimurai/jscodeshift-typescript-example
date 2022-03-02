@@ -1,5 +1,5 @@
 import { API, FileInfo, JSCodeshift } from 'jscodeshift';
-import { parseExpression, getElementMapping, isSupported } from './utils';
+import { parseExpression, getElementMapping, isSupported, isATextProp } from './utils';
 import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
@@ -101,7 +101,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     ))
   }
 
-  return root.toSource({ quote: 'single' });
+  return root.toSource({ quote: 'single', trailingComma: true });
 };
 
 const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclImports) => {
@@ -157,7 +157,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   const properties = []
   let hasExpressionError = false;
 
-  const addProperties = (property, initialValue, parent?: '_hover') => {
+  const addProperties = (property, initialValue, parent?: '_hover' | '_text') => {
     let identifier = property;
     let value = initialValue;
 
@@ -252,6 +252,12 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       }
       return;
     }
+
+    let parent = null;
+    // if the element is a box we have to next the text properties under _text
+    if (activeElement.component === 'Box' && isATextProp(key)) {
+      parent = '_text';
+    }
     // One-offs Pre toRN
     // -------
     if (key === 'margin' && value?.includes('auto')) {
@@ -262,7 +268,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
     const convertedObj = toRN([[key, value]]);
     _.keys(convertedObj).forEach((k) => {
       const v = convertedObj[k];
-      addProperties(k, v);
+      addProperties(k, v, parent);
     });
   })(_.keys(obj));
 
