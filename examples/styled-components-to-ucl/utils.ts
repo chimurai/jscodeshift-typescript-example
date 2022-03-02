@@ -142,7 +142,7 @@ export const getElementMapping = (el: string) => {
 
 export const parseExpression = (j: JSCodeshift, expression) => {
   const finalVars = [];
-  let finalValue;
+
   if (expression.type === 'MemberExpression') {
     let v = expression;
     // TODO maps styles or maybe more this to a separate code mod
@@ -177,7 +177,6 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     }
 
     const propertyName = expression?.property?.name;
-    finalValue = expression;
     let vars;
     if (propertyName && includeTypes) {
       vars = [{
@@ -197,7 +196,6 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     }
     const { value, vars } = parseExpression(j, expression.body);
     expression.body = value;
-    finalValue = expression.body;
     if (vars?.length) finalVars.push(vars);
     return {
       value: expression.body,

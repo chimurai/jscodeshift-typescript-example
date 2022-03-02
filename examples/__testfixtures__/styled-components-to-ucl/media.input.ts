@@ -1,0 +1,9 @@
+import styled from 'styled-components';
+
+export const Component = styled.div`
+  padding: 12px 4px;
+  margin: 12px;
+  ${Styles.desktop`
+    margin: 4px;
+  `}
+`;
