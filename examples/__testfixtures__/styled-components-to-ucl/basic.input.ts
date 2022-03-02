@@ -6,6 +6,7 @@ import Modal from './modal';
  */
 export const Basic = styled.div`
   display: flex;
+  margin: 0 auto;
   justify-content: space-between;
   align-items: center;
   text-align: left;

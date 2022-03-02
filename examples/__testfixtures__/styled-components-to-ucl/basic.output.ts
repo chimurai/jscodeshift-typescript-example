@@ -9,6 +9,7 @@ export const Basic = Box.withConfig<{
   backgroundColor: string
 }>(p => ({
   display: 'flex',
+  alignSelf: 'center',
   justifyContent: 'space-between',
   alignItems: 'center',
   textAlign: 'left',

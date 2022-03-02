@@ -14,8 +14,6 @@ const tagTypes = {
   MemberExpression: node => node.object,
 };
 
-// const importSpecifiers = ['ImportDefaultSpecifier', 'ImportSpecifier'];
-
 export const parser = 'tsx'
 export default function transformer(fileInfo: FileInfo, api: API) {
   const j = api.jscodeshift;
@@ -181,9 +179,8 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       value = j.literal(initialValue);
     }
 
-    // One-offs
+    // One-offs Post toRN
     // -------
-
     if (identifier === 'font') {
       // The correct variant is set in utils/parseExpression
       identifier = 'variant';
@@ -235,7 +232,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   }
 
   _.map((key: string) => {
-    const value = obj[key];
+    let value = obj[key];
     // Nested objects as values
     if (_.isObject(value)) {
       console.log(`>>> obj value: `, value);
@@ -255,6 +252,13 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       }
       return;
     }
+    // One-offs Pre toRN
+    // -------
+    if (key === 'margin' && value?.includes('auto')) {
+      key = 'align-self';
+      value = 'center';
+    }
+
     const convertedObj = toRN([[key, value]]);
     _.keys(convertedObj).forEach((k) => {
       const v = convertedObj[k];
