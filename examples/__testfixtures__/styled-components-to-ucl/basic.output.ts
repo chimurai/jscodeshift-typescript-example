@@ -1,4 +1,4 @@
-import { Box, Header } from '@rbilabs/universal-components';
+import { Box, Header as UCLHeader } from '@rbilabs/universal-components';
 import Modal from './modal';
 
 /**
@@ -37,7 +37,7 @@ export const Tokens = Box.withConfig({
   borderStyle: Styles.color.primary,
 });
 
-export const SubHeader = Header.withConfig({
+export const Header = UCLHeader.withConfig({
   color: '__legacyToken.text-reversed',
 });
 

@@ -23,7 +23,7 @@ export const Tokens = styled.div`
   border: 2px solid ${Styles.color.primary};
 `;
 
-export const SubHeader = styled.h1`
+export const Header = styled.h1`
   color: ${p => p.theme.token('text-reversed')};
 `;
 

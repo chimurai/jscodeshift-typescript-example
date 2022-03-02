@@ -20,6 +20,23 @@ export default function transformer(fileInfo: FileInfo, api: API) {
 
   const root = j(fileInfo.source);
   const uclImports = [];
+  const localVariable = [];
+
+  // Add all local variables
+  // @ts-ignore
+  // root.findVariableDeclarators().forEach(d => console.log(d.value.id.name));
+  root.findVariableDeclarators().forEach(d => localVariable.push(d.value.id.name));
+
+  const addUCLImport = (componentRealName) => {
+    // Prefix with UCL if there is a local variable with the same name
+    let name = componentRealName;
+    let alias = undefined;
+    if (_.includes(name, localVariable)) {
+      alias = 'UCL' + name;
+    }
+    uclImports.push([name, alias]);
+    return alias ? alias : name;
+  }
 
   const styledImport = root
     .find(j.ImportDeclaration, {
@@ -64,7 +81,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       // styled.XXX
       // @ts-ignore
       const activeElement = getElementMapping(elementPropName);
-      processFile(j, nodePath, activeElement, true, uclImports);
+      processFile(j, nodePath, activeElement, true, addUCLImport);
     });
 
   root.find(j.CallExpression, {
@@ -77,7 +94,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       const { node } = nodePath;
       // @ts-ignore
       const nameOfArg = node.tag?.arguments[0]?.name;
-      processFile(j, nodePath, { component: nameOfArg }, false, uclImports);
+      processFile(j, nodePath, { component: nameOfArg }, false, addUCLImport);
     });
 
   // Imports
@@ -91,9 +108,11 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       // All imports on the page
       _.flow(
         // dedupe
-        _.uniq,
-        _.map((name: string) => j.importSpecifier(
-          j.identifier(name),
+        // First item in the tuple
+        _.uniqBy((arr) => arr[0]),
+        _.map((obj: Array<string>) => j.importSpecifier(
+          j.identifier(obj[0]),
+          obj[1] ? j.identifier(obj[1]) : null,
         )),
         _.values,
       )(uclImports),
@@ -104,7 +123,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   return root.toSource({ quote: 'single', trailingComma: true });
 };
 
-const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclImports) => {
+const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, addToUCLImportsFn) => {
   const { quasi, tag } = nodePath.node
   if (!(tag.type in tagTypes)) return;
 
@@ -114,7 +133,9 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
 
   if (callee.type !== 'Identifier') return;
 
-  if (activeElement?.component && addToImports) uclImports.push(activeElement.component)
+  const componentNameOrAlias = addToImports
+    ? addToUCLImportsFn(activeElement.component)
+    : activeElement.component;
 
   const { quasis, expressions } = quasi;
   // Substitute all ${interpolations} with arbitrary test that we can find later
@@ -235,7 +256,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
     let value = obj[key];
     // Nested objects as values
     if (_.isObject(value)) {
-      console.log(`>>> obj value: `, value);
+      // console.log(`>>> obj value: `, value);
       // Supported properties that can have objects as key
       if (key === '&:hover') {
         _.map((k: string) => {
@@ -311,7 +332,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
 
   const exprs = j.callExpression(
     j.memberExpression(
-      j.identifier(activeElement.component),
+      j.identifier(componentNameOrAlias),
       j.identifier('withConfig'),
     ),
     [asObjectOrFunction],
