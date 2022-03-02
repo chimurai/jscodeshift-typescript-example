@@ -5,12 +5,8 @@ import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
 
-export const SpreadContentContainer = `
-  font-size: 1.1rem;
-  text-align: center;
-`;
-
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
+const ERR_NO_STYLED_COMPONENT_IMPORT = `ERR_NO_STYLED_COMPONENT_IMPORT`;
 
 const tagTypes = {
   Identifier: node => node,
@@ -35,7 +31,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     });
 
   if (!styledImport.length) {
-    const msg = `NO_STYLED_COMPONENT_IMPORT`;
+    const msg = ERR_NO_STYLED_COMPONENT_IMPORT;
     throw new Error(msg);
   }
 
@@ -155,27 +151,20 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
   substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
 
   root = postcss.parse(cssText);
-  // root.walkDecls((decl) => {
-  //   console.log(`decl.prop: `, decl.prop);
-  //   console.log(`decl.value: `, decl.value);
-  //   const testProp = decl.prop.replace(/-/g, '').toLowerCase();
-  //   const obj = toRN([[decl.prop, decl.value]]);
-  //   // @ts-ignore
-  //   decl.prop = _.keys(obj)[0];
-  //   const prop = _.keys(obj)[0];
-  //   decl.value = obj[prop] as string;
-  // });
 
   const obj = postcssJs.objectify(root);
+  // console.log(`>>>>>>> obj: `, obj);
 
-  console.log(`>>>>>>> obj: `, obj);
   let localVars = [];
   const properties = []
   let hasExpressionError = false;
 
-  const addProperties = (property, initialValue) => {
+  const addProperties = (property, initialValue, parent?: '_hover') => {
     let identifier = property;
     let value = initialValue;
+
+    // const foundExpressionAsProp = substitutionMap[value];
+    // console.log(`>>> foundExpressionAsProp: `, foundExpressionAsProp);
 
     // If the value is is an expression
     const foundExpression = substitutionMap[value];
@@ -222,27 +211,68 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       // Add comment
       builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
     }
-    properties.push(builderProperty);
+    if (parent) {
+      // find the parent
+      // @ts-ignore
+      const found = _.find(p => p.key.name === parent)(properties);
+      if (found) {
+        // @ts-ignore
+        found.value.properties.push(builderProperty);
+      } else {
+        // Create a new object with the parent as the key
+        const parentObject = j.objectExpression([builderProperty])
+        const parentProperty = j.property(
+          'init',
+          j.identifier(parent),
+          parentObject,
+        );
+        properties.push(parentProperty);
+
+      }
+    } else {
+      properties.push(builderProperty);
+    }
   }
 
   _.map((key: string) => {
-    const initialValue = obj[key];
-    console.log(`initialValue: `, initialValue);
-    // Nested objects are not supported
-    if (typeof initialValue === 'object') {
-      hasExpressionError = true;
+    const value = obj[key];
+    // Nested objects as values
+    if (_.isObject(value)) {
+      console.log(`>>> obj value: `, value);
+      // Supported properties that can have objects as key
+      if (key === '&:hover') {
+        _.map((k: string) => {
+          const v = value[k];
+          const convertedObj = toRN([[k, v]]);
+          _.keys(convertedObj).forEach((k) => {
+            const v = convertedObj[k];
+            addProperties(k, v, '_hover');
+          });
+        })(_.keys(value))
+        // Unsupported
+      } else {
+        hasExpressionError = true;
+      }
       return;
     }
-    const convertedObj = toRN([[key, initialValue]]);
+    const convertedObj = toRN([[key, value]]);
     _.keys(convertedObj).forEach((k) => {
       const v = convertedObj[k];
       addProperties(k, v);
     });
   })(_.keys(obj));
 
-  let asObjectOrFunction;
   if (comments.length) {
     comments.forEach((c, i) => {
+      // Expressions at the property level will appear as comments
+      // console.log(`>>> c.text: `, c.text);
+      // console.log(`>>> substitutionMap: `, substitutionMap);
+      const exp = substitutionMap[`/*${c.text}*/`];
+      if (exp) {
+        // const p = parseExpression(j, exp);
+        // console.log(`>>>>>>> p: `, p);
+      }
+
       // Get the position adjusted for the fact that
       // comments have been removed from the `properties` array
       const position = c.position - i;
@@ -256,6 +286,9 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, uclI
       }
     })
   }
+
+  let asObjectOrFunction;
+
   if (localVars.length) {
     asObjectOrFunction = j.arrowFunctionExpression(
       [j.identifier('p')],

@@ -4,6 +4,14 @@ import CloseButton from 'components/close-button';
 import { FIXED_STICKY_FOOTER_HEIGHT } from 'components/sticky-footer/constants';
 import { primitive } from 'styles/constants/primitives';
 
+const k = keyframes`
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0
+  }
+`
 export const ModalCloseButton = CloseButton.withConfig({
   paddingTop: '$20',
 
