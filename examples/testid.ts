@@ -1,5 +1,6 @@
 import { API, FileInfo } from "jscodeshift";
 
+export const parser = "tsx";
 export default function transformer(file: FileInfo, api: API) {
   const j = api.jscodeshift;
 
