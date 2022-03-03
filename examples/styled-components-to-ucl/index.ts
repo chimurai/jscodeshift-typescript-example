@@ -1,5 +1,5 @@
 import { API, FileInfo, JSCodeshift } from 'jscodeshift';
-import { parseExpression, getElementMapping, isSupported, isATextProp } from './utils';
+import { parseExpression, getElementMapping, isSupported, isATextProp, mediaPropertyNames } from './utils';
 import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
@@ -203,28 +203,44 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
         // @ts-ignore
         const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
         _.keys(obj).forEach((k) => {
-          const v = obj[k];
+          let v = obj[k];
           // In the case media queries we want to turn the property into
           // an object, so the parent is the original key, e.g. `margin:`
           const parent = k;
-          // original values should be set to base -- mobile first
-          const originalPropertyNewName = 'base'
           // Set the new key based on the media query
-          const newPropertyName = 'large';
-          properties = addProperties({
-            j,
-            properties,
-            substitutionMap,
-            addToLocalVars,
-            property: k,
-            initialValue: v,
-            parent,
-            newPropertyName,
-            originalPropertyNewName,
-          })
-        });
+          // @ts-ignore
+          const queryName = exp.tag.property.name;
+          // e.g. `mobile` `desktop`
+          const { origProp, newProp } = mediaPropertyNames[queryName];
+          if (!origProp) {
+            return;
+          }
 
-        // Return so that comment is added to the object
+          // One-offs Pre toRN
+          // -------
+          // @todo DRY
+          if (k === 'margin' && v?.includes('auto')) {
+            k = 'align-self';
+            v = 'center';
+          }
+          // Convert
+          const convertedObj = toRN([[k, v]]);
+          _.keys(convertedObj).forEach((k) => {
+            const v = convertedObj[k];
+            properties = addProperties({
+              j,
+              properties,
+              substitutionMap,
+              addToLocalVars,
+              property: k,
+              initialValue: v,
+              parent,
+              newPropertyName: newProp,
+              originalPropertyNewName: origProp,
+            })
+          });
+        });
+        // Return so that comment is not added to the object
         return;
       }
 

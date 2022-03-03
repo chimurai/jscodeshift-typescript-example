@@ -6,6 +6,13 @@ export const Component = Box.withConfig({
 
   margin: {
     base: '$3',
-    large: '$4',
+    lg: '$4',
+  },
+});
+
+export const Second = Box.withConfig({
+  margin: {
+    lg: '$3',
+    base: '$1',
   },
 });

@@ -7,3 +7,10 @@ export const Component = styled.div`
     margin: 16px;
   `}
 `;
+
+export const Second = styled.div`
+  margin: 12px;
+  ${Styles.mobile`
+    margin: 4px;
+  `}
+`;
