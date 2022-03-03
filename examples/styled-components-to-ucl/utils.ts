@@ -20,6 +20,29 @@ const primitiveMap = {
   '$spacing11': '$20'
 };
 
+const boxToTextProperties = [
+  'bold',
+  'color',
+  'font',
+  'font',
+  'fontSize',
+  'fontWeight',
+  'highlight',
+  'isTruncated',
+  'italic',
+  'lineHeight',
+  'lineSpacing',
+  'noOfLines',
+  'strickThrough',
+  'sub',
+  'textAlign',
+  'textTransform',
+  'underline',
+  'variant',
+];
+
+export const isATextProp = (p) => _.includes(p, boxToTextProperties)
+
 const brandFontMap = {
   'hero': 'hero',
   'headerOne': 'headerOne',
@@ -33,11 +56,11 @@ const brandFontMap = {
 
 const removeProps = [
   /^animation/,
+  /^transition/,
 ];
 
 const unsupportedProps = [
   /^objectFit$/,
-  /^animation/,
 ];
 
 const unsupportedValue = [

@@ -1,4 +1,4 @@
-import { Box, Header } from '@rbilabs/universal-components';
+import { Box, Header as UCLHeader } from '@rbilabs/universal-components';
 import Modal from './modal';
 
 /**
@@ -9,29 +9,48 @@ export const Basic = Box.withConfig<{
   backgroundColor: string
 }>(p => ({
   display: 'flex',
+  alignSelf: 'center',
   justifyContent: 'space-between',
   alignItems: 'center',
-  textAlign: 'left',
-  color: p.color,
-  backgroundColor: p.backgroundColor
+
+  _text: {
+    textAlign: 'left',
+    color: p.color,
+  },
+
+  backgroundColor: p.backgroundColor,
+  borderTopWidth: 1,
+  borderTopColor: Styles.color.primary,
+  borderTopStyle: 'solid',
 }));
 
 export const Tokens = Box.withConfig({
-  color: '__legacyToken.text-reversed',
-  backgroundColor: '__legacyToken.background-pattern'
+  alignSelf: 'center',
+
+  _text: {
+    color: '__legacyToken.text-reversed',
+  },
+
+  backgroundColor: '__legacyToken.background-pattern',
+  borderWidth: 2,
+  borderColor: Styles.color.primary,
+  borderStyle: 'solid',
 });
 
-export const SubHeader = Header.withConfig({
-  color: '__legacyToken.text-reversed'
+export const Header = UCLHeader.withConfig({
+  color: '__legacyToken.text-reversed',
 });
 
 export const Conditional = Box.withConfig<{
   reversed: boolean
 }>(p => ({
-  color: p.reversed ? '__legacyToken.text-reversed' : '__legacyToken.text-default',
-  backgroundColor: p.reversed ? Styles.color.white : '__legacyToken.text-default'
+  _text: {
+    color: p.reversed ? '__legacyToken.text-reversed' : '__legacyToken.text-default',
+  },
+
+  backgroundColor: p.reversed ? Styles.color.white : '__legacyToken.text-default',
 }));
 
 export const ModalExtended = Modal.withConfig({
-  backgroundColor: '__legacyToken.background-pattern'
+  backgroundColor: '__legacyToken.background-pattern',
 });

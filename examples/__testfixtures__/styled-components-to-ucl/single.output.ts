@@ -1,10 +1,10 @@
-import { Box } from '@rbilabs/universal-components';
+import { Box as UCLBox } from '@rbilabs/universal-components';
 
-export const RewardCategoriesContainer = Box.withConfig({
+export const Box = UCLBox.withConfig({
   width: '$10',
   height: '$16',
   paddingTop: '$3',
   paddingRight: '$1',
   paddingBottom: '$3',
-  paddingLeft: '1px'
+  paddingLeft: '1px',
 });
