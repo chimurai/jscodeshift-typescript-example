@@ -81,7 +81,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       // styled.XXX
       // @ts-ignore
       const activeElement = getElementMapping(elementPropName);
-      processFile(j, nodePath, activeElement, true, addUCLImport);
+      processElement(j, nodePath, activeElement, true, addUCLImport);
     });
 
   root.find(j.CallExpression, {
@@ -94,7 +94,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       const { node } = nodePath;
       // @ts-ignore
       const nameOfArg = node.tag?.arguments[0]?.name;
-      processFile(j, nodePath, { component: nameOfArg }, false, addUCLImport);
+      processElement(j, nodePath, { component: nameOfArg }, false, addUCLImport);
     });
 
   // Imports
@@ -123,134 +123,16 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   return root.toSource({ quote: 'single', trailingComma: true });
 };
 
-const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, addToUCLImportsFn) => {
-  const { quasi, tag } = nodePath.node
-  if (!(tag.type in tagTypes)) return;
-
-  // Get the identifier for styled in either styled.View`...` or styled(View)`...`
-  // Note we aren't checking the name of the callee
-  const callee = tagTypes[tag.type](tag);
-
-  if (callee.type !== 'Identifier') return;
-
+const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, addToUCLImportsFn) => {
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.component)
     : activeElement.component;
 
-  const { quasis, expressions } = quasi;
-  // Substitute all ${interpolations} with arbitrary test that we can find later
-  // This is so we can shove it in postCSS
-  const substitutionNames = expressions.map((_value, index) => `/*__${index}substitution__*/`);
-  let cssText =
-    quasis[0].value.cooked +
-    substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
-  // @ts-ignore
-  let substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
-
-  // Replace mixin interpolations as comments, but as ids if in properties
-  let root = postcss.parse(cssText, {
-    map: { annotation: false }
-  });
-
-  const comments = [];
-  const notInPropertiesIndexes = {};
-  root.walkComments((comment, position) => {
-    comments.push({ text: comment.text, position });
-    const index = substitutionNames.indexOf(`/*${comment.text}*/`);
-    if (index >= 0) notInPropertiesIndexes[index] = true;
-  });
-
-  substitutionNames.forEach((name, index) => {
-    if (!notInPropertiesIndexes[index]) substitutionNames[index] = name.replace(/^\/\*(.+)\*\/$/, '$1');
-  });
-  cssText =
-    quasis[0].value.cooked +
-    substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
-  // @ts-ignore
-  substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
-
-  root = postcss.parse(cssText);
-
-  const obj = postcssJs.objectify(root);
-  // console.log(`>>>>>>> obj: `, obj);
-
+  const { obj, cssText, substitutionMap, comments } = parseTemplate(nodePath);
   let localVars = [];
+  const addToLocalVars = (v) => localVars.push(v);
   const properties = []
   let hasExpressionError = false;
-
-  const addProperties = (property, initialValue, parent?: '_hover' | '_text') => {
-    let identifier = property;
-    let value = initialValue;
-
-    // const foundExpressionAsProp = substitutionMap[value];
-    // console.log(`>>> foundExpressionAsProp: `, foundExpressionAsProp);
-
-    // If the value is is an expression
-    const foundExpression = substitutionMap[value];
-
-    if (foundExpression) {
-      const parsed = parseExpression(j, foundExpression);
-
-      value = parsed.value;
-      // These are variables that are used in Arrow functions
-      if (parsed.vars?.length) {
-        localVars.push(parsed.vars);
-      }
-    } else {
-      value = j.literal(initialValue);
-    }
-
-    // One-offs Post toRN
-    // -------
-    if (identifier === 'font') {
-      // The correct variant is set in utils/parseExpression
-      identifier = 'variant';
-    }
-    // ------
-
-    const [supported, shouldRemove] = isSupported(identifier, value?.value);
-
-    // Things like `animation` we don't want to include at all
-    if (shouldRemove) {
-      return;
-    }
-
-    // Comment the others
-    if (!supported) {
-      identifier = '// ' + identifier;
-    }
-    const builderProperty = j.property(
-      'init',
-      j.identifier(identifier as string),
-      value,
-    );
-
-    if (!supported) {
-      // Add comment
-      builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
-    }
-    if (parent) {
-      // find the parent
-      // @ts-ignore
-      const found = _.find(p => p.key.name === parent)(properties);
-      if (found) {
-        // @ts-ignore
-        found.value.properties.push(builderProperty);
-      } else {
-        // Create a new object with the parent as the key
-        const parentObject = j.objectExpression([builderProperty])
-        const parentProperty = j.property(
-          'init',
-          j.identifier(parent),
-          parentObject,
-        );
-        properties.push(parentProperty);
-
-      }
-    } else {
-      properties.push(builderProperty);
-    }
-  }
 
   _.map((key: string) => {
     let value = obj[key];
@@ -264,7 +146,8 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, addT
           const convertedObj = toRN([[k, v]]);
           _.keys(convertedObj).forEach((k) => {
             const v = convertedObj[k];
-            addProperties(k, v, '_hover');
+            const prop = addProperties(j, properties, substitutionMap, addToLocalVars, k, v, '_hover');
+            if (prop) { properties.push(prop) }
           });
         })(_.keys(value))
         // Unsupported
@@ -289,7 +172,8 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, addT
     const convertedObj = toRN([[key, value]]);
     _.keys(convertedObj).forEach((k) => {
       const v = convertedObj[k];
-      addProperties(k, v, parent);
+      const prop = addProperties(j, properties, substitutionMap, addToLocalVars, k, v, parent);
+      if (prop) { properties.push(prop) }
     });
   })(_.keys(obj));
 
@@ -301,7 +185,7 @@ const processFile = (j: JSCodeshift, nodePath, activeElement, addToImports, addT
       const exp = substitutionMap[`/*${c.text}*/`];
       if (exp) {
         // const p = parseExpression(j, exp);
-        // console.log(`>>>>>>> p: `, p);
+        console.log(`>>>>>>> exp: `, exp);
       }
 
       // Get the position adjusted for the fact that
@@ -373,4 +257,128 @@ ${ct}
   }
   j(nodePath).replaceWith(exprs);
   return;
+}
+
+const parseTemplate = (nodePath) => {
+  const { quasi, tag } = nodePath.node
+  if (!(tag.type in tagTypes)) return;
+
+  // Get the identifier for styled in either styled.View`...` or styled(View)`...`
+  // Note we aren't checking the name of the callee
+  const callee = tagTypes[tag.type](tag);
+
+  if (callee.type !== 'Identifier') return;
+
+  const { quasis, expressions } = quasi;
+  // Substitute all ${interpolations} with arbitrary test that we can find later
+  // This is so we can shove it in postCSS
+  const substitutionNames = expressions.map((_value, index) => `/*__${index}substitution__*/`);
+  let cssText =
+    quasis[0].value.cooked +
+    substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
+  // @ts-ignore
+  let substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
+
+  // Replace mixin interpolations as comments, but as ids if in properties
+  let root = postcss.parse(cssText, {
+    map: { annotation: false }
+  });
+
+  const comments = [];
+  const notInPropertiesIndexes = {};
+  root.walkComments((comment, position) => {
+    comments.push({ text: comment.text, position });
+    const index = substitutionNames.indexOf(`/*${comment.text}*/`);
+    if (index >= 0) notInPropertiesIndexes[index] = true;
+  });
+
+  substitutionNames.forEach((name, index) => {
+    if (!notInPropertiesIndexes[index]) substitutionNames[index] = name.replace(/^\/\*(.+)\*\/$/, '$1');
+  });
+  cssText =
+    quasis[0].value.cooked +
+    substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
+  // @ts-ignore
+  substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
+
+  root = postcss.parse(cssText);
+
+  const obj = postcssJs.objectify(root);
+  return {
+    cssText,
+    obj,
+    substitutionMap,
+    comments,
+  }
+}
+
+const addProperties = (j, properties, substitutionMap, addToLocalVars, property, initialValue, parent?: '_hover' | '_text') => {
+  let identifier = property;
+  let value = initialValue;
+
+  // If the value is is an expression
+  const foundExpression = substitutionMap[value];
+
+  if (foundExpression) {
+    const parsed = parseExpression(j, foundExpression);
+
+    value = parsed.value;
+    // These are variables that are used in Arrow functions
+    if (parsed.vars?.length) {
+      addToLocalVars(parsed.vars);
+    }
+  } else {
+    value = j.literal(initialValue);
+  }
+
+  // One-offs Post toRN
+  // -------
+  if (identifier === 'font') {
+    // The correct variant is set in utils/parseExpression
+    identifier = 'variant';
+  }
+  // ------
+
+  const [supported, shouldRemove] = isSupported(identifier, value?.value);
+
+  // Things like `animation` we don't want to include at all
+  if (shouldRemove) {
+    return;
+  }
+
+  // Comment the others
+  if (!supported) {
+    identifier = '// ' + identifier;
+  }
+  const builderProperty = j.property(
+    'init',
+    j.identifier(identifier as string),
+    value,
+  );
+
+  if (!supported) {
+    // Add comment
+    builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
+  }
+  if (parent) {
+    // find the parent
+    // @ts-ignore
+    const found = _.find(p => p.key.name === parent)(properties);
+    if (found) {
+      // @ts-ignore
+      found.value.properties.push(builderProperty);
+    } else {
+      // Create a new object with the parent as the key
+      const parentObject = j.objectExpression([builderProperty])
+      const parentProperty = j.property(
+        'init',
+        j.identifier(parent),
+        parentObject,
+      );
+      return parentProperty;
+
+    }
+  } else {
+    return builderProperty;
+  }
 }

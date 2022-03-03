@@ -4,6 +4,8 @@ export const Component = Box.withConfig({
   paddingX: '$1',
   paddingY: '$3',
 
-  // __0substitution__
-  margin: '$3',
+  margin: {
+    base: '$3',
+    lg: '$1',
+  }
 });
