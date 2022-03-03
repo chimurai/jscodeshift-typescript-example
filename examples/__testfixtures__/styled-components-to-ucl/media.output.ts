@@ -6,6 +6,6 @@ export const Component = Box.withConfig({
 
   margin: {
     base: '$3',
-    lg: '$1',
-  }
+    large: '$4',
+  },
 });

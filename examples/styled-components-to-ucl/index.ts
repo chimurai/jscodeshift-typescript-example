@@ -24,7 +24,6 @@ export default function transformer(fileInfo: FileInfo, api: API) {
 
   // Add all local variables
   // @ts-ignore
-  // root.findVariableDeclarators().forEach(d => console.log(d.value.id.name));
   root.findVariableDeclarators().forEach(d => localVariable.push(d.value.id.name));
 
   const addUCLImport = (componentRealName) => {
@@ -128,17 +127,18 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     ? addToUCLImportsFn(activeElement.component)
     : activeElement.component;
 
-  const { obj, cssText, substitutionMap, comments } = parseTemplate(nodePath);
+  const { quasi, tag } = nodePath.node
+  const { obj, cssText, substitutionMap, comments } = parseTemplate({ quasi, tag });
+
+  let properties = [];
   let localVars = [];
-  const addToLocalVars = (v) => localVars.push(v);
-  const properties = []
   let hasExpressionError = false;
+  const addToLocalVars = (v) => localVars.push(v);
 
   _.map((key: string) => {
     let value = obj[key];
     // Nested objects as values
     if (_.isObject(value)) {
-      // console.log(`>>> obj value: `, value);
       // Supported properties that can have objects as key
       if (key === '&:hover') {
         _.map((k: string) => {
@@ -146,8 +146,17 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
           const convertedObj = toRN([[k, v]]);
           _.keys(convertedObj).forEach((k) => {
             const v = convertedObj[k];
-            const prop = addProperties(j, properties, substitutionMap, addToLocalVars, k, v, '_hover');
-            if (prop) { properties.push(prop) }
+            properties = addProperties({
+              j,
+              properties,
+              substitutionMap,
+              addToLocalVars,
+              property: k,
+              initialValue: v,
+              parent: '_hover',
+              newPropertyName: null,
+              originalPropertyNewName: null,
+            })
           });
         })(_.keys(value))
         // Unsupported
@@ -172,20 +181,51 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     const convertedObj = toRN([[key, value]]);
     _.keys(convertedObj).forEach((k) => {
       const v = convertedObj[k];
-      const prop = addProperties(j, properties, substitutionMap, addToLocalVars, k, v, parent);
-      if (prop) { properties.push(prop) }
+      properties = addProperties({
+        j,
+        properties,
+        substitutionMap,
+        addToLocalVars,
+        property: k,
+        initialValue: v,
+        parent: parent,
+        newPropertyName: null,
+        originalPropertyNewName: null,
+      })
     });
   })(_.keys(obj));
 
   if (comments.length) {
     comments.forEach((c, i) => {
       // Expressions at the property level will appear as comments
-      // console.log(`>>> c.text: `, c.text);
-      // console.log(`>>> substitutionMap: `, substitutionMap);
       const exp = substitutionMap[`/*${c.text}*/`];
       if (exp) {
-        // const p = parseExpression(j, exp);
-        console.log(`>>>>>>> exp: `, exp);
+        // @ts-ignore
+        const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
+        _.keys(obj).forEach((k) => {
+          const v = obj[k];
+          // In the case media queries we want to turn the property into
+          // an object, so the parent is the original key, e.g. `margin:`
+          const parent = k;
+          // original values should be set to base -- mobile first
+          const originalPropertyNewName = 'base'
+          // Set the new key based on the media query
+          const newPropertyName = 'large';
+          properties = addProperties({
+            j,
+            properties,
+            substitutionMap,
+            addToLocalVars,
+            property: k,
+            initialValue: v,
+            parent,
+            newPropertyName,
+            originalPropertyNewName,
+          })
+        });
+
+        // Return so that comment is added to the object
+        return;
       }
 
       // Get the position adjusted for the fact that
@@ -259,8 +299,7 @@ ${ct}
   return;
 }
 
-const parseTemplate = (nodePath) => {
-  const { quasi, tag } = nodePath.node
+const parseTemplate = ({ quasi, tag }) => {
   if (!(tag.type in tagTypes)) return;
 
   // Get the identifier for styled in either styled.View`...` or styled(View)`...`
@@ -312,7 +351,17 @@ const parseTemplate = (nodePath) => {
   }
 }
 
-const addProperties = (j, properties, substitutionMap, addToLocalVars, property, initialValue, parent?: '_hover' | '_text') => {
+const addProperties = ({
+  j,
+  properties,
+  substitutionMap,
+  addToLocalVars,
+  property,
+  initialValue,
+  parent,
+  newPropertyName,
+  originalPropertyNewName,
+}) => {
   let identifier = property;
   let value = initialValue;
 
@@ -341,9 +390,9 @@ const addProperties = (j, properties, substitutionMap, addToLocalVars, property,
 
   const [supported, shouldRemove] = isSupported(identifier, value?.value);
 
-  // Things like `animation` we don't want to include at all
+  // Things like `animation` we don't want to include at all so just return early
   if (shouldRemove) {
-    return;
+    return properties;
   }
 
   // Comment the others
@@ -352,7 +401,7 @@ const addProperties = (j, properties, substitutionMap, addToLocalVars, property,
   }
   const builderProperty = j.property(
     'init',
-    j.identifier(identifier as string),
+    j.identifier(identifier),
     value,
   );
 
@@ -363,22 +412,49 @@ const addProperties = (j, properties, substitutionMap, addToLocalVars, property,
   if (parent) {
     // find the parent
     // @ts-ignore
-    const found = _.find(p => p.key.name === parent)(properties);
+    const found = _.find(p => p?.key?.name === parent)(properties);
     if (found) {
+      // Confirm that property is an object
       // @ts-ignore
-      found.value.properties.push(builderProperty);
+      if (found.value.properties) {
+        // @ts-ignore
+        found.value.properties.push(builderProperty);
+      } else {
+        // In not an object, convert to an object
+        // @ts-ignore
+        const originalValue = found.value;
+        // Remove
+        // @ts-ignore
+        properties = _.remove(p => p?.key?.name === parent)(properties)
+
+        const originalProperty = j.property(
+          'init',
+          j.identifier(originalPropertyNewName),
+          originalValue,
+        );
+        // Change the property name
+        builderProperty.key.name = newPropertyName;
+        properties.push(j.property(
+          'init',
+          j.identifier(parent),
+          j.objectExpression([
+            originalProperty,
+            builderProperty,
+          ]),
+        ));
+      }
+      return properties;
     } else {
       // Create a new object with the parent as the key
-      const parentObject = j.objectExpression([builderProperty])
-      const parentProperty = j.property(
+      properties.push(j.property(
         'init',
         j.identifier(parent),
-        parentObject,
-      );
-      return parentProperty;
-
+        j.objectExpression([builderProperty]),
+      ));
+      return properties;
     }
   } else {
-    return builderProperty;
+    properties.push(builderProperty);
+    return properties;
   }
 }
