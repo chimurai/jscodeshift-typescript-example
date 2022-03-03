@@ -5,6 +5,16 @@ const styleColorMap = {
   'black': 'black',
 }
 
+export const mediaPropertyNames = {
+  'mobile': { origProp: 'lg', newProp: 'base', },
+  'mobileTiny': { origProp: 'lg', newProp: 'base', },
+  'mobileSmall': { origProp: 'lg', newProp: 'base', },
+  'mobileFullscreen': { origProp: 'lg', newProp: 'base', },
+  'mobileLandscape': { origProp: 'lg', newProp: 'base', },
+  'desktop': { origProp: 'base', newProp: 'lg', },
+  'desktopLarge': { origProp: 'base', newProp: 'lg', },
+};
+
 const primitiveMap = {
   '$spacing0': '$0',
   '$spacing1': '$1',
