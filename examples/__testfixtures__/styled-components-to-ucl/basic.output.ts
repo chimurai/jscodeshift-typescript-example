@@ -20,8 +20,8 @@ export const Basic = Box.withConfig<{
 
   backgroundColor: p.backgroundColor,
   borderTopWidth: 1,
-  borderTopColor: 'solid',
-  borderTopStyle: Styles.color.primary,
+  borderTopColor: Styles.color.primary,
+  borderTopStyle: 'solid',
 }));
 
 export const Tokens = Box.withConfig({
@@ -33,8 +33,8 @@ export const Tokens = Box.withConfig({
 
   backgroundColor: '__legacyToken.background-pattern',
   borderWidth: 2,
-  borderColor: 'solid',
-  borderStyle: Styles.color.primary,
+  borderColor: Styles.color.primary,
+  borderStyle: 'solid',
 });
 
 export const Header = UCLHeader.withConfig({
