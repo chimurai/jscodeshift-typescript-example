@@ -162,7 +162,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
               })
             });
           } catch (error) {
-            console.error(`toRN: `, error);
+            console.error('toRN', error);
             hasExpressionError = true;
           }
         })(_.keys(value))
@@ -204,7 +204,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       });
 
     } catch (error) {
-      console.error(`toRN: `, error);
+      console.error('toRN', error);
       hasExpressionError = true;
       return;
     }
@@ -239,22 +239,27 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
             v = 'center';
           }
           // Convert
-          const convertedObj = toRN([[k, v]]);
-          _.keys(convertedObj).forEach((k) => {
-            const v = convertedObj[k];
-            properties = addProperties({
-              j,
-              properties,
-              substitutionMap,
-              addToLocalVars,
-              property: k,
-              initialValue: v,
-              parent,
-              newPropertyName: newProp,
-              originalPropertyNewName: origProp,
-              needsFlexRemapping: needsFlexRemapping(obj),
-            })
-          });
+          try {
+            const convertedObj = toRN([[k, v]]);
+            _.keys(convertedObj).forEach((k) => {
+              const v = convertedObj[k];
+              properties = addProperties({
+                j,
+                properties,
+                substitutionMap,
+                addToLocalVars,
+                property: k,
+                initialValue: v,
+                parent: k,
+                newPropertyName: newProp,
+                originalPropertyNewName: origProp,
+                needsFlexRemapping: needsFlexRemapping(obj),
+              })
+            });
+          } catch (error) {
+            console.error('toRN', error);
+            hasExpressionError = true;
+          }
         });
         // Return so that comment is not added to the object
         return;
@@ -442,6 +447,9 @@ const addProperties = ({
     return properties;
   }
 
+  if (parent && newPropertyName) {
+    identifier = newPropertyName;
+  }
   // Comment the others
   if (!supported) {
     identifier = '// ' + identifier;
@@ -464,6 +472,7 @@ const addProperties = ({
       // Confirm that property is an object
       // @ts-ignore
       if (found.value.properties) {
+        // If it is; just push to the properties
         // @ts-ignore
         found.value.properties.push(builderProperty);
       } else {

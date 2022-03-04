@@ -71,6 +71,8 @@ const removeProps = [
 
 const unsupportedProps = [
   /^objectFit$/,
+  /^transform$/,
+  /^span$/,
 ];
 
 const unsupportedValue = [

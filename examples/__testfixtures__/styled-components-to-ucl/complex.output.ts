@@ -44,7 +44,7 @@ export const RewardCategoriesContainer = Box.withConfig({
 
   paddingBottom: {
     // TODO RN: unsupported CSS
-    // paddingBottom: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
+    // base: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
   },
 });
 

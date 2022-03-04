@@ -1,6 +1,7 @@
-import { Box } from '@rbilabs/universal-components';
+import { Box as UCLBox } from '@rbilabs/universal-components';
+import { primitive } from 'styles/constants/primitives';
 
-export const CartItemEditContainer = Box.withConfig<{
+export const CartItemEditContainer = UCLBox.withConfig<{
   color: string
 }>(p => ({
   _text: {
@@ -26,3 +27,15 @@ Please use git history to get the exact values
   }
 
 */;
+
+export const Box = UCLBox.withConfig({
+  width: '$10',
+  height: '$16',
+  paddingTop: '$3',
+  paddingRight: '$1',
+  paddingBottom: '$3',
+  paddingLeft: '1px',
+  marginX: '0',
+  marginY: '$2',
+});
+
