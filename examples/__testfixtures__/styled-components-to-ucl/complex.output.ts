@@ -1,4 +1,5 @@
 import { Box } from '@rbilabs/universal-components';
+import { keyframes } from 'styled-components';
 
 import CloseButton from 'components/close-button';
 import { FIXED_STICKY_FOOTER_HEIGHT } from 'components/sticky-footer/constants';

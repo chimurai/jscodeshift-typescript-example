@@ -50,22 +50,8 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     return;
   }
 
-  // other imports from styled-components
-  // e.g. `css` `animate`
-  const otherImports = styledImport.get(0).node.specifiers
-    .filter(p => p.type === 'ImportSpecifier')
-    .map(p => p.imported.name);
-
-
-  if (otherImports.length) {
-
-  }
 
   // Find the methods that are being called.
-
-  // Collect deps
-  // const elementsUsed = [];
-
   // check to see if we are importing css
   let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
 
@@ -99,8 +85,25 @@ export default function transformer(fileInfo: FileInfo, api: API) {
 
   // Imports
   // -------
+
+  // other imports from styled-components
+  // e.g. `css` `animate`
+  const otherImports = styledImport.get(0).node.specifiers
+    .filter(p => p.type === 'ImportSpecifier')
+    .map(p => p.imported.name);
+
+
   // Remove the 'styled-components' import
-  styledImport.remove();
+  if (otherImports.length) {
+    console.log(`styledImport.get(0).node.specifiers: `, styledImport.get(0).node.specifiers);
+    // @ts-ignore
+    styledImport.get(0).node.specifiers = _.filter((s) => (s?.type !== 'ImportDefaultSpecifier'))
+      (styledImport.get(0).node.specifiers);
+    console.log(`after styledImport.get(0).node.specifiers: `, styledImport.get(0).node.specifiers);
+  } else {
+    styledImport.remove();
+  }
+
 
   // Replace Import with UCL
   if (_.keys(uclImports).length) {
