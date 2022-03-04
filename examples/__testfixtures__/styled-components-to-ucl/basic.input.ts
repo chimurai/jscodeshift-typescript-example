@@ -8,6 +8,7 @@ export const Basic = styled.div`
   display: flex;
   position: relative;
   margin: 0 auto;
+  transform: rotate(180deg) translateX(50%);
   justify-content: space-between;
   align-items: center;
   text-align: left;

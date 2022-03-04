@@ -143,8 +143,15 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       // Supported properties that can have objects as key
       if (key === '&:hover') {
         _.map((k: string) => {
-          const v = value[k];
+          let v = value[k];
           try {
+            const o = preToRNTransform(k, v);
+            if (!o.isSupported) {
+              properties = addUnsupportedProperty(j, properties, k, v);
+              return;
+            }
+            k = o.key;
+            v = o.value;
             const convertedObj = toRN([[k, v]]);
             _.keys(convertedObj).forEach((k) => {
               const v = convertedObj[k];
@@ -178,12 +185,14 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     if (activeElement.component === 'Box' && isATextProp(key)) {
       parent = '_text';
     }
-    // One-offs Pre toRN
-    // -------
-    if (key === 'margin' && value?.includes('auto')) {
-      key = 'align-self';
-      value = 'center';
+
+    const o = preToRNTransform(key, value);
+    if (!o.isSupported) {
+      properties = addUnsupportedProperty(j, properties, key, value);
+      return;
     }
+    key = o.key;
+    value = o.value;
 
     try {
       const convertedObj = toRN([[key, value]]);
@@ -216,6 +225,12 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       const exp = substitutionMap[`/*${c.text}*/`];
       if (exp) {
         // @ts-ignore
+        // if (!(exp.tag || exp.quasi)) {
+        //   console.log(`exp: `, exp);
+        //   hasExpressionError = true;
+        //   return;
+        // }
+        // @ts-ignore
         const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
         _.keys(obj).forEach((k) => {
           let v = obj[k];
@@ -234,10 +249,14 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
           // One-offs Pre toRN
           // -------
           // @todo DRY
-          if (k === 'margin' && v?.includes('auto')) {
-            k = 'align-self';
-            v = 'center';
+
+          const o = preToRNTransform(k, v);
+          if (!o.isSupported) {
+            properties = addUnsupportedProperty(j, properties, k, v);
+            return;
           }
+          k = o.key;
+          v = o.value;
           // Convert
           try {
             const convertedObj = toRN([[k, v]]);
@@ -512,5 +531,37 @@ const addProperties = ({
   } else {
     properties.push(builderProperty);
     return properties;
+  }
+}
+
+const addUnsupportedProperty = (j: JSCodeshift, properties, identifier, value) => {
+  return [
+    ...properties,
+    j.property(
+      'init',
+      j.identifier(`// ${ERR_NO_STYLED_COMPONENT_IMPORT}\n// ` + identifier),
+      j.literal(value),
+    )
+  ]
+}
+
+const preToRNTransform = (key, value) => {
+  let k = key;
+  let v = value;
+  let isSupported = true;
+
+  // One-offs Pre toRN
+  // -------
+  if (key === 'margin' && value?.includes('auto')) {
+    k = 'align-self';
+    v = 'center';
+  }
+  if (key === 'transform') {
+    isSupported = false;
+  }
+  return {
+    key: k,
+    value: v,
+    isSupported
   }
 }

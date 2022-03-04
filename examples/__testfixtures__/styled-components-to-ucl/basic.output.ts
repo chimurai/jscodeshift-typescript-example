@@ -9,6 +9,10 @@ export const Basic = Box.withConfig<{
   backgroundColor: string
 }>(p => ({
   alignSelf: 'center',
+
+  // ERR_NO_STYLED_COMPONENT_IMPORT
+  // transform: 'rotate(180deg) translateX(50%)',
+
   alignItems: 'space-between',
   justifyContent: 'center',
 
