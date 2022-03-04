@@ -222,7 +222,10 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     }
 
     if (expression?.object?.type === 'MemberExpression') {
-      if (expression?.object?.object?.name === 'Styles') {
+      if (
+        expression?.object?.object?.name === 'Styles' ||
+        expression?.object?.object?.object?.name === 'Styles'
+      ) {
         includeTypes = false;
         v = expression;
         // TODO
