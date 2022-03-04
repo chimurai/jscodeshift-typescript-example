@@ -7,4 +7,6 @@ export const Box = UCLBox.withConfig({
   paddingRight: '$1',
   paddingBottom: '$3',
   paddingLeft: '1px',
+  marginX: '0',
+  marginY: '$2',
 });

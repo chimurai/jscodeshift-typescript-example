@@ -143,23 +143,27 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       if (key === '&:hover') {
         _.map((k: string) => {
           const v = value[k];
-          const convertedObj = toRN([[k, v]]);
-
-          _.keys(convertedObj).forEach((k) => {
-            const v = convertedObj[k];
-            properties = addProperties({
-              j,
-              properties,
-              substitutionMap,
-              addToLocalVars,
-              property: k,
-              initialValue: v,
-              parent: '_hover',
-              newPropertyName: null,
-              originalPropertyNewName: null,
-              needsFlexRemapping: needsFlexRemapping(value),
-            })
-          });
+          try {
+            const convertedObj = toRN([[k, v]]);
+            _.keys(convertedObj).forEach((k) => {
+              const v = convertedObj[k];
+              properties = addProperties({
+                j,
+                properties,
+                substitutionMap,
+                addToLocalVars,
+                property: k,
+                initialValue: v,
+                parent: '_hover',
+                newPropertyName: null,
+                originalPropertyNewName: null,
+                needsFlexRemapping: needsFlexRemapping(value),
+              })
+            });
+          } catch (error) {
+            console.error(`toRN: `, error);
+            hasExpressionError = true;
+          }
         })(_.keys(value))
         // Unsupported
       } else {
@@ -180,22 +184,29 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       value = 'center';
     }
 
-    const convertedObj = toRN([[key, value]]);
-    _.keys(convertedObj).forEach((k) => {
-      const v = convertedObj[k];
-      properties = addProperties({
-        j,
-        properties,
-        substitutionMap,
-        addToLocalVars,
-        property: k,
-        initialValue: v,
-        parent: parent,
-        newPropertyName: null,
-        originalPropertyNewName: null,
-        needsFlexRemapping: needsFlexRemapping(obj),
-      })
-    });
+    try {
+      const convertedObj = toRN([[key, value]]);
+      _.keys(convertedObj).forEach((k) => {
+        const v = convertedObj[k];
+        properties = addProperties({
+          j,
+          properties,
+          substitutionMap,
+          addToLocalVars,
+          property: k,
+          initialValue: v,
+          parent: parent,
+          newPropertyName: null,
+          originalPropertyNewName: null,
+          needsFlexRemapping: needsFlexRemapping(obj),
+        })
+      });
+
+    } catch (error) {
+      console.error(`toRN: `, error);
+      hasExpressionError = true;
+      return;
+    }
   })(_.keys(obj));
 
   if (comments.length) {
