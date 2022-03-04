@@ -45,8 +45,9 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     });
 
   if (!styledImport.length) {
-    const msg = ERR_NO_STYLED_COMPONENT_IMPORT;
-    throw new Error(msg);
+    // const msg = ERR_NO_STYLED_COMPONENT_IMPORT;
+    // throw new Error(msg);
+    return;
   }
 
   // other imports from styled-components

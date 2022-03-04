@@ -1,1 +1,1 @@
-import BaseLink from "components/link";
+import BaseLink from 'components/link';

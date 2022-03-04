@@ -1,6 +1,9 @@
 import { defineTest } from 'jscodeshift/src/testUtils';
 
+jest.spyOn(console, "error").mockImplementation(() => { });
+
 describe("renaming a variable", () => {
+  defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/bad', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/basic', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/comments', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex', { parser: 'ts' });
