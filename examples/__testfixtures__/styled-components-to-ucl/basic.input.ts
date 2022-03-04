@@ -17,7 +17,7 @@ export const Basic = styled.div`
   border-top: 1px solid ${Styles.color.primary};
 `;
 
-export const Tokens = styled.div`
+export const Tokens = styled.header`
   display: block;
   margin: 9px auto 0;
   color: ${p => p.theme.token('text-reversed')};

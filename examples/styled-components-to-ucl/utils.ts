@@ -169,6 +169,7 @@ const elementMap: Record<string, IMapping> = {
   'h5': { component: 'Header' },
   'h6': { component: 'Header' },
   'p': { component: 'Text' },
+  'header': { component: 'Box' },
   'label': { component: 'Text', notSupported: 'use InputLabel' },
   'button': { component: 'Button' },
   'ul': { component: 'Box', notSupported: 'use ScrollView' },
