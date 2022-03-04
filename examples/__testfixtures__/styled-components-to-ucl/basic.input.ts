@@ -9,6 +9,7 @@ export const Basic = styled.div`
   position: relative;
   margin: 0 auto;
   transform: rotate(180deg) translateX(50%);
+  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
   justify-content: space-between;
   align-items: center;
   text-align: left;

@@ -13,6 +13,9 @@ export const Basic = Box.withConfig<{
   // ERR_NO_STYLED_COMPONENT_IMPORT
   // transform: 'rotate(180deg) translateX(50%)',
 
+  // ERR_NO_STYLED_COMPONENT_IMPORT
+  // boxShadow: 'inset 0px 1px 3px 0px rgba(0, 0, 0, 0.1)',
+
   alignItems: 'space-between',
   justifyContent: 'center',
 

@@ -556,7 +556,7 @@ const preToRNTransform = (key, value) => {
     k = 'align-self';
     v = 'center';
   }
-  if (key === 'transform') {
+  if (_.includes(key, ['transform', 'boxShadow'])) {
     isSupported = false;
   }
   return {
