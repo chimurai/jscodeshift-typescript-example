@@ -95,11 +95,9 @@ export default function transformer(fileInfo: FileInfo, api: API) {
 
   // Remove the 'styled-components' import
   if (otherImports.length) {
-    console.log(`styledImport.get(0).node.specifiers: `, styledImport.get(0).node.specifiers);
     // @ts-ignore
     styledImport.get(0).node.specifiers = _.filter((s) => (s?.type !== 'ImportDefaultSpecifier'))
       (styledImport.get(0).node.specifiers);
-    console.log(`after styledImport.get(0).node.specifiers: `, styledImport.get(0).node.specifiers);
   } else {
     styledImport.remove();
   }
