@@ -162,7 +162,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
               })
             });
           } catch (error) {
-            console.error('toRN', error);
+            console.error('toRN', error.message);
             hasExpressionError = true;
           }
         })(_.keys(value))
@@ -204,7 +204,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       });
 
     } catch (error) {
-      console.error('toRN', error);
+      console.error('toRN', error.message);
       hasExpressionError = true;
       return;
     }
@@ -257,7 +257,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
               })
             });
           } catch (error) {
-            console.error('toRN', error);
+            console.error('toRN', error.message);
             hasExpressionError = true;
           }
         });
