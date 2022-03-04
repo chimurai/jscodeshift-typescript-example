@@ -8,10 +8,9 @@ export const Basic = Box.withConfig<{
   color: string,
   backgroundColor: string
 }>(p => ({
-  display: 'flex',
   alignSelf: 'center',
-  justifyContent: 'space-between',
-  alignItems: 'center',
+  alignItems: 'space-between',
+  justifyContent: 'center',
 
   _text: {
     textAlign: 'left',
@@ -25,6 +24,9 @@ export const Basic = Box.withConfig<{
 }));
 
 export const Tokens = Box.withConfig({
+  // TODO RN: unsupported CSS
+  // display: 'block',
+
   alignSelf: 'center',
 
   _text: {

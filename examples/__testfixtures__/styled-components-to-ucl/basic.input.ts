@@ -6,6 +6,7 @@ import Modal from './modal';
  */
 export const Basic = styled.div`
   display: flex;
+  position: relative;
   margin: 0 auto;
   justify-content: space-between;
   align-items: center;
@@ -17,6 +18,7 @@ export const Basic = styled.div`
 `;
 
 export const Tokens = styled.div`
+  display: block;
   margin: 9px auto 0;
   color: ${p => p.theme.token('text-reversed')};
   background-color: ${props => props.theme.token('background-pattern')};

@@ -144,6 +144,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
         _.map((k: string) => {
           const v = value[k];
           const convertedObj = toRN([[k, v]]);
+
           _.keys(convertedObj).forEach((k) => {
             const v = convertedObj[k];
             properties = addProperties({
@@ -156,6 +157,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
               parent: '_hover',
               newPropertyName: null,
               originalPropertyNewName: null,
+              needsFlexRemapping: needsFlexRemapping(value),
             })
           });
         })(_.keys(value))
@@ -191,6 +193,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
         parent: parent,
         newPropertyName: null,
         originalPropertyNewName: null,
+        needsFlexRemapping: needsFlexRemapping(obj),
       })
     });
   })(_.keys(obj));
@@ -237,6 +240,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
               parent,
               newPropertyName: newProp,
               originalPropertyNewName: origProp,
+              needsFlexRemapping: needsFlexRemapping(obj),
             })
           });
         });
@@ -315,6 +319,8 @@ ${ct}
   return;
 }
 
+const needsFlexRemapping = (obj) => obj.display === 'flex' && !obj.flexDirection;
+
 const parseTemplate = ({ quasi, tag }) => {
   if (!(tag.type in tagTypes)) return;
 
@@ -377,9 +383,11 @@ const addProperties = ({
   parent,
   newPropertyName,
   originalPropertyNewName,
+  needsFlexRemapping,
 }) => {
   let identifier = property;
   let value = initialValue;
+
 
   // If the value is is an expression
   const foundExpression = substitutionMap[value];
@@ -401,6 +409,17 @@ const addProperties = ({
   if (identifier === 'font') {
     // The correct variant is set in utils/parseExpression
     identifier = 'variant';
+  }
+
+  if (needsFlexRemapping) {
+    switch (identifier) {
+      case 'justifyContent':
+        identifier = 'alignItems';
+        break;
+      case 'alignItems':
+        identifier = 'justifyContent';
+        break;
+    }
   }
   // ------
 

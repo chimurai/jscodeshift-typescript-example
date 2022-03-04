@@ -81,26 +81,44 @@ const unsupportedValue = [
 const _isUnsupported = (test, regex) =>
   _.some(re => re.test(test), regex);
 
+const _isRemovable = (property: string, value: string) => {
+  if (property === 'position' && value === 'relative') {
+    return true;
+  }
+
+  if (property === 'flexDirection' && value === 'column') {
+    return true;
+  }
+
+  if (property === 'display' && value === 'flex') {
+    return true;
+  }
+
+  return false;
+};
+
 export const isSupported = (property: string, value: string) => {
 
-  if (property === 'display' && !['none', 'flex'].includes(value)) {
+
+  if (_isRemovable(property, value)) {
+    return [true, true];
+  }
+
+  if (property === 'display' && !['none'].includes(value)) {
     return [false, false];
   }
 
   if (_isUnsupported(property, removeProps)) {
     return [false, true];
-
   }
 
   // Broken stuff
   // -----------
   if (_isUnsupported(property, unsupportedProps)) {
     return [false, false];
-
   }
   if (_isUnsupported(value, unsupportedValue)) {
     return [false, false];
-
   }
   return [true, false];
 }

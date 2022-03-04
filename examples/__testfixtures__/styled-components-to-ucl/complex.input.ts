@@ -53,3 +53,8 @@ export const StyledContainer = styled.div`
   object-fit: contain;
   display: block;
 `;
+
+export const FlexRemapping = styled.div`
+  display: flex;
+  justify-content: center;
+`;

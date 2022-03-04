@@ -29,9 +29,6 @@ export const ModalCloseButton = CloseButton.withConfig({
 });
 
 export const Background = Box.withConfig({
-  // TODO RN: unsupported CSS
-  // position: 'relative',
-
   backgroundColor: '__legacyToken.background-pattern',
 });
 
@@ -39,8 +36,6 @@ export const AllModalContent = Box.withConfig({
   backgroundColor: '__legacyToken.background-pattern',
   width: '100%',
   height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
   justifyContent: 'space-between',
 });
 
@@ -65,4 +60,8 @@ export const StyledContainer = Box.withConfig({
 
   // TODO RN: unsupported CSS
   // display: 'block',
+});
+
+export const FlexRemapping = Box.withConfig({
+  alignItems: 'center',
 });
