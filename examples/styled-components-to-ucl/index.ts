@@ -1,12 +1,18 @@
 import { API, FileInfo, JSCodeshift } from 'jscodeshift';
-import { parseExpression, getElementMapping, isSupported, isATextProp, mediaPropertyNames } from './utils';
+import {
+  getElementMapping,
+  isATextProp,
+  mediaPropertyNames,
+  parseExpression,
+  postToRNTransform,
+  preToRNTransform,
+} from './utils';
 import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
-const ERR_NO_STYLED_COMPONENT_IMPORT = `ERR_NO_STYLED_COMPONENT_IMPORT`;
 
 const tagTypes = {
   Identifier: node => node,
@@ -129,7 +135,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     ? addToUCLImportsFn(activeElement.component)
     : activeElement.component;
 
-  const { quasi, tag } = nodePath.node
+  const { quasi, tag } = nodePath.node;
   const { obj, cssText, substitutionMap, comments } = parseTemplate({ quasi, tag });
 
   let properties = [];
@@ -146,13 +152,21 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
         _.map((k: string) => {
           let v = value[k];
           try {
-            const o = preToRNTransform(k, v);
-            if (!o.isSupported) {
+            const {
+              identifier,
+              isRemovable,
+              isSupported,
+              value,
+            } = preToRNTransform(k, v);
+            k = identifier;
+            v = value;
+            if (isRemovable) {
+              return;
+            }
+            if (!isSupported) {
               properties = addUnsupportedProperty(j, properties, k, v);
               return;
             }
-            k = o.key;
-            v = o.value;
             const convertedObj = toRN([[k, v]]);
             _.keys(convertedObj).forEach((k) => {
               const v = convertedObj[k];
@@ -161,7 +175,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
                 properties,
                 substitutionMap,
                 addToLocalVars,
-                property: k,
+                identifier: k,
                 initialValue: v,
                 parent: '_hover',
                 newPropertyName: null,
@@ -187,13 +201,21 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       parent = '_text';
     }
 
-    const o = preToRNTransform(key, value);
-    if (!o.isSupported) {
+    const {
+      identifier,
+      isRemovable,
+      isSupported,
+      value: _value,
+    } = preToRNTransform(key, value);
+    key = identifier;
+    value = _value;
+    if (isRemovable) {
+      return;
+    }
+    if (!isSupported) {
       properties = addUnsupportedProperty(j, properties, key, value);
       return;
     }
-    key = o.key;
-    value = o.value;
 
     try {
       const convertedObj = toRN([[key, value]]);
@@ -204,7 +226,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
           properties,
           substitutionMap,
           addToLocalVars,
-          property: k,
+          identifier: k,
           initialValue: v,
           parent: parent,
           newPropertyName: null,
@@ -237,7 +259,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
           let v = obj[k];
           // In the case media queries we want to turn the property into
           // an object, so the parent is the original key, e.g. `margin:`
-          const parent = k;
+          // const parent = k;
           // Set the new key based on the media query
           // @ts-ignore
           const queryName = exp.tag.property.name;
@@ -246,18 +268,22 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
           if (!origProp) {
             return;
           }
-
-          // One-offs Pre toRN
-          // -------
-          // @todo DRY
-
-          const o = preToRNTransform(k, v);
-          if (!o.isSupported) {
+          const {
+            identifier,
+            isRemovable,
+            isSupported,
+            value,
+          } = preToRNTransform(k, v);
+          k = identifier;
+          v = value;
+          if (isRemovable) {
+            return;
+          }
+          if (!isSupported) {
             properties = addUnsupportedProperty(j, properties, k, v);
             return;
           }
-          k = o.key;
-          v = o.value;
+
           // Convert
           try {
             const convertedObj = toRN([[k, v]]);
@@ -268,7 +294,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
                 properties,
                 substitutionMap,
                 addToLocalVars,
-                property: k,
+                identifier: k,
                 initialValue: v,
                 parent: k,
                 newPropertyName: newProp,
@@ -322,15 +348,19 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
   if (hasExpressionError) {
     let ct = cssText;
     _.map(((k: string) => {
-      ct = ct.replace(k, '!EXPRESSION!')
+      try {
+        // Try to get a nice string
+        ct = nodePathToString(nodePath);
+      } catch (error) {
+        // But fall back
+      }
     }))(
       _.keys(substitutionMap)
     )
     exprs.comments = [j.commentBlock(`
 ${TODO_RN_COMMENT}
+Some attributes couldn't be converted.
 
-Some attributes couldn't be converted
-Please use git history to get the exact values
 ${ct}
 `, false, true)];
   }
@@ -415,17 +445,14 @@ const addProperties = ({
   properties,
   substitutionMap,
   addToLocalVars,
-  property,
+  identifier,
   initialValue,
   parent,
   newPropertyName,
   originalPropertyNewName,
   needsFlexRemapping,
 }) => {
-  let identifier = property;
   let value = initialValue;
-
-
   // If the value is is an expression
   const foundExpression = substitutionMap[value];
 
@@ -441,37 +468,29 @@ const addProperties = ({
     value = j.literal(initialValue);
   }
 
-  // One-offs Post toRN
-  // -------
-  if (identifier === 'font') {
-    // The correct variant is set in utils/parseExpression
-    identifier = 'variant';
-  }
 
-  if (needsFlexRemapping) {
-    switch (identifier) {
-      case 'justifyContent':
-        identifier = 'alignItems';
-        break;
-      case 'alignItems':
-        identifier = 'justifyContent';
-        break;
-    }
-  }
-  // ------
+  const {
+    identifier: _identifier,
+    value: _value,
+    isSupported,
+    isRemovable,
+  } = postToRNTransform(identifier, value.value, needsFlexRemapping);
 
-  const [supported, shouldRemove] = isSupported(identifier, value?.value);
+  value.value = _value;
+  identifier = _identifier;
 
   // Things like `animation` we don't want to include at all so just return early
-  if (shouldRemove) {
+  if (isRemovable) {
     return properties;
   }
 
+  // Change property name if this going to be an attribute of a nested object
   if (parent && newPropertyName) {
     identifier = newPropertyName;
   }
+
   // Comment the others
-  if (!supported) {
+  if (!isSupported) {
     identifier = '// ' + identifier;
   }
   const builderProperty = j.property(
@@ -480,7 +499,7 @@ const addProperties = ({
     value,
   );
 
-  if (!supported) {
+  if (!isSupported) {
     // Add comment
     builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
   }
@@ -540,29 +559,27 @@ const addUnsupportedProperty = (j: JSCodeshift, properties, identifier, value) =
     ...properties,
     j.property(
       'init',
-      j.identifier(`// ${ERR_NO_STYLED_COMPONENT_IMPORT}\n// ` + identifier),
+      j.identifier(`// ${TODO_RN_COMMENT}\n// ` + identifier),
       j.literal(value),
     )
   ]
 }
 
-const preToRNTransform = (key, value) => {
-  let k = key;
-  let v = value;
-  let isSupported = true;
-
-  // One-offs Pre toRN
-  // -------
-  if (key === 'margin' && value?.includes('auto')) {
-    k = 'align-self';
-    v = 'center';
+const nodePathToString = (nodePath) => {
+  if (nodePath?.node?.loc) {
+    try {
+      const start = nodePath?.node?.loc?.start?.line - 1;
+      const end = nodePath?.node?.loc?.end?.line + 1;
+      const str = _.flow(
+        _.slice(start, end),
+        // @ts-ignore
+        _.map(o => o?.line),
+        _.join('\n'),
+      )(nodePath?.node?.loc?.lines?.infos);
+      return str;
+    } catch (error) {
+      throw new Error(`nodePathToString error`)
+    }
   }
-  if (_.includes(key, ['transform', 'boxShadow'])) {
-    isSupported = false;
-  }
-  return {
-    key: k,
-    value: v,
-    isSupported
-  }
+  return 'And error occurred';
 }

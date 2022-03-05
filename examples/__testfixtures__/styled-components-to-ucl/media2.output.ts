@@ -65,12 +65,17 @@ export const TextHalf = EqualHalves.withConfig({
   },
 })/*
 TODO RN: unsupported CSS
+Some attributes couldn't be converted.
 
-Some attributes couldn't be converted
-Please use git history to get the exact values
-
+export const TextHalf = styled(EqualHalves)`
   z-index: 100;
-  padding-top: !EXPRESSION!;
-  !EXPRESSION!
+  padding-top: ${primitive.$spacing9};
+  ${Styles.desktop`
+    justify-content: flex-start;
+    order: 1;
+    padding-left: 0;
+    padding-bottom: ${primitive.$spacing11};
+  `}
+`;
 
 */;

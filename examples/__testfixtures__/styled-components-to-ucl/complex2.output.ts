@@ -9,22 +9,22 @@ export const CartItemEditContainer = UCLBox.withConfig<{
   },
 }))/*
 TODO RN: unsupported CSS
+Some attributes couldn't be converted.
 
-Some attributes couldn't be converted
-Please use git history to get the exact values
-
-  color: !EXPRESSION!;
+export const CartItemEditContainer = styled.div`
+  color: ${props => props.color};
   button {
-    background-color: !EXPRESSION!;
+    background-color: ${Styles.color.cardBackground};
   }
   & > button {
     display: flex;
-    color: !EXPRESSION!;
+    color: ${Styles.color.black};
 
     svg {
-      color: !EXPRESSION!;
+      color: ${Styles.color.black};
     }
   }
+`;
 
 */;
 

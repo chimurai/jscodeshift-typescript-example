@@ -19,7 +19,8 @@ export const ModalCloseButton = CloseButton.withConfig({
   // TODO RN: unsupported CSS
   // left: 'calc(1.25rem + env(safe-area-inset-left))',
 
-  position: 'fixed',
+  // TODO RN: unsupported CSS
+  // position: 'fixed',
 
   // TODO RN: unsupported CSS
   // top: 'calc(1rem + env(safe-area-inset-top))',
@@ -43,10 +44,8 @@ export const AllModalContent = Box.withConfig({
 export const RewardCategoriesContainer = Box.withConfig({
   paddingTop: '$20',
 
-  paddingBottom: {
-    // TODO RN: unsupported CSS
-    // base: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
-  },
+  // TODO RN: unsupported CSS
+  // paddingBottom: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
 });
 
 export const StyledContainer = Box.withConfig({

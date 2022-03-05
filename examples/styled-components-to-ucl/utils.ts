@@ -69,9 +69,27 @@ const removeProps = [
   /^transition/,
 ];
 
-const unsupportedProps = [
+const removeKeyValuePairs = [
+  { key: 'position', value: 'relative' },
+  { key: 'flexDirection', value: 'column' },
+  { key: 'flex-direction', value: 'column' },
+  { key: 'display', value: 'flex' },
+];
+
+
+const unsupportedKeyValuePairs = [
+  { key: 'position', value: 'relative' },
+  { key: 'flexDirection', value: 'column' },
+  { key: 'flex-direction', value: 'column' },
+  { key: 'display', value: 'flex' },
+]
+
+const unsupportedIdentifiers = [
   /^objectFit$/,
+  /^object-fit$/,
   /^transform$/,
+  /^boxShadow$/,
+  /^box-shadow$/,
   /^span$/,
 ];
 
@@ -80,10 +98,12 @@ const unsupportedValue = [
   /^relative$/,
 ];
 
-const _isUnsupported = (test, regex) =>
+
+const _isInReg = (test, regex) =>
   _.some(re => re.test(test), regex);
 
 const _isRemovable = (property: string, value: string) => {
+
   if (property === 'position' && value === 'relative') {
     return true;
   }
@@ -96,33 +116,96 @@ const _isRemovable = (property: string, value: string) => {
     return true;
   }
 
+  if (_isInReg(property, removeProps)) {
+    return true;
+  }
+
   return false;
 };
 
-export const isSupported = (property: string, value: string) => {
+export const _isSupported = (property: string, value: string) => {
+  // anything but flex or none is not supported
+  if (property === 'display' && !['none', 'flex'].includes(value)) {
+    return false;
+  }
+  if (_isInReg(property, unsupportedIdentifiers)) {
+    return false;
+  }
+  if (_isInReg(value, unsupportedValue)) {
+    return false;
+  }
+  return true;
+}
 
+// One-offs Pre toRN
+// -------
+export const preToRNTransform = (identifier, value) => {
+  let i = identifier;
+  let v = value;
+  let isSupported = _isSupported(identifier, value);
+  let isRemovable = _isRemovable(identifier, value);
 
-  if (_isRemovable(property, value)) {
-    return [true, true];
+  // Mappings
+  // --------
+
+  if (identifier === 'margin' && _.includes('auto', value)) {
+    i = 'align-self';
+    v = 'center';
+  }
+  if (identifier === 'font') {
+    i = 'fontFamily';
   }
 
-  if (property === 'display' && !['none'].includes(value)) {
-    return [false, false];
+  // Supported
+  // ---------
+
+  // Objects are not supported
+  if (_.isObject(value)) {
+    isSupported = false;
   }
 
-  if (_isUnsupported(property, removeProps)) {
-    return [false, true];
+  if (identifier === 'position' && value === 'fixed') {
+    isSupported = false;
   }
 
-  // Broken stuff
-  // -----------
-  if (_isUnsupported(property, unsupportedProps)) {
-    return [false, false];
+  return {
+    identifier: i,
+    value: v,
+    isSupported,
+    isRemovable,
   }
-  if (_isUnsupported(value, unsupportedValue)) {
-    return [false, false];
+}
+
+// One-offs Post toRN
+// -------
+export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
+  let i = identifier;
+  let v = value;
+  let isSupported = _isSupported(identifier, value);
+  let isRemovable = _isRemovable(identifier, value);
+
+  if (identifier === 'fontFamily') {
+    // The correct variant is set in utils/parseExpression
+    i = 'variant';
   }
-  return [true, false];
+
+  if (needsFlexRemapping) {
+    switch (identifier) {
+      case 'justifyContent':
+        i = 'alignItems';
+        break;
+      case 'alignItems':
+        i = 'justifyContent';
+        break;
+    }
+  }
+
+  return {
+    identifier: i,
+    value: v,
+    isSupported,
+    isRemovable,
+  }
 }
 
 const stylesToValue = (j: JSCodeshift, group, value) => {

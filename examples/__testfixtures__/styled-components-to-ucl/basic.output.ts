@@ -10,10 +10,10 @@ export const Basic = Box.withConfig<{
 }>(p => ({
   alignSelf: 'center',
 
-  // ERR_NO_STYLED_COMPONENT_IMPORT
+  // TODO RN: unsupported CSS
   // transform: 'rotate(180deg) translateX(50%)',
 
-  // ERR_NO_STYLED_COMPONENT_IMPORT
+  // TODO RN: unsupported CSS
   // boxShadow: 'inset 0px 1px 3px 0px rgba(0, 0, 0, 0.1)',
 
   alignItems: 'space-between',
