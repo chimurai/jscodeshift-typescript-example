@@ -28,6 +28,7 @@ export const Tokens = styled.header`
 `;
 
 export const Header = styled.h1`
+  text-shadow: 10px 20px 30px red;
   color: ${p => p.theme.token('text-reversed')};
 `;
 

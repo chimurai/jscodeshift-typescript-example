@@ -248,12 +248,6 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       const exp = substitutionMap[`/*${c.text}*/`];
       if (exp) {
         // @ts-ignore
-        // if (!(exp.tag || exp.quasi)) {
-        //   console.log(`exp: `, exp);
-        //   hasExpressionError = true;
-        //   return;
-        // }
-        // @ts-ignore
         const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
         _.keys(obj).forEach((k) => {
           let v = obj[k];
@@ -467,7 +461,6 @@ const addProperties = ({
   } else {
     value = j.literal(initialValue);
   }
-
 
   const {
     identifier: _identifier,

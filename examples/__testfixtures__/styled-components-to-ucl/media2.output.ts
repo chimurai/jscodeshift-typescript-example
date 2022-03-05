@@ -18,8 +18,8 @@ export const EqualHalves = Box.withConfig({
   },
 
   paddingBottom: {
-    base: '0',
-    lg: '0',
+    base: 0,
+    lg: 0,
   },
 
   paddingLeft: {
@@ -30,10 +30,10 @@ export const EqualHalves = Box.withConfig({
 
 export const ImageHalf = EqualHalves.withConfig({
   width: '100%',
-  paddingTop: '0',
-  paddingRight: '0',
-  paddingBottom: '0',
-  paddingLeft: '0',
+  paddingTop: 0,
+  paddingRight: 0,
+  paddingBottom: 0,
+  paddingLeft: 0,
 
   justifyContent: {
     base: 'center',
@@ -45,7 +45,7 @@ export const ImageHalf = EqualHalves.withConfig({
   },
 
   padding: {
-    lg: '0',
+    lg: 0,
   },
 });
 
@@ -57,7 +57,7 @@ export const TextHalf = EqualHalves.withConfig({
   },
 
   paddingLeft: {
-    lg: '0',
+    lg: 0,
   },
 
   paddingBottom: {

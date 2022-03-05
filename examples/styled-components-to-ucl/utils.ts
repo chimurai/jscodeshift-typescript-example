@@ -67,6 +67,10 @@ const brandFontMap = {
 const removeProps = [
   /^animation/,
   /^transition/,
+  /^text-shadow$/,
+  /^textShadow$/,
+  /^text-shadow-offset$/,
+  /^textShadowOffset$/,
 ];
 
 const removeKeyValuePairs = [
@@ -90,6 +94,8 @@ const unsupportedIdentifiers = [
   /^transform$/,
   /^boxShadow$/,
   /^box-shadow$/,
+  /^shadow-offset$/,
+  /^shadowOffset$/,
   /^span$/,
 ];
 
@@ -123,12 +129,12 @@ const _isRemovable = (property: string, value: string) => {
   return false;
 };
 
-export const _isSupported = (property: string, value: string) => {
+export const _isSupported = (identifier: string, value: string) => {
   // anything but flex or none is not supported
-  if (property === 'display' && !['none', 'flex'].includes(value)) {
+  if (identifier === 'display' && !['none', 'flex'].includes(value)) {
     return false;
   }
-  if (_isInReg(property, unsupportedIdentifiers)) {
+  if (_isInReg(identifier, unsupportedIdentifiers)) {
     return false;
   }
   if (_isInReg(value, unsupportedValue)) {
@@ -161,6 +167,7 @@ export const preToRNTransform = (identifier, value) => {
 
   // Objects are not supported
   if (_.isObject(value)) {
+    console.log(`OBJ found value: `, identifier, value);
     isSupported = false;
   }
 
@@ -187,6 +194,12 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
   if (identifier === 'fontFamily') {
     // The correct variant is set in utils/parseExpression
     i = 'variant';
+  }
+
+  // Objects are not supported
+  if (_.isObject(value)) {
+    console.log(`OBJ found value: `, identifier, value);
+    isSupported = false;
   }
 
   if (needsFlexRemapping) {
@@ -305,16 +318,20 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       }
     }
 
-    if (expression?.object?.type === 'MemberExpression') {
-      if (
-        expression?.object?.object?.name === 'Styles' ||
-        expression?.object?.object?.object?.name === 'Styles'
-      ) {
-        includeTypes = false;
-        v = expression;
-        // TODO
-        // v = stylesToValue(j, expression.object.property.name, expression.property.name);
-      }
+    const isMember = (expression?.type === 'MemberExpression' ||
+      expression?.object?.type === 'MemberExpression' ||
+      expression?.object?.object?.type === 'MemberExpression');
+    const isStyles = (
+      expression?.object?.name === 'Styles' ||
+      expression?.object?.object?.name === 'Styles' ||
+      expression?.object?.object?.object?.name === 'Styles'
+    );
+
+    if (isMember && isStyles) {
+      includeTypes = false;
+      v = expression;
+      // TODO
+      // v = stylesToValue(j, expression.object.property.name, expression.property.name);
     }
 
     const propertyName = expression?.property?.name;
