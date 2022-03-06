@@ -683,6 +683,10 @@ const nodePathToString = (nodePath) => {
         _.slice(start, end),
         // @ts-ignore
         _.map(o => o?.line),
+        _.map((o: string) => _.flow(
+          _.replace('/*', '//'),
+          _.replace('*/', '')
+        )(o)),
         _.join('\n'),
       )(nodePath?.node?.loc?.lines?.infos);
       return str;

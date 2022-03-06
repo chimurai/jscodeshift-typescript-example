@@ -18,7 +18,9 @@ export const TierLabel = styled.p`
 `;
 
 export const ShortCodeErrorContainer = styled.div`
+  /* Inline comment */
   border: solid 1px ${Styles.color.grey.five};
+  // And another
   padding: 1rem 1.875rem;
   text-align: center;
   border-radius: ${Styles.borderRadius};

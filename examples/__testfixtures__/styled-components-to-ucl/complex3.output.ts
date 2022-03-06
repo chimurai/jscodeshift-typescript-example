@@ -16,8 +16,12 @@ export const TierLabel = Text.withConfig({
 });
 
 export const ShortCodeErrorContainer = Box.withConfig({
+  // Inline comment
   borderWidth: 1,
+
+  // And another
   borderColor: Styles.color.grey.five,
+
   borderStyle: 'solid',
   paddingX: '30px',
   paddingY: '$4',
@@ -39,7 +43,9 @@ TODO RN: unsupported CSS
 Some attributes were not converted.
 
 export const ShortCodeErrorContainer = styled.div`
+  // Inline comment 
   border: solid 1px ${Styles.color.grey.five};
+  // And another
   padding: 1rem 1.875rem;
   text-align: center;
   border-radius: ${Styles.borderRadius};
