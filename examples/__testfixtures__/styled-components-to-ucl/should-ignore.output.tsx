@@ -1,22 +1,14 @@
 import { Box as UCLBox } from '@rbilabs/universal-components';
-import { ThemeProvider, keyframes } from 'styled-components';
+import { ThemeProvider } from 'styled-components';
 
-export const c = css`
-  padding: ${primitive.$spacing1} ${primitive.$spacing2};
-`;
+export const c = {
+  paddingX: '$2',
+  paddingY: '$1',
+};
 
 export const Box = UCLBox.withConfig({
   width: '$10',
 });
-
-export const k = keyframes`
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0
-  }
-`
 
 function App() {
   return (

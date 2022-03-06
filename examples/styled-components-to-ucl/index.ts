@@ -11,6 +11,7 @@ import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
+import { forEach } from 'lodash';
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
 
@@ -66,29 +67,33 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     .filter(p => p.type === 'ImportSpecifier')
     .map(p => p.imported.name);
 
-  console.log(`otherImports: `, otherImports);
   if (otherImports.length) {
-    root.find(j.TaggedTemplateExpression, {
-      tag: {
-        name: otherImports[0],
-      },
-    })
-      .forEach(nodePath => {
-        // @ts-ignore
-        if (_.contains(nodePath.node.tag.name, styledComponentsImportsToRemove)) {
-          nodePath.parent?.parent?.replace();
-          return;
-        }
-        const expression = processElement({
-          j,
-          nodePath,
-          activeElement: { component: 'noop' },
-          addToImports: false,
-          addToUCLImportsFn: _.noop,
-          asObject: true,
+    otherImports.forEach(name => {
+      if (_.contains(name, styledComponentsImportsToRemove)) {
+        // Remove the export
+        root.find(j.Identifier, { name: name, }).closest(j.ExportNamedDeclaration).remove();
+        // Or the local var if there is no export
+        root.find(j.Identifier, { name: name, }).closest(j.VariableDeclaration).remove();
+        return;
+      }
+
+      root.find(j.TaggedTemplateExpression, {
+        tag: {
+          name: name,
+        },
+      })
+        .forEach(nodePath => {
+          const expression = processElement({
+            j,
+            nodePath,
+            activeElement: { component: 'noop' },
+            addToImports: false,
+            addToUCLImportsFn: _.noop,
+            asObject: true,
+          });
+          j(nodePath).replaceWith(expression);
         });
-        j(nodePath).replaceWith(expression);
-      });
+    })
   }
 
   root.find(j.MemberExpression, {
@@ -145,13 +150,16 @@ export default function transformer(fileInfo: FileInfo, api: API) {
         return false;
       }
       // @ts-ignore
-      if (_.contains(s?.imported?.name, ['css', 'animation'])) {
+      if (_.contains(s?.imported?.name, styledComponentsImportsToRemove)) {
+        return false;
+      }
+      // @ts-ignore
+      if (_.contains(s?.imported?.name, ['css'])) {
         return false;
       }
       return true;
     }
     )(specifiers);
-    // console.log(`specifiers: `, specifiers);
     if (!specifiers.length) {
       styledImport.remove();
     } else {
