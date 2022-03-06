@@ -150,6 +150,7 @@ export const preToRNTransform = (identifier, value) => {
   let v = value;
   let isSupported = _isSupported(identifier, value);
   let isRemovable = _isRemovable(identifier, value);
+  let isSkipable = false
 
   // Mappings
   // --------
@@ -157,6 +158,13 @@ export const preToRNTransform = (identifier, value) => {
   if (identifier === 'margin' && _.includes('auto', value)) {
     i = 'align-self';
     v = 'center';
+  }
+  if (identifier === 'textDecoration') {
+    i = 'underline'
+    v = (value === 'none')
+      ? false
+      : true
+    isSkipable = true;
   }
   if (identifier === 'font') {
     i = 'fontFamily';
@@ -179,6 +187,7 @@ export const preToRNTransform = (identifier, value) => {
     value: v,
     isSupported,
     isRemovable,
+    isSkipable,
   }
 }
 

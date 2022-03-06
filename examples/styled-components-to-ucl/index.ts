@@ -231,6 +231,7 @@ const processElement = ({
               identifier,
               isRemovable,
               isSupported,
+              isSkipable,
               value,
             } = preToRNTransform(k, v);
             k = identifier;
@@ -239,10 +240,15 @@ const processElement = ({
               return;
             }
             if (!isSupported) {
-              properties = addUnsupportedProperty(j, properties, k, v);
+              properties = addProperty(j, properties, k, v, isSupported);
               return;
             }
-            const convertedObj = toRN([[k, v]]);
+            let convertedObj
+            if (isSkipable) {
+              convertedObj = { [k]: v };
+            } else {
+              convertedObj = toRN([[k, v]]);
+            }
             _.keys(convertedObj).forEach((k) => {
               const v = convertedObj[k];
               properties = addProperties({
@@ -271,29 +277,37 @@ const processElement = ({
     }
 
     let parent = null;
-    // if the element is a box we have to next the text properties under _text
-    if (activeElement.component === 'Box' && isATextProp(key)) {
-      parent = '_text';
-    }
 
     const {
       identifier,
       isRemovable,
       isSupported,
+      isSkipable,
       value: _value,
     } = preToRNTransform(key, value);
     key = identifier;
     value = _value;
+
+    // if the element is a box we have to next the text properties under _text
+    if (activeElement.component === 'Box' && isATextProp(key)) {
+      parent = '_text';
+    }
+
     if (isRemovable) {
       return;
     }
     if (!isSupported) {
-      properties = addUnsupportedProperty(j, properties, key, value);
+      properties = addProperty(j, properties, key, value, isSupported);
       return;
     }
 
     try {
-      const convertedObj = toRN([[key, value]]);
+      let convertedObj
+      if (isSkipable) {
+        convertedObj = { [key]: value };
+      } else {
+        convertedObj = toRN([[key, value]]);
+      }
       _.keys(convertedObj).forEach((k) => {
         const v = convertedObj[k];
         properties = addProperties({
@@ -353,6 +367,7 @@ const processElement = ({
             identifier,
             isRemovable,
             isSupported,
+            isSkipable,
             value,
           } = preToRNTransform(k, v);
           k = identifier;
@@ -361,13 +376,18 @@ const processElement = ({
             return;
           }
           if (!isSupported) {
-            properties = addUnsupportedProperty(j, properties, k, v);
+            properties = addProperty(j, properties, k, v, isSupported);
             return;
           }
 
           // Convert
           try {
-            const convertedObj = toRN([[k, v]]);
+            let convertedObj;
+            if (isSkipable) {
+              convertedObj = { [k]: v };
+            } else {
+              convertedObj = toRN([[k, v]]);
+            }
             _.keys(convertedObj).forEach((k) => {
               const v = convertedObj[k];
               properties = addProperties({
@@ -642,12 +662,13 @@ const addProperties = ({
   }
 }
 
-const addUnsupportedProperty = (j: JSCodeshift, properties, identifier, value) => {
+const addProperty = (j: JSCodeshift, properties, identifier, value, isSupported) => {
+  const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : '';
   return [
     ...properties,
     j.property(
       'init',
-      j.identifier(`// ${TODO_RN_COMMENT}\n// ` + identifier),
+      j.identifier(prefix + identifier),
       j.literal(value),
     )
   ]

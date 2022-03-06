@@ -73,9 +73,7 @@ const LinkStyles = {
 
   variant: Styles.fontFamily.base,
   fontWeight: Styles.fontWeight.heavy,
-  textDecorationLine: 'none',
-  textDecorationColor: 'black',
-  textDecorationStyle: 'solid',
+  underline: false,
 
   borderBottomWidth: {
     base: 1,

@@ -25,11 +25,13 @@ export const Tokens = styled.header`
   color: ${p => p.theme.token('text-reversed')};
   background-color: ${props => props.theme.token('background-pattern')};
   border: 2px solid ${Styles.color.primary};
+  text-decoration: underline;
 `;
 
 export const Header = styled.h1`
   text-shadow: 10px 20px 30px red;
   color: ${p => p.theme.token('text-reversed')};
+  text-decoration: none;
 `;
 
 export const Conditional = styled.div`

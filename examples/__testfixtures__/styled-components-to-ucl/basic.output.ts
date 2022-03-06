@@ -38,6 +38,7 @@ export const Tokens = Box.withConfig({
 
   _text: {
     color: '__legacyToken.text-reversed',
+    underline: true,
   },
 
   backgroundColor: '__legacyToken.background-pattern',
@@ -48,6 +49,7 @@ export const Tokens = Box.withConfig({
 
 export const Header = UCLHeader.withConfig({
   color: '__legacyToken.text-reversed',
+  underline: false,
 });
 
 export const Conditional = Box.withConfig<{
