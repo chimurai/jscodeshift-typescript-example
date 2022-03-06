@@ -65,7 +65,7 @@ export const TextHalf = EqualHalves.withConfig({
   },
 })/*
 TODO RN: unsupported CSS
-Some attributes couldn't be converted.
+Some attributes were not converted.
 
 export const TextHalf = styled(EqualHalves)`
   z-index: 100;

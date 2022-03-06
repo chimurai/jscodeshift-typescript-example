@@ -1,5 +1,5 @@
 import { Box as UCLBox } from '@rbilabs/universal-components';
-import { ThemeProvider, css, keyframes } from 'styled-components';
+import { ThemeProvider, keyframes } from 'styled-components';
 
 export const c = css`
   padding: ${primitive.$spacing1} ${primitive.$spacing2};

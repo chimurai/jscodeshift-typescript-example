@@ -167,7 +167,6 @@ export const preToRNTransform = (identifier, value) => {
 
   // Objects are not supported
   if (_.isObject(value)) {
-    console.log(`OBJ found value: `, identifier, value);
     isSupported = false;
   }
 
@@ -198,7 +197,6 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
 
   // Objects are not supported
   if (_.isObject(value)) {
-    console.log(`OBJ found value: `, identifier, value);
     isSupported = false;
   }
 

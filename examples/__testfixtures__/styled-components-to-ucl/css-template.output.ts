@@ -1,6 +1,5 @@
 import { Text, Box } from '@rbilabs/universal-components';
 
-
 export const TierLabel = Text.withConfig({
   alignItems: 'center',
   justifyContent: 'center',
@@ -65,3 +64,75 @@ export const ShortCodeErrorContainer = styled.div`
 `;
 
 */;
+
+const LinkStyles = {
+  color: Styles.color.black,
+
+  // TODO RN: unsupported CSS
+  // display: 'block',
+
+  variant: Styles.fontFamily.base,
+  fontWeight: Styles.fontWeight.heavy,
+  textDecorationLine: 'none',
+  textDecorationColor: 'black',
+  textDecorationStyle: 'solid',
+
+  borderBottomWidth: {
+    base: 1,
+    lg: 0,
+  },
+
+  borderBottomColor: {
+    base: Styles.color.grey.nine,
+    lg: 'black',
+  },
+
+  borderBottomStyle: {
+    base: 'solid',
+    lg: 'solid',
+  },
+
+  fontSize: {
+    base: 16,
+    lg: 26,
+  },
+
+  paddingX: {
+    base: 0,
+    lg: 0,
+  },
+
+  paddingY: {
+    base: '18px',
+    lg: '$8',
+  },
+}/*
+TODO RN: unsupported CSS
+Some attributes were not converted.
+
+const LinkStyles = css`
+  border-bottom: solid 1px ${Styles.color.grey.nine};
+  color: ${Styles.color.black};
+  display: block;
+  font-family: ${Styles.fontFamily.base};
+  font-size: 1rem;
+  font-weight: ${Styles.fontWeight.heavy};
+  padding: 1.125rem 0;
+  text-decoration: none;
+
+  :last-of-type {
+    border-bottom: 0;
+  }
+
+  ${Styles.desktop`
+    border-bottom: 0;
+    font-size: 1.625rem;
+    padding: 2rem 0
+  `};
+`;
+
+*/;
+
+export const StyledLink = Link.withConfig({
+  ...LinkStyles,
+})

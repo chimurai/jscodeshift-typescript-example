@@ -20,6 +20,8 @@ const tagTypes = {
   MemberExpression: node => node.object,
 };
 
+const styledComponentsImportsToRemove = ['keyframes'];
+
 export const parser = 'tsx'
 export default function transformer(fileInfo: FileInfo, api: API) {
   const j = api.jscodeshift;
@@ -51,15 +53,43 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     });
 
   if (!styledImport.length) {
-    // const msg = ERR_NO_STYLED_COMPONENT_IMPORT;
-    // throw new Error(msg);
     return;
   }
-
 
   // Find the methods that are being called.
   // check to see if we are importing css
   let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
+
+  // other imports from styled-components
+  // e.g. `css` `animate`
+  const otherImports = styledImport.get(0).node.specifiers
+    .filter(p => p.type === 'ImportSpecifier')
+    .map(p => p.imported.name);
+
+  console.log(`otherImports: `, otherImports);
+  if (otherImports.length) {
+    root.find(j.TaggedTemplateExpression, {
+      tag: {
+        name: otherImports[0],
+      },
+    })
+      .forEach(nodePath => {
+        // @ts-ignore
+        if (_.contains(nodePath.node.tag.name, styledComponentsImportsToRemove)) {
+          nodePath.parent?.parent?.replace();
+          return;
+        }
+        const expression = processElement({
+          j,
+          nodePath,
+          activeElement: { component: 'noop' },
+          addToImports: false,
+          addToUCLImportsFn: _.noop,
+          asObject: true,
+        });
+        j(nodePath).replaceWith(expression);
+      });
+  }
 
   root.find(j.MemberExpression, {
     object: {
@@ -73,7 +103,14 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       // styled.XXX
       // @ts-ignore
       const activeElement = getElementMapping(elementPropName);
-      processElement(j, nodePath, activeElement, true, addUCLImport);
+      const expression = processElement({
+        j,
+        nodePath,
+        activeElement,
+        addToImports: true,
+        addToUCLImportsFn: addUCLImport,
+      });
+      j(nodePath).replaceWith(expression);
     });
 
   root.find(j.CallExpression, {
@@ -86,24 +123,40 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       const { node } = nodePath;
       // @ts-ignore
       const nameOfArg = node.tag?.arguments[0]?.name;
-      processElement(j, nodePath, { component: nameOfArg }, false, addUCLImport);
+      const expression = processElement({
+        j,
+        nodePath,
+        activeElement: { component: nameOfArg },
+        addToImports: false,
+        addToUCLImportsFn: addUCLImport,
+      });
+      j(nodePath).replaceWith(expression);
     });
 
   // Imports
   // -------
 
-  // other imports from styled-components
-  // e.g. `css` `animate`
-  const otherImports = styledImport.get(0).node.specifiers
-    .filter(p => p.type === 'ImportSpecifier')
-    .map(p => p.imported.name);
-
-
   // Remove the 'styled-components' import
   if (otherImports.length) {
-    // @ts-ignore
-    styledImport.get(0).node.specifiers = _.filter((s) => (s?.type !== 'ImportDefaultSpecifier'))
-      (styledImport.get(0).node.specifiers);
+    let specifiers = styledImport.get(0).node.specifiers;
+    specifiers = _.filter(s => {
+      // @ts-ignore
+      if (s?.type === 'ImportDefaultSpecifier') {
+        return false;
+      }
+      // @ts-ignore
+      if (_.contains(s?.imported?.name, ['css', 'animation'])) {
+        return false;
+      }
+      return true;
+    }
+    )(specifiers);
+    // console.log(`specifiers: `, specifiers);
+    if (!specifiers.length) {
+      styledImport.remove();
+    } else {
+      styledImport.get(0).node.specifiers = specifiers;
+    }
   } else {
     styledImport.remove();
   }
@@ -130,7 +183,21 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   return root.toSource({ quote: 'single', trailingComma: true });
 };
 
-const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, addToUCLImportsFn) => {
+const processElement = ({
+  j,
+  nodePath,
+  activeElement,
+  addToImports,
+  addToUCLImportsFn,
+  asObject = false,
+}: {
+  j: JSCodeshift,
+  nodePath: any,
+  activeElement: any,
+  addToImports: boolean,
+  addToUCLImportsFn: Function,
+  asObject?: boolean,
+}) => {
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.component)
     : activeElement.component;
@@ -247,8 +314,20 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       // Expressions at the property level will appear as comments
       const exp = substitutionMap[`/*${c.text}*/`];
       if (exp) {
+        // is the expression is an variable, spread it.
+        // @ts-ignore
+        if (exp.type === 'Identifier') {
+          properties = [
+            ...properties,
+            // @ts-ignore
+            j.spreadElement(j.identifier(exp.name)),
+          ];
+        }
+
         // @ts-ignore
         const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
+        if (!obj) return;
+
         _.keys(obj).forEach((k) => {
           let v = obj[k];
           // In the case media queries we want to turn the property into
@@ -331,13 +410,19 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     asObjectOrFunction = j.objectExpression(properties);
   }
 
-  const exprs = j.callExpression(
-    j.memberExpression(
-      j.identifier(componentNameOrAlias),
-      j.identifier('withConfig'),
-    ),
-    [asObjectOrFunction],
-  );
+  let exprs;
+
+  if (asObject) {
+    exprs = asObjectOrFunction;
+  } else {
+    exprs = j.callExpression(
+      j.memberExpression(
+        j.identifier(componentNameOrAlias),
+        j.identifier('withConfig'),
+      ),
+      [asObjectOrFunction],
+    );
+  }
 
   if (hasExpressionError) {
     let ct = cssText;
@@ -353,7 +438,7 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     )
     exprs.comments = [j.commentBlock(`
 ${TODO_RN_COMMENT}
-Some attributes couldn't be converted.
+Some attributes were not converted.
 
 ${ct}
 `, false, true)];
@@ -376,14 +461,16 @@ ${ct}
       ),
     ]);
   }
-  j(nodePath).replaceWith(exprs);
-  return;
+  return exprs;
 }
 
 const needsFlexRemapping = (obj) => obj.display === 'flex' && !obj.flexDirection;
 
 const parseTemplate = ({ quasi, tag }) => {
-  if (!(tag.type in tagTypes)) return;
+  // Nested expressions
+  if (!tag?.type) return {};
+
+  if (!(tag.type in tagTypes)) return {};
 
   // Get the identifier for styled in either styled.View`...` or styled(View)`...`
   // Note we aren't checking the name of the callee

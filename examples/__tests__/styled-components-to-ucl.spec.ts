@@ -9,6 +9,7 @@ describe("renaming a variable", () => {
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex2', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex3', { parser: 'ts' });
+  defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/css-template', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/media', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/media2', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/pseudo', { parser: 'ts' });
