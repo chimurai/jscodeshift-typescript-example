@@ -1,5 +1,21 @@
-import { Text, Box } from '@rbilabs/universal-components';
+import { Box, Text } from '@rbilabs/universal-components';
+import { primitive } from 'styles/constants/primitives';
 
+export const BannerContainer = Box.withConfig({
+  paddingX: '$4',
+  paddingY: 0,
+  overflow: 'hidden',
+
+  _text: {
+    fontFamily: Styles.fontFamily.base,
+    color: 'white',
+  },
+
+  // TODO RN: unsupported CSS
+  // boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+
+  backgroundColor: primitive.th.$coffeeBrown,
+});
 
 export const TierLabel = Text.withConfig({
   alignItems: 'center',

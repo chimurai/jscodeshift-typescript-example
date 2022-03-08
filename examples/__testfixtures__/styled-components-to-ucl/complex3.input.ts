@@ -1,5 +1,16 @@
 import styled from 'styled-components';
+import { primitive } from 'styles/constants/primitives';
 
+export const BannerContainer = styled.div`
+  padding: 0 1rem;
+  overflow: hidden;
+  position: relative;
+  animation: ${fadeIn} 0.4s forwards;
+  font-family: ${Styles.fontFamily.base};
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  background-color: ${primitive.th.$coffeeBrown};
+  color: ${primitive.$white};
+`;
 
 export const TierLabel = styled.p`
   display: flex;
