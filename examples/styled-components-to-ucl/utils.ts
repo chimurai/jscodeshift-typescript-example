@@ -37,6 +37,7 @@ const boxToTextProperties = [
   'font',
   'fontSize',
   'fontWeight',
+  'fontFamily',
   'highlight',
   'isTruncated',
   'italic',

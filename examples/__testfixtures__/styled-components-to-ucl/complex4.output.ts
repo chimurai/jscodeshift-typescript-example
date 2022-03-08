@@ -109,9 +109,13 @@ export const TertiaryButton = Button.withConfig({
   borderTopRightRadius: Styles.borderRadius,
   borderBottomRightRadius: Styles.borderRadius,
   borderBottomLeftRadius: Styles.borderRadius,
-  color: Styles.color.black,
-  fontFamily: Styles.fontFamily.body,
-  fontSize: 15,
+
+  _text: {
+    color: Styles.color.black,
+    fontFamily: Styles.fontFamily.body,
+    fontSize: 15,
+  },
+
   paddingX: '$4',
   paddingY: '9px',
   width: '100%',

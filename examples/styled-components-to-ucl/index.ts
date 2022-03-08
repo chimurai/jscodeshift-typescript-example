@@ -295,7 +295,7 @@ const processElement = ({
     value = _value;
 
     // if the element is a box we have to next the text properties under _text
-    if (activeElement.component === 'Box' && isATextProp(key)) {
+    if (isATextProp(key) && _.includes(activeElement.component, ['Box', 'Button'])) {
       parent = '_text';
     }
 
