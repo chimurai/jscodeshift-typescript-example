@@ -11,9 +11,7 @@ export const BannerContainer = Box.withConfig({
     color: 'white',
   },
 
-  // TODO RN: unsupported CSS
-  // boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-
+  boxShadow: 'default',
   backgroundColor: primitive.th.$coffeeBrown,
 });
 

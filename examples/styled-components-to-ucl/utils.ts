@@ -113,8 +113,6 @@ const unsupportedIdentifiers = [
   /^object-fit$/,
   /^transform/,
   /^content$/,
-  /^boxShadow$/,
-  /^box-shadow$/,
   /^shadow-offset$/,
   /^shadowOffset$/,
   /^span$/,
@@ -179,6 +177,12 @@ export const preToRNTransform = (identifier, value) => {
   // Mappings
   // --------
 
+  if (identifier === 'boxShadow') {
+    i = 'boxShadow';
+    v = 'default';
+    isSkipable = true;
+    isSupported = true;
+  }
   if (identifier === 'margin' && _.includes('auto', value)) {
     i = 'align-self';
     v = 'center';
