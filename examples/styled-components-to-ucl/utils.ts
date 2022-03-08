@@ -404,7 +404,7 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
     if (expression.body?.object?.name === 'props') {
       expression.body.object.name = 'p';
     }
-    if (expression.body?.test.object?.name === 'props') {
+    if (expression.body?.test?.object?.name === 'props') {
       expression.body.test.object.name = 'p';
     }
     const { value, vars } = parseExpression(j, expression.body);
