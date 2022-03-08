@@ -9,3 +9,20 @@ export const UnauthenticatedContainer = styled.div<{ center: boolean }>`
     align-items: center;
   `}
 `;
+
+export const ItemOfferHeading = styled.span<{ $isApplied: boolean }>`
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  color: ${({ $isApplied }) => ($isApplied ? Styles.color.black : Styles.color.red)};
+`
+
+export const Y = styled.div<{ center: boolean }>`
+  color: ${({ $isApplied }) => ($isApplied ? Styles.color.black : Styles.color.red)};
+  align-items: ${props => (props.center ? 'center' : 'flex-end')};
+`;
+
+export const Z = styled.div<{ center: boolean }>`
+  align-items: ${props => (props.center ? 'center' : 'flex-end')};
+  align-self: ${({ center }) => (center ? 'center' : 'flex-end')};
+  color: ${({ $isApplied }) => ($isApplied ? Styles.color.black : Styles.color.red)};
+`;

@@ -403,6 +403,15 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
     }
   }
   if (expression.type === 'ArrowFunctionExpression') {
+    let exp;
+    // @ts-ignore
+    if (expression?.params?.[0].type === 'ObjectPattern') {
+      // convert children to use `p.xxx`
+      const vars = expression.params[0].properties?.map(p => p.key.name);
+      exp = j.memberExpression(j.identifier('p'), j.identifier(vars[0]));
+      // @ts-ignore
+      expression.body?.test = exp;
+    }
 
     // And change `props` to `p`
     if (expression.body?.object?.name === 'props') {
@@ -425,7 +434,7 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
     expression.consequent = consequent.value;
     const alternate = parseExpression(j, expression.alternate);
     expression.alternate = alternate.value;
-    const conditionalVar = expression?.test?.property?.name
+    const conditionalVar = expression?.test?.property?.name || expression?.test?.name;
     let localVars = [];
     if (conditionalVar) {
       localVars.push({
