@@ -11,7 +11,6 @@ import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
-import { forEach } from 'lodash';
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
 
@@ -28,6 +27,8 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   const j = api.jscodeshift;
 
   const root = j(fileInfo.source);
+
+  const isJSFile = fileInfo.path.endsWith('.js');
   const uclImports = [];
   const localVariable = [];
 
@@ -90,6 +91,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
             addToImports: false,
             addToUCLImportsFn: _.noop,
             asObject: true,
+            includeTypes: !isJSFile,
           });
           j(nodePath).replaceWith(expression);
         });
@@ -114,6 +116,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
         activeElement,
         addToImports: true,
         addToUCLImportsFn: addUCLImport,
+        includeTypes: !isJSFile,
       });
       j(nodePath).replaceWith(expression);
     });
@@ -134,6 +137,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
         activeElement: { component: nameOfArg },
         addToImports: false,
         addToUCLImportsFn: addUCLImport,
+        includeTypes: !isJSFile,
       });
       j(nodePath).replaceWith(expression);
     });
@@ -198,6 +202,7 @@ const processElement = ({
   addToImports,
   addToUCLImportsFn,
   asObject = false,
+  includeTypes = true,
 }: {
   j: JSCodeshift,
   nodePath: any,
@@ -205,6 +210,7 @@ const processElement = ({
   addToImports: boolean,
   addToUCLImportsFn: Function,
   asObject?: boolean,
+  includeTypes?: boolean,
 }) => {
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.component)
@@ -473,7 +479,7 @@ ${ct}
   }
 
   // Map Types
-  if (localVars.length) {
+  if (localVars.length && includeTypes) {
     // Add types
     // @ts-ignore
     exprs.typeArguments = j.tsTypeParameterInstantiation([
