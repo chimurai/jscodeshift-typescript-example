@@ -64,6 +64,13 @@ const brandFontMap = {
   'formUtility': 'formUtility',
 };
 
+const styleFontFamilyMap = {
+  'base': 'heading',
+  'body': 'body',
+  'alternative': 'alternative',
+  'brand': 'heading',
+};
+
 const removeProps = [
   /^animation/,
   /^transition/,
@@ -92,11 +99,13 @@ const unsupportedIdentifiers = [
   /^objectFit$/,
   /^object-fit$/,
   /^transform$/,
+  /^content$/,
   /^boxShadow$/,
   /^box-shadow$/,
   /^shadow-offset$/,
   /^shadowOffset$/,
   /^span$/,
+  /^grid/,
 ];
 
 const unsupportedValue = [
@@ -166,8 +175,10 @@ export const preToRNTransform = (identifier, value) => {
       : true
     isSkipable = true;
   }
+
+  // Skip font because we are converting to a variant
   if (identifier === 'font') {
-    i = 'fontFamily';
+    isSkipable = true;
   }
 
   // Supported
@@ -199,7 +210,7 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
   let isSupported = _isSupported(identifier, value);
   let isRemovable = _isRemovable(identifier, value);
 
-  if (identifier === 'fontFamily') {
+  if (identifier === 'font') {
     // The correct variant is set in utils/parseExpression
     i = 'variant';
   }

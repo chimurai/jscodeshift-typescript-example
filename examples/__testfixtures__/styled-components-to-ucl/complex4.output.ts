@@ -1,4 +1,4 @@
-import { Text, Box } from '@rbilabs/universal-components';
+import { Text, Box, Button } from '@rbilabs/universal-components';
 
 import { ModalHeading } from 'components/modal';
 
@@ -43,7 +43,7 @@ export const StyledModalHeader = styled(ModalHeading)`
 export const LoadingText = Text.withConfig({
   textAlign: 'center',
   fontSize: 15,
-  variant: Styles.fontFamily.body,
+  fontFamily: Styles.fontFamily.body,
   paddingX: '$10',
   paddingY: '7px',
 })/*
@@ -95,5 +95,31 @@ export const GraphicTextWrapper = Box.withConfig({
   // TODO RN: unsupported CSS
   // display: 'grid',
 
-  gridTemplateRows: 'auto 1fr',
+  // TODO RN: unsupported CSS
+  // gridTemplateRows: 'auto 1fr',
+});
+
+
+export const TertiaryButton = Button.withConfig({
+  backgroundColor: 'none',
+  borderWidth: 1,
+  borderColor: Styles.color.grey.four,
+  borderStyle: 'solid',
+  borderTopLeftRadius: Styles.borderRadius,
+  borderTopRightRadius: Styles.borderRadius,
+  borderBottomRightRadius: Styles.borderRadius,
+  borderBottomLeftRadius: Styles.borderRadius,
+  color: Styles.color.black,
+  fontFamily: Styles.fontFamily.body,
+  fontSize: 15,
+  paddingX: '$4',
+  paddingY: '9px',
+  width: '100%',
+
+  _hover: {
+    borderTopColor: Styles.color.grey.three,
+    borderRightColor: Styles.color.grey.three,
+    borderBottomColor: Styles.color.grey.three,
+    borderLeftColor: Styles.color.grey.three,
+  },
 });

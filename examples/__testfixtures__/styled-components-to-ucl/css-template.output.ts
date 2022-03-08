@@ -71,7 +71,7 @@ const LinkStyles = {
   // TODO RN: unsupported CSS
   // display: 'block',
 
-  variant: Styles.fontFamily.base,
+  fontFamily: Styles.fontFamily.base,
   fontWeight: Styles.fontWeight.heavy,
   underline: false,
 

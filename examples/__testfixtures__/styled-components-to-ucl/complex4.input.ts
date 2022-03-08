@@ -50,3 +50,19 @@ export const GraphicTextWrapper = styled.div`
   display: grid;
   grid-template-rows: auto 1fr;
 `;
+
+
+export const TertiaryButton = styled.button`
+  background: none;
+  border: 1px solid ${Styles.color.grey.four};
+  border-radius: ${Styles.borderRadius};
+  color: ${Styles.color.black};
+  font-family: ${Styles.fontFamily.body};
+  font-size: 0.9375rem;
+  padding: 0.6rem 1rem;
+  width: 100%;
+
+  &:hover {
+    border-color: ${Styles.color.grey.three};
+  }
+`;
