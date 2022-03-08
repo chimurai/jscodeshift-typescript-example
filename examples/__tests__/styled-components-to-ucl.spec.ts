@@ -10,6 +10,7 @@ describe("styled-components to UCL", () => {
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex2', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex3', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex4', { parser: 'ts' });
+  // defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/complex5', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/css-template', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/media', { parser: 'ts' });
   defineTest(__dirname, './styled-components-to-ucl/index.ts', null, 'styled-components-to-ucl/media2', { parser: 'ts' });

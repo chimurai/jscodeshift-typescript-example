@@ -31,6 +31,12 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   const isJSFile = fileInfo.path.endsWith('.js');
   const uclImports = [];
   const localVariable = [];
+  let localImportNames = [];
+
+  root.find(j.ImportDeclaration).forEach(i => {
+    // @ts-ignore
+    localImportNames = localImportNames.concat(i.value.specifiers.map(s => s.local.name));
+  });
 
   // Add all local variables
   // @ts-ignore
@@ -40,7 +46,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     // Prefix with UCL if there is a local variable with the same name
     let name = componentRealName;
     let alias = undefined;
-    if (_.includes(name, localVariable)) {
+    if (_.includes(name, _.concat(localVariable, localImportNames))) {
       alias = 'UCL' + name;
     }
     uclImports.push([name, alias]);
@@ -92,6 +98,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
             addToUCLImportsFn: _.noop,
             asObject: true,
             includeTypes: !isJSFile,
+            localImportNames,
           });
           j(nodePath).replaceWith(expression);
         });
@@ -117,6 +124,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
         addToImports: true,
         addToUCLImportsFn: addUCLImport,
         includeTypes: !isJSFile,
+        localImportNames,
       });
       j(nodePath).replaceWith(expression);
     });
@@ -138,6 +146,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
         addToImports: false,
         addToUCLImportsFn: addUCLImport,
         includeTypes: !isJSFile,
+        localImportNames,
       });
       j(nodePath).replaceWith(expression);
     });
@@ -203,6 +212,7 @@ const processElement = ({
   addToUCLImportsFn,
   asObject = false,
   includeTypes = true,
+  localImportNames = [],
 }: {
   j: JSCodeshift,
   nodePath: any,
@@ -211,6 +221,7 @@ const processElement = ({
   addToUCLImportsFn: Function,
   asObject?: boolean,
   includeTypes?: boolean,
+  localImportNames?: string[]
 }) => {
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.component)
@@ -268,6 +279,7 @@ const processElement = ({
                 newPropertyName: null,
                 originalPropertyNewName: null,
                 needsFlexRemapping: needsFlexRemapping(value),
+                localImportNames,
               })
             });
           } catch (error) {
@@ -327,6 +339,7 @@ const processElement = ({
           newPropertyName: null,
           originalPropertyNewName: null,
           needsFlexRemapping: needsFlexRemapping(obj),
+          localImportNames,
         })
       });
 
@@ -407,6 +420,7 @@ const processElement = ({
                 newPropertyName: newProp,
                 originalPropertyNewName: origProp,
                 needsFlexRemapping: needsFlexRemapping(obj),
+                localImportNames,
               })
             });
           } catch (error) {
@@ -464,7 +478,6 @@ const processElement = ({
       try {
         // Try to get a nice string
         ct = nodePathToString(nodePath);
-        console.log(`ct: `, ct, k);
       } catch (error) {
         console.log(`error: `, error);
         // But fall back
@@ -570,13 +583,14 @@ const addProperties = ({
   newPropertyName,
   originalPropertyNewName,
   needsFlexRemapping,
+  localImportNames
 }) => {
   let value = initialValue;
   // If the value is is an expression
   const foundExpression = substitutionMap[value];
 
   if (foundExpression) {
-    const parsed = parseExpression(j, foundExpression);
+    const parsed = parseExpression(j, foundExpression, localImportNames);
 
     value = parsed.value;
     // These are variables that are used in Arrow functions
@@ -699,7 +713,6 @@ const nodePathToString = (nodePath) => {
         )(o)),
         _.join('\n'),
       )(nodePath?.node?.loc?.lines?.infos);
-      console.log(`str: `, str);
       return str;
     } catch (error) {
       throw new Error(`nodePathToString error`)

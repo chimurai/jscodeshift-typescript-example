@@ -1,10 +1,32 @@
-import { Text, Box, Button } from '@rbilabs/universal-components';
-
-import { ModalHeading } from 'components/modal';
+import { Box, Text as UCLText, Button } from '@rbilabs/universal-components';
 
 import { ModalContent } from '../styled';
+import { ModalHeading } from 'components/modal';
+import { Text } from './somthing';
+import theme from './theme';
 
-import { HEADER_TOP_PADDING, IMAGE_BACKGROUND_COLOR } from './checking-availability-constants';
+export const AnotherOne = Box.withConfig<{
+  secondary: boolean
+}>(p => ({
+  width: '$10',
+  height: '$16',
+  top: p.secondary ? '5vh' : '10vh',
+  flexGrow: 1,
+  flexShrink: 1,
+  flexBasis: 0,
+  paddingTop: '$3',
+  paddingRight: '$1',
+  paddingBottom: '$3',
+  paddingLeft: '1px',
+
+  _text: {
+    color: Styles.color.grey.four,
+  },
+
+  marginX: 0,
+  marginY: '$2',
+  backgroundColor: theme.backgroundColor,
+}));
 
 export const Container = ModalContent.withConfig({
   height: '100%',
@@ -40,7 +62,7 @@ export const StyledModalHeader = styled(ModalHeading)`
 
 */;
 
-export const LoadingText = Text.withConfig({
+export const LoadingText = UCLText.withConfig({
   textAlign: 'center',
   fontSize: 15,
   fontFamily: Styles.fontFamily.body,

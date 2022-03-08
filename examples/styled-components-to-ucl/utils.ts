@@ -27,7 +27,19 @@ const primitiveMap = {
   '$spacing8': '$10',
   '$spacing9': '$12',
   '$spacing10': '$13.5',
-  '$spacing11': '$20'
+  '$spacing11': '$20',
+  '$black': 'black',
+  '$white': 'white',
+  '$error': 'errorRed',
+  '$disabledText': 'blackOpacity.50',
+  '$disabledTextReversed': 'whiteOpacity.50',
+  '$blackOpacity70': 'blackOpacity.70',
+  '$blackOpacity30': 'blackOpacity.30',
+  '$blackOpacity10': 'blackOpacity.10',
+  '$blackOpacity4': 'blackOpacity.5',
+  '$whiteOpacity30': 'whiteOpacity.30',
+  '$whiteOpacity10': 'whiteOpacity.10',
+  '$whiteOpacity4': 'whiteOpacity.5',
 };
 
 const boxToTextProperties = [
@@ -111,6 +123,8 @@ const unsupportedIdentifiers = [
 
 const unsupportedValue = [
   /^calc/,
+  /^max/,
+  /^min/,
   /^relative$/,
 ];
 
@@ -310,25 +324,48 @@ export const getElementMapping = (el: string) => {
   return found;
 }
 
-export const parseExpression = (j: JSCodeshift, expression) => {
+const isType = (expression, t) =>
+(expression?.type === t ||
+  expression?.object?.type === t ||
+  expression?.object?.object?.type === t);
+
+const isName = (expression, n) => (
+  expression?.object?.name === n ||
+  expression?.object?.object?.name === n ||
+  expression?.object?.object?.object?.name === n
+);
+
+export const parseExpression = (j: JSCodeshift, expression, localImportNames?: string[]) => {
   const finalVars = [];
 
+  // console.log(`expression.type: `, expression.type);
   if (expression.type === 'MemberExpression') {
     let v = expression;
-    // TODO maps styles or maybe more this to a separate code mod
-    // remove Styles
     let includeTypes = true;
+
+    // check if the expession is an import
+    if (_.contains('theme', localImportNames)) {
+      includeTypes = false;
+    }
+
+    const isMember = isType(expression, 'MemberExpression');
+    const isPrimitive = isName(expression, 'primitive');
+
+    if (isPrimitive) {
+      includeTypes = false;
+    }
 
     // Local variables
     if (expression?.object?.type === 'Identifier') {
-      if (expression.object.name === 'primitive') {
+      if (isPrimitive) {
         const foundPrimitive = primitiveMap[expression.property.name]
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
           includeTypes = false;
         }
       }
-      if (expression.object.name === 'brandFont') {
+      const isBrandFont = isName(expression, 'brandFont');
+      if (isBrandFont) {
         const foundPrimitive = brandFontMap[expression.property.name]
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
@@ -337,14 +374,9 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       }
     }
 
-    const isMember = (expression?.type === 'MemberExpression' ||
-      expression?.object?.type === 'MemberExpression' ||
-      expression?.object?.object?.type === 'MemberExpression');
-    const isStyles = (
-      expression?.object?.name === 'Styles' ||
-      expression?.object?.object?.name === 'Styles' ||
-      expression?.object?.object?.object?.name === 'Styles'
-    );
+    // TODO maps styles or maybe more this to a separate code mod
+    // remove Styles
+    const isStyles = isName(expression, 'Styles');
 
     if (isMember && isStyles) {
       includeTypes = false;
@@ -367,6 +399,7 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     }
   }
   if (expression.type === 'ArrowFunctionExpression') {
+
     // And change `props` to `p`
     if (expression.body?.object?.name === 'props') {
       expression.body.object.name = 'p';

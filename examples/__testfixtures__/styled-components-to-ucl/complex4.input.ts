@@ -1,10 +1,20 @@
 import styled, { css } from 'styled-components';
 
-import { ModalHeading } from 'components/modal';
-
 import { ModalContent } from '../styled';
+import { ModalHeading } from 'components/modal';
+import { Text } from './somthing';
+import theme from './theme';
 
-import { HEADER_TOP_PADDING, IMAGE_BACKGROUND_COLOR } from './checking-availability-constants';
+export const AnotherOne = styled.div`
+  width: 40;
+  height: 4rem;
+  top: ${p => (p.secondary ? '5vh' : '10vh')};
+  flex: 1;
+  padding: 12px 4px 12px 1px;
+  color: ${Styles.color.grey.four};
+  margin: ${primitive.$spacing2} 0;
+  background-color: ${theme.backgroundColor};
+`;
 
 export const Container = styled(ModalContent)`
   height: 100%;
