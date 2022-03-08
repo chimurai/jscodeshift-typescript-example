@@ -99,7 +99,7 @@ const unsupportedKeyValuePairs = [
 const unsupportedIdentifiers = [
   /^objectFit$/,
   /^object-fit$/,
-  /^transform$/,
+  /^transform/,
   /^content$/,
   /^boxShadow$/,
   /^box-shadow$/,
@@ -425,5 +425,14 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       }
     }
   }
+
+  if (expression.type === 'StringLiteral') {
+    console.log(`expression: `, expression);
+    return {
+      value: j.stringLiteral(expression?.value),
+      vars: null,
+    }
+  }
+
   throw new Error('Expression not implemented type: ' + expression.type)
 };
