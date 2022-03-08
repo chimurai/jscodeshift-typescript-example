@@ -127,3 +127,19 @@ export const TertiaryButton = Button.withConfig({
     borderLeftColor: Styles.color.grey.three,
   },
 });
+
+export const focusStyle = {
+  // https://ghinda.net/article/mimic-native-focus-css/
+  outline: '2px solid Highlight',
+}/*
+TODO RN: unsupported CSS
+Some attributes were not converted.
+
+
+  // https://ghinda.net/article/mimic-native-focus-css/ 
+  outline: 2px solid Highlight;
+  @media (-webkit-min-device-pixel-ratio: 0) {
+    outline: -webkit-focus-ring-color auto 5px;
+  }
+
+*/

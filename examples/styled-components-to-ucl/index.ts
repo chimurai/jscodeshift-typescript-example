@@ -464,12 +464,16 @@ const processElement = ({
       try {
         // Try to get a nice string
         ct = nodePathToString(nodePath);
+        console.log(`ct: `, ct, k);
       } catch (error) {
+        console.log(`error: `, error);
         // But fall back
       }
     }))(
       _.keys(substitutionMap)
     )
+    ct = ct.replaceAll('/*', '//')
+    ct = ct.replaceAll('*/', '')
     exprs.comments = [j.commentBlock(`
 ${TODO_RN_COMMENT}
 Some attributes were not converted.
@@ -695,6 +699,7 @@ const nodePathToString = (nodePath) => {
         )(o)),
         _.join('\n'),
       )(nodePath?.node?.loc?.lines?.infos);
+      console.log(`str: `, str);
       return str;
     } catch (error) {
       throw new Error(`nodePathToString error`)
