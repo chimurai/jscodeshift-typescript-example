@@ -11,7 +11,6 @@ export const BannerContainer = Box.withConfig({
     color: 'white',
   },
 
-  boxShadow: 'default',
   backgroundColor: primitive.th.$coffeeBrown,
 });
 

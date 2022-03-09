@@ -109,6 +109,8 @@ const unsupportedKeyValuePairs = [
 ]
 
 const unsupportedIdentifiers = [
+  /^boxShadow$/,
+  /^box-shadow$/,
   /^objectFit$/,
   /^object-fit$/,
   /^transform/,
@@ -177,12 +179,12 @@ export const preToRNTransform = (identifier, value) => {
   // Mappings
   // --------
 
-  if (identifier === 'boxShadow') {
-    i = 'boxShadow';
-    v = 'default';
-    isSkipable = true;
-    isSupported = true;
-  }
+  // if (identifier === 'boxShadow') {
+  //   i = 'boxShadow';
+  //   v = 'default';
+  //   isSkipable = true;
+  //   isSupported = true;
+  // }
   if (identifier === 'margin' && _.includes('auto', value)) {
     i = 'align-self';
     v = 'center';
@@ -295,7 +297,7 @@ interface IMapping {
 
 const elementMap: Record<string, IMapping> = {
   'div': { component: 'Box', notSupported: true },
-  'span': { component: 'Box' },
+  'span': { component: 'Text' },
   'section': { component: 'Box' },
   'h1': { component: 'Header' },
   'h2': { component: 'Header' },
@@ -410,7 +412,9 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
       const vars = expression.params[0].properties?.map(p => p.key.name);
       exp = j.memberExpression(j.identifier('p'), j.identifier(vars[0]));
       // @ts-ignore
-      expression.body?.test = exp;
+      if (expression?.body?.test) {
+        expression.body.test = exp;
+      }
     }
 
     // And change `props` to `p`

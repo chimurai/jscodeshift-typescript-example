@@ -1,4 +1,4 @@
-import { Box } from '@rbilabs/universal-components';
+import { Box, Text } from '@rbilabs/universal-components';
 
 export const UnauthenticatedContainer = Box.withConfig<{
   center: boolean
@@ -14,14 +14,12 @@ export const UnauthenticatedContainer = Box.withConfig<{
   },
 }));
 
-export const ItemOfferHeading = Box.withConfig<{
+export const ItemOfferHeading = Text.withConfig<{
   $isApplied: boolean
 }>(p => ({
-  _text: {
-    fontSize: 10,
-    textTransform: 'uppercase',
-    color: p.$isApplied ? Styles.color.black : Styles.color.red,
-  },
+  fontSize: 10,
+  textTransform: 'uppercase',
+  color: p.$isApplied ? Styles.color.black : Styles.color.red,
 }))
 
 export const Y = Box.withConfig<{

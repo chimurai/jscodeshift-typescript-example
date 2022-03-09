@@ -21,6 +21,7 @@ const tagTypes = {
 };
 
 const styledComponentsImportsToRemove = ['keyframes'];
+const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
 
 export const parser = 'tsx'
 export default function transformer(fileInfo: FileInfo, api: API) {
@@ -285,11 +286,15 @@ const processElement = ({
           } catch (error) {
             console.error('toRN', error.message);
             hasExpressionError = true;
+            throw error;
           }
         })(_.keys(value))
         // Unsupported
       } else {
         hasExpressionError = true;
+        if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+          throw new Error('Contains object - ' + value);
+        }
       }
       return;
     }
@@ -473,6 +478,10 @@ const processElement = ({
   }
 
   if (hasExpressionError) {
+    // Don't try to convert
+    if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+      throw new Error('Unable to convert');
+    }
     let ct = cssText;
     _.map(((k: string) => {
       try {
