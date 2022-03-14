@@ -4,21 +4,14 @@ import CloseButton from 'components/close-button';
 import { FIXED_STICKY_FOOTER_HEIGHT } from 'components/sticky-footer/constants';
 import { primitive } from 'styles/constants/primitives';
 
-const k = keyframes`
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0
-  }
-`
 export const ModalCloseButton = CloseButton.withConfig({
   paddingTop: '$20',
 
   // TODO RN: unsupported CSS
   // left: 'calc(1.25rem + env(safe-area-inset-left))',
 
-  position: 'fixed',
+  // TODO RN: unsupported CSS
+  // position: 'fixed',
 
   // TODO RN: unsupported CSS
   // top: 'calc(1rem + env(safe-area-inset-top))',
@@ -29,9 +22,6 @@ export const ModalCloseButton = CloseButton.withConfig({
 });
 
 export const Background = Box.withConfig({
-  // TODO RN: unsupported CSS
-  // position: 'relative',
-
   backgroundColor: '__legacyToken.background-pattern',
 });
 
@@ -39,18 +29,14 @@ export const AllModalContent = Box.withConfig({
   backgroundColor: '__legacyToken.background-pattern',
   width: '100%',
   height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
   justifyContent: 'space-between',
 });
 
 export const RewardCategoriesContainer = Box.withConfig({
   paddingTop: '$20',
 
-  paddingBottom: {
-    // TODO RN: unsupported CSS
-    // paddingBottom: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
-  },
+  // TODO RN: unsupported CSS
+  // paddingBottom: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
 });
 
 export const StyledContainer = Box.withConfig({
@@ -65,4 +51,8 @@ export const StyledContainer = Box.withConfig({
 
   // TODO RN: unsupported CSS
   // display: 'block',
+});
+
+export const FlexRemapping = Box.withConfig({
+  alignItems: 'center',
 });

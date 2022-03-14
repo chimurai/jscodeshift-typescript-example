@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import Modal from './modal';
 
 /**
@@ -6,7 +6,10 @@ import Modal from './modal';
  */
 export const Basic = styled.div`
   display: flex;
+  position: relative;
   margin: 0 auto;
+  transform: rotate(180deg) translateX(50%);
+  box-shadow: inset 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
   justify-content: space-between;
   align-items: center;
   text-align: left;
@@ -16,15 +19,19 @@ export const Basic = styled.div`
   border-top: 1px solid ${Styles.color.primary};
 `;
 
-export const Tokens = styled.div`
+export const Tokens = styled.header`
+  display: block;
   margin: 9px auto 0;
   color: ${p => p.theme.token('text-reversed')};
   background-color: ${props => props.theme.token('background-pattern')};
   border: 2px solid ${Styles.color.primary};
+  text-decoration: underline;
 `;
 
 export const Header = styled.h1`
+  text-shadow: 10px 20px 30px red;
   color: ${p => p.theme.token('text-reversed')};
+  text-decoration: none;
 `;
 
 export const Conditional = styled.div`

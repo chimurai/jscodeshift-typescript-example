@@ -27,7 +27,19 @@ const primitiveMap = {
   '$spacing8': '$10',
   '$spacing9': '$12',
   '$spacing10': '$13.5',
-  '$spacing11': '$20'
+  '$spacing11': '$20',
+  '$black': 'black',
+  '$white': 'white',
+  '$error': 'errorRed',
+  '$disabledText': 'blackOpacity.50',
+  '$disabledTextReversed': 'whiteOpacity.50',
+  '$blackOpacity70': 'blackOpacity.70',
+  '$blackOpacity30': 'blackOpacity.30',
+  '$blackOpacity10': 'blackOpacity.10',
+  '$blackOpacity4': 'blackOpacity.5',
+  '$whiteOpacity30': 'whiteOpacity.30',
+  '$whiteOpacity10': 'whiteOpacity.10',
+  '$whiteOpacity4': 'whiteOpacity.5',
 };
 
 const boxToTextProperties = [
@@ -37,6 +49,7 @@ const boxToTextProperties = [
   'font',
   'fontSize',
   'fontWeight',
+  'fontFamily',
   'highlight',
   'isTruncated',
   'italic',
@@ -64,45 +77,187 @@ const brandFontMap = {
   'formUtility': 'formUtility',
 };
 
+const styleFontFamilyMap = {
+  'base': 'heading',
+  'body': 'body',
+  'alternative': 'alternative',
+  'brand': 'heading',
+};
+
 const removeProps = [
   /^animation/,
   /^transition/,
+  /^text-shadow$/,
+  /^textShadow$/,
+  /^text-shadow-offset$/,
+  /^textShadowOffset$/,
 ];
 
-const unsupportedProps = [
+const removeKeyValuePairs = [
+  { key: 'position', value: 'relative' },
+  { key: 'flexDirection', value: 'column' },
+  { key: 'flex-direction', value: 'column' },
+  { key: 'display', value: 'flex' },
+];
+
+
+const unsupportedKeyValuePairs = [
+  { key: 'position', value: 'relative' },
+  { key: 'flexDirection', value: 'column' },
+  { key: 'flex-direction', value: 'column' },
+  { key: 'display', value: 'flex' },
+]
+
+const unsupportedIdentifiers = [
+  /^boxShadow$/,
+  /^box-shadow$/,
   /^objectFit$/,
+  /^object-fit$/,
+  /^transform/,
+  /^content$/,
+  /^shadow-offset$/,
+  /^shadowOffset$/,
+  /^span$/,
+  /^grid/,
 ];
 
 const unsupportedValue = [
   /^calc/,
+  /^max/,
+  /^min/,
   /^relative$/,
 ];
 
-const _isUnsupported = (test, regex) =>
+
+const _isInReg = (test, regex) =>
   _.some(re => re.test(test), regex);
 
-export const isSupported = (property: string, value: string) => {
+const _isRemovable = (property: string, value: string) => {
 
-  if (property === 'display' && !['none', 'flex'].includes(value)) {
-    return [false, false];
+  if (property === 'position' && value === 'relative') {
+    return true;
   }
 
-  if (_isUnsupported(property, removeProps)) {
-    return [false, true];
-
+  if (property === 'flexDirection' && value === 'column') {
+    return true;
   }
 
-  // Broken stuff
-  // -----------
-  if (_isUnsupported(property, unsupportedProps)) {
-    return [false, false];
-
+  if (property === 'display' && value === 'flex') {
+    return true;
   }
-  if (_isUnsupported(value, unsupportedValue)) {
-    return [false, false];
 
+  if (_isInReg(property, removeProps)) {
+    return true;
   }
-  return [true, false];
+
+  return false;
+};
+
+export const _isSupported = (identifier: string, value: string) => {
+  // anything but flex or none is not supported
+  if (identifier === 'display' && !['none', 'flex'].includes(value)) {
+    return false;
+  }
+  if (_isInReg(identifier, unsupportedIdentifiers)) {
+    return false;
+  }
+  if (_isInReg(value, unsupportedValue)) {
+    return false;
+  }
+  return true;
+}
+
+// One-offs Pre toRN
+// -------
+export const preToRNTransform = (identifier, value) => {
+  let i = identifier;
+  let v = value;
+  let isSupported = _isSupported(identifier, value);
+  let isRemovable = _isRemovable(identifier, value);
+  let isSkipable = false
+
+  // Mappings
+  // --------
+
+  // if (identifier === 'boxShadow') {
+  //   i = 'boxShadow';
+  //   v = 'default';
+  //   isSkipable = true;
+  //   isSupported = true;
+  // }
+  if (identifier === 'margin' && _.includes('auto', value)) {
+    i = 'align-self';
+    v = 'center';
+  }
+  if (identifier === 'textDecoration') {
+    i = 'underline'
+    v = (value === 'none')
+      ? false
+      : true
+    isSkipable = true;
+  }
+
+  // Skip font because we are converting to a variant
+  if (identifier === 'font') {
+    isSkipable = true;
+  }
+
+  // Supported
+  // ---------
+
+  // Objects are not supported
+  if (_.isObject(value)) {
+    isSupported = false;
+  }
+
+  if (identifier === 'position' && value === 'fixed') {
+    isSupported = false;
+  }
+
+  return {
+    identifier: i,
+    value: v,
+    isSupported,
+    isRemovable,
+    isSkipable,
+  }
+}
+
+// One-offs Post toRN
+// -------
+export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
+  let i = identifier;
+  let v = value;
+  let isSupported = _isSupported(identifier, value);
+  let isRemovable = _isRemovable(identifier, value);
+
+  if (identifier === 'font') {
+    // The correct variant is set in utils/parseExpression
+    i = 'variant';
+  }
+
+  // Objects are not supported
+  if (_.isObject(value)) {
+    isSupported = false;
+  }
+
+  if (needsFlexRemapping) {
+    switch (identifier) {
+      case 'justifyContent':
+        i = 'alignItems';
+        break;
+      case 'alignItems':
+        i = 'justifyContent';
+        break;
+    }
+  }
+
+  return {
+    identifier: i,
+    value: v,
+    isSupported,
+    isRemovable,
+  }
 }
 
 const stylesToValue = (j: JSCodeshift, group, value) => {
@@ -142,7 +297,7 @@ interface IMapping {
 
 const elementMap: Record<string, IMapping> = {
   'div': { component: 'Box', notSupported: true },
-  'span': { component: 'Box' },
+  'span': { component: 'Text' },
   'section': { component: 'Box' },
   'h1': { component: 'Header' },
   'h2': { component: 'Header' },
@@ -151,6 +306,8 @@ const elementMap: Record<string, IMapping> = {
   'h5': { component: 'Header' },
   'h6': { component: 'Header' },
   'p': { component: 'Text' },
+  'header': { component: 'Box' },
+  'nav': { component: 'Box' },
   'label': { component: 'Text', notSupported: 'use InputLabel' },
   'button': { component: 'Button' },
   'ul': { component: 'Box', notSupported: 'use ScrollView' },
@@ -173,25 +330,48 @@ export const getElementMapping = (el: string) => {
   return found;
 }
 
-export const parseExpression = (j: JSCodeshift, expression) => {
+const isType = (expression, t) =>
+(expression?.type === t ||
+  expression?.object?.type === t ||
+  expression?.object?.object?.type === t);
+
+const isName = (expression, n) => (
+  expression?.object?.name === n ||
+  expression?.object?.object?.name === n ||
+  expression?.object?.object?.object?.name === n
+);
+
+export const parseExpression = (j: JSCodeshift, expression, localImportNames?: string[]) => {
   const finalVars = [];
 
+  // console.log(`expression.type: `, expression.type);
   if (expression.type === 'MemberExpression') {
     let v = expression;
-    // TODO maps styles or maybe more this to a separate code mod
-    // remove Styles
     let includeTypes = true;
+
+    // check if the expession is an import
+    if (_.contains('theme', localImportNames)) {
+      includeTypes = false;
+    }
+
+    const isMember = isType(expression, 'MemberExpression');
+    const isPrimitive = isName(expression, 'primitive');
+
+    if (isPrimitive) {
+      includeTypes = false;
+    }
 
     // Local variables
     if (expression?.object?.type === 'Identifier') {
-      if (expression.object.name === 'primitive') {
+      if (isPrimitive) {
         const foundPrimitive = primitiveMap[expression.property.name]
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
           includeTypes = false;
         }
       }
-      if (expression.object.name === 'brandFont') {
+      const isBrandFont = isName(expression, 'brandFont');
+      if (isBrandFont) {
         const foundPrimitive = brandFontMap[expression.property.name]
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
@@ -200,13 +380,15 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       }
     }
 
-    if (expression?.object?.type === 'MemberExpression') {
-      if (expression?.object?.object?.name === 'Styles') {
-        includeTypes = false;
-        v = expression;
-        // TODO
-        // v = stylesToValue(j, expression.object.property.name, expression.property.name);
-      }
+    // TODO maps styles or maybe more this to a separate code mod
+    // remove Styles
+    const isStyles = isName(expression, 'Styles');
+
+    if (isMember && isStyles) {
+      includeTypes = false;
+      v = expression;
+      // TODO
+      // v = stylesToValue(j, expression.object.property.name, expression.property.name);
     }
 
     const propertyName = expression?.property?.name;
@@ -223,9 +405,24 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     }
   }
   if (expression.type === 'ArrowFunctionExpression') {
+    let exp;
+    // @ts-ignore
+    if (expression?.params?.[0].type === 'ObjectPattern') {
+      // convert children to use `p.xxx`
+      const vars = expression.params[0].properties?.map(p => p.key.name);
+      exp = j.memberExpression(j.identifier('p'), j.identifier(vars[0]));
+      // @ts-ignore
+      if (expression?.body?.test) {
+        expression.body.test = exp;
+      }
+    }
+
     // And change `props` to `p`
     if (expression.body?.object?.name === 'props') {
       expression.body.object.name = 'p';
+    }
+    if (expression.body?.test?.object?.name === 'props') {
+      expression.body.test.object.name = 'p';
     }
     const { value, vars } = parseExpression(j, expression.body);
     expression.body = value;
@@ -241,7 +438,7 @@ export const parseExpression = (j: JSCodeshift, expression) => {
     expression.consequent = consequent.value;
     const alternate = parseExpression(j, expression.alternate);
     expression.alternate = alternate.value;
-    const conditionalVar = expression?.test?.property?.name
+    const conditionalVar = expression?.test?.property?.name || expression?.test?.name;
     let localVars = [];
     if (conditionalVar) {
       localVars.push({
@@ -281,5 +478,13 @@ export const parseExpression = (j: JSCodeshift, expression) => {
       }
     }
   }
+
+  if (expression.type === 'StringLiteral') {
+    return {
+      value: j.stringLiteral(expression?.value),
+      vars: null,
+    }
+  }
+
   throw new Error('Expression not implemented type: ' + expression.type)
 };

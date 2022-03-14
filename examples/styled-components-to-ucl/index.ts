@@ -1,12 +1,18 @@
 import { API, FileInfo, JSCodeshift } from 'jscodeshift';
-import { parseExpression, getElementMapping, isSupported, isATextProp, mediaPropertyNames } from './utils';
+import {
+  getElementMapping,
+  isATextProp,
+  mediaPropertyNames,
+  parseExpression,
+  postToRNTransform,
+  preToRNTransform,
+} from './utils';
 import * as _ from 'lodash/fp';
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
-const ERR_NO_STYLED_COMPONENT_IMPORT = `ERR_NO_STYLED_COMPONENT_IMPORT`;
 
 const tagTypes = {
   Identifier: node => node,
@@ -14,13 +20,24 @@ const tagTypes = {
   MemberExpression: node => node.object,
 };
 
+const styledComponentsImportsToRemove = ['keyframes'];
+const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
+
 export const parser = 'tsx'
 export default function transformer(fileInfo: FileInfo, api: API) {
   const j = api.jscodeshift;
 
   const root = j(fileInfo.source);
+
+  const isJSFile = fileInfo.path.endsWith('.js');
   const uclImports = [];
   const localVariable = [];
+  let localImportNames = [];
+
+  root.find(j.ImportDeclaration).forEach(i => {
+    // @ts-ignore
+    localImportNames = localImportNames.concat(i.value.specifiers.map(s => s.local.name));
+  });
 
   // Add all local variables
   // @ts-ignore
@@ -30,7 +47,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     // Prefix with UCL if there is a local variable with the same name
     let name = componentRealName;
     let alias = undefined;
-    if (_.includes(name, localVariable)) {
+    if (_.includes(name, _.concat(localVariable, localImportNames))) {
       alias = 'UCL' + name;
     }
     uclImports.push([name, alias]);
@@ -45,9 +62,12 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     });
 
   if (!styledImport.length) {
-    const msg = ERR_NO_STYLED_COMPONENT_IMPORT;
-    throw new Error(msg);
+    return;
   }
+
+  // Find the methods that are being called.
+  // check to see if we are importing css
+  let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
 
   // other imports from styled-components
   // e.g. `css` `animate`
@@ -55,18 +75,36 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     .filter(p => p.type === 'ImportSpecifier')
     .map(p => p.imported.name);
 
-
   if (otherImports.length) {
+    otherImports.forEach(name => {
+      if (_.contains(name, styledComponentsImportsToRemove)) {
+        // Remove the export
+        root.find(j.Identifier, { name: name, }).closest(j.ExportNamedDeclaration).remove();
+        // Or the local var if there is no export
+        root.find(j.Identifier, { name: name, }).closest(j.VariableDeclaration).remove();
+        return;
+      }
 
+      root.find(j.TaggedTemplateExpression, {
+        tag: {
+          name: name,
+        },
+      })
+        .forEach(nodePath => {
+          const expression = processElement({
+            j,
+            nodePath,
+            activeElement: { component: 'noop' },
+            addToImports: false,
+            addToUCLImportsFn: _.noop,
+            asObject: true,
+            includeTypes: !isJSFile,
+            localImportNames,
+          });
+          j(nodePath).replaceWith(expression);
+        });
+    })
   }
-
-  // Find the methods that are being called.
-
-  // Collect deps
-  // const elementsUsed = [];
-
-  // check to see if we are importing css
-  let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
 
   root.find(j.MemberExpression, {
     object: {
@@ -80,7 +118,16 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       // styled.XXX
       // @ts-ignore
       const activeElement = getElementMapping(elementPropName);
-      processElement(j, nodePath, activeElement, true, addUCLImport);
+      const expression = processElement({
+        j,
+        nodePath,
+        activeElement,
+        addToImports: true,
+        addToUCLImportsFn: addUCLImport,
+        includeTypes: !isJSFile,
+        localImportNames,
+      });
+      j(nodePath).replaceWith(expression);
     });
 
   root.find(j.CallExpression, {
@@ -93,13 +140,49 @@ export default function transformer(fileInfo: FileInfo, api: API) {
       const { node } = nodePath;
       // @ts-ignore
       const nameOfArg = node.tag?.arguments[0]?.name;
-      processElement(j, nodePath, { component: nameOfArg }, false, addUCLImport);
+      const expression = processElement({
+        j,
+        nodePath,
+        activeElement: { component: nameOfArg },
+        addToImports: false,
+        addToUCLImportsFn: addUCLImport,
+        includeTypes: !isJSFile,
+        localImportNames,
+      });
+      j(nodePath).replaceWith(expression);
     });
 
   // Imports
   // -------
+
   // Remove the 'styled-components' import
-  styledImport.remove();
+  if (otherImports.length) {
+    let specifiers = styledImport.get(0).node.specifiers;
+    specifiers = _.filter(s => {
+      // @ts-ignore
+      if (s?.type === 'ImportDefaultSpecifier') {
+        return false;
+      }
+      // @ts-ignore
+      if (_.contains(s?.imported?.name, styledComponentsImportsToRemove)) {
+        return false;
+      }
+      // @ts-ignore
+      if (_.contains(s?.imported?.name, ['css'])) {
+        return false;
+      }
+      return true;
+    }
+    )(specifiers);
+    if (!specifiers.length) {
+      styledImport.remove();
+    } else {
+      styledImport.get(0).node.specifiers = specifiers;
+    }
+  } else {
+    styledImport.remove();
+  }
+
 
   // Replace Import with UCL
   if (_.keys(uclImports).length) {
@@ -122,12 +205,30 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   return root.toSource({ quote: 'single', trailingComma: true });
 };
 
-const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, addToUCLImportsFn) => {
+const processElement = ({
+  j,
+  nodePath,
+  activeElement,
+  addToImports,
+  addToUCLImportsFn,
+  asObject = false,
+  includeTypes = true,
+  localImportNames = [],
+}: {
+  j: JSCodeshift,
+  nodePath: any,
+  activeElement: any,
+  addToImports: boolean,
+  addToUCLImportsFn: Function,
+  asObject?: boolean,
+  includeTypes?: boolean,
+  localImportNames?: string[]
+}) => {
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.component)
     : activeElement.component;
 
-  const { quasi, tag } = nodePath.node
+  const { quasi, tag } = nodePath.node;
   const { obj, cssText, substitutionMap, comments } = parseTemplate({ quasi, tag });
 
   let properties = [];
@@ -142,57 +243,116 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       // Supported properties that can have objects as key
       if (key === '&:hover') {
         _.map((k: string) => {
-          const v = value[k];
-          const convertedObj = toRN([[k, v]]);
-          _.keys(convertedObj).forEach((k) => {
-            const v = convertedObj[k];
-            properties = addProperties({
-              j,
-              properties,
-              substitutionMap,
-              addToLocalVars,
-              property: k,
-              initialValue: v,
-              parent: '_hover',
-              newPropertyName: null,
-              originalPropertyNewName: null,
-            })
-          });
+          let v = value[k];
+          try {
+            const {
+              identifier,
+              isRemovable,
+              isSupported,
+              isSkipable,
+              value,
+            } = preToRNTransform(k, v);
+            k = identifier;
+            v = value;
+            if (isRemovable) {
+              return;
+            }
+            if (!isSupported) {
+              properties = addProperty(j, properties, k, v, isSupported);
+              return;
+            }
+            let convertedObj
+            if (isSkipable) {
+              convertedObj = { [k]: v };
+            } else {
+              convertedObj = toRN([[k, v]]);
+            }
+            _.keys(convertedObj).forEach((k) => {
+              const v = convertedObj[k];
+              properties = addProperties({
+                j,
+                properties,
+                substitutionMap,
+                addToLocalVars,
+                identifier: k,
+                initialValue: v,
+                parent: '_hover',
+                newPropertyName: null,
+                originalPropertyNewName: null,
+                needsFlexRemapping: needsFlexRemapping(value),
+                localImportNames,
+              })
+            });
+          } catch (error) {
+            console.error('toRN', error.message);
+            hasExpressionError = true;
+            throw error;
+          }
         })(_.keys(value))
         // Unsupported
       } else {
         hasExpressionError = true;
+        if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+          throw new Error('Contains object - ' + value);
+        }
       }
       return;
     }
 
     let parent = null;
+
+    const {
+      identifier,
+      isRemovable,
+      isSupported,
+      isSkipable,
+      value: _value,
+    } = preToRNTransform(key, value);
+    key = identifier;
+    value = _value;
+
     // if the element is a box we have to next the text properties under _text
-    if (activeElement.component === 'Box' && isATextProp(key)) {
+    if (isATextProp(key) && _.includes(activeElement.component, ['Box', 'Button'])) {
       parent = '_text';
     }
-    // One-offs Pre toRN
-    // -------
-    if (key === 'margin' && value?.includes('auto')) {
-      key = 'align-self';
-      value = 'center';
+
+    if (isRemovable) {
+      return;
+    }
+    if (!isSupported) {
+      properties = addProperty(j, properties, key, value, isSupported);
+      return;
     }
 
-    const convertedObj = toRN([[key, value]]);
-    _.keys(convertedObj).forEach((k) => {
-      const v = convertedObj[k];
-      properties = addProperties({
-        j,
-        properties,
-        substitutionMap,
-        addToLocalVars,
-        property: k,
-        initialValue: v,
-        parent: parent,
-        newPropertyName: null,
-        originalPropertyNewName: null,
-      })
-    });
+    try {
+      let convertedObj
+      if (isSkipable) {
+        convertedObj = { [key]: value };
+      } else {
+        convertedObj = toRN([[key, value]]);
+      }
+      _.keys(convertedObj).forEach((k) => {
+        const v = convertedObj[k];
+        properties = addProperties({
+          j,
+          properties,
+          substitutionMap,
+          addToLocalVars,
+          identifier: k,
+          initialValue: v,
+          parent: parent,
+          newPropertyName: null,
+          originalPropertyNewName: null,
+          needsFlexRemapping: needsFlexRemapping(obj),
+          localImportNames,
+        })
+      });
+
+    } catch (error) {
+      console.error('toRN', error.message);
+      hasExpressionError = true;
+      return;
+    }
   })(_.keys(obj));
 
   if (comments.length) {
@@ -200,13 +360,25 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
       // Expressions at the property level will appear as comments
       const exp = substitutionMap[`/*${c.text}*/`];
       if (exp) {
+        // is the expression is an variable, spread it.
+        // @ts-ignore
+        if (exp.type === 'Identifier') {
+          properties = [
+            ...properties,
+            // @ts-ignore
+            j.spreadElement(j.identifier(exp.name)),
+          ];
+        }
+
         // @ts-ignore
         const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
+        if (!obj) return;
+
         _.keys(obj).forEach((k) => {
           let v = obj[k];
           // In the case media queries we want to turn the property into
           // an object, so the parent is the original key, e.g. `margin:`
-          const parent = k;
+          // const parent = k;
           // Set the new key based on the media query
           // @ts-ignore
           const queryName = exp.tag.property.name;
@@ -215,30 +387,51 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
           if (!origProp) {
             return;
           }
-
-          // One-offs Pre toRN
-          // -------
-          // @todo DRY
-          if (k === 'margin' && v?.includes('auto')) {
-            k = 'align-self';
-            v = 'center';
+          const {
+            identifier,
+            isRemovable,
+            isSupported,
+            isSkipable,
+            value,
+          } = preToRNTransform(k, v);
+          k = identifier;
+          v = value;
+          if (isRemovable) {
+            return;
           }
+          if (!isSupported) {
+            properties = addProperty(j, properties, k, v, isSupported);
+            return;
+          }
+
           // Convert
-          const convertedObj = toRN([[k, v]]);
-          _.keys(convertedObj).forEach((k) => {
-            const v = convertedObj[k];
-            properties = addProperties({
-              j,
-              properties,
-              substitutionMap,
-              addToLocalVars,
-              property: k,
-              initialValue: v,
-              parent,
-              newPropertyName: newProp,
-              originalPropertyNewName: origProp,
-            })
-          });
+          try {
+            let convertedObj;
+            if (isSkipable) {
+              convertedObj = { [k]: v };
+            } else {
+              convertedObj = toRN([[k, v]]);
+            }
+            _.keys(convertedObj).forEach((k) => {
+              const v = convertedObj[k];
+              properties = addProperties({
+                j,
+                properties,
+                substitutionMap,
+                addToLocalVars,
+                identifier: k,
+                initialValue: v,
+                parent: k,
+                newPropertyName: newProp,
+                originalPropertyNewName: origProp,
+                needsFlexRemapping: needsFlexRemapping(obj),
+                localImportNames,
+              })
+            });
+          } catch (error) {
+            console.error('toRN', error.message);
+            hasExpressionError = true;
+          }
         });
         // Return so that comment is not added to the object
         return;
@@ -270,32 +463,49 @@ const processElement = (j: JSCodeshift, nodePath, activeElement, addToImports, a
     asObjectOrFunction = j.objectExpression(properties);
   }
 
-  const exprs = j.callExpression(
-    j.memberExpression(
-      j.identifier(componentNameOrAlias),
-      j.identifier('withConfig'),
-    ),
-    [asObjectOrFunction],
-  );
+  let exprs;
+
+  if (asObject) {
+    exprs = asObjectOrFunction;
+  } else {
+    exprs = j.callExpression(
+      j.memberExpression(
+        j.identifier(componentNameOrAlias),
+        j.identifier('withConfig'),
+      ),
+      [asObjectOrFunction],
+    );
+  }
 
   if (hasExpressionError) {
+    // Don't try to convert
+    if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+      throw new Error('Unable to convert');
+    }
     let ct = cssText;
     _.map(((k: string) => {
-      ct = ct.replace(k, '!EXPRESSION!')
+      try {
+        // Try to get a nice string
+        ct = nodePathToString(nodePath);
+      } catch (error) {
+        console.log(`error: `, error);
+        // But fall back
+      }
     }))(
       _.keys(substitutionMap)
     )
+    ct = ct.replaceAll('/*', '//')
+    ct = ct.replaceAll('*/', '')
     exprs.comments = [j.commentBlock(`
 ${TODO_RN_COMMENT}
+Some attributes were not converted.
 
-Some attributes couldn't be converted
-Please use git history to get the exact values
 ${ct}
 `, false, true)];
   }
 
   // Map Types
-  if (localVars.length) {
+  if (localVars.length && includeTypes) {
     // Add types
     // @ts-ignore
     exprs.typeArguments = j.tsTypeParameterInstantiation([
@@ -311,12 +521,16 @@ ${ct}
       ),
     ]);
   }
-  j(nodePath).replaceWith(exprs);
-  return;
+  return exprs;
 }
 
+const needsFlexRemapping = (obj) => obj.display === 'flex' && !obj.flexDirection;
+
 const parseTemplate = ({ quasi, tag }) => {
-  if (!(tag.type in tagTypes)) return;
+  // Nested expressions
+  if (!tag?.type) return {};
+
+  if (!(tag.type in tagTypes)) return {};
 
   // Get the identifier for styled in either styled.View`...` or styled(View)`...`
   // Note we aren't checking the name of the callee
@@ -372,20 +586,20 @@ const addProperties = ({
   properties,
   substitutionMap,
   addToLocalVars,
-  property,
+  identifier,
   initialValue,
   parent,
   newPropertyName,
   originalPropertyNewName,
+  needsFlexRemapping,
+  localImportNames
 }) => {
-  let identifier = property;
   let value = initialValue;
-
   // If the value is is an expression
   const foundExpression = substitutionMap[value];
 
   if (foundExpression) {
-    const parsed = parseExpression(j, foundExpression);
+    const parsed = parseExpression(j, foundExpression, localImportNames);
 
     value = parsed.value;
     // These are variables that are used in Arrow functions
@@ -396,23 +610,28 @@ const addProperties = ({
     value = j.literal(initialValue);
   }
 
-  // One-offs Post toRN
-  // -------
-  if (identifier === 'font') {
-    // The correct variant is set in utils/parseExpression
-    identifier = 'variant';
-  }
-  // ------
+  const {
+    identifier: _identifier,
+    value: _value,
+    isSupported,
+    isRemovable,
+  } = postToRNTransform(identifier, value.value, needsFlexRemapping);
 
-  const [supported, shouldRemove] = isSupported(identifier, value?.value);
+  value.value = _value;
+  identifier = _identifier;
 
   // Things like `animation` we don't want to include at all so just return early
-  if (shouldRemove) {
+  if (isRemovable) {
     return properties;
   }
 
+  // Change property name if this going to be an attribute of a nested object
+  if (parent && newPropertyName) {
+    identifier = newPropertyName;
+  }
+
   // Comment the others
-  if (!supported) {
+  if (!isSupported) {
     identifier = '// ' + identifier;
   }
   const builderProperty = j.property(
@@ -421,7 +640,7 @@ const addProperties = ({
     value,
   );
 
-  if (!supported) {
+  if (!isSupported) {
     // Add comment
     builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
   }
@@ -433,6 +652,7 @@ const addProperties = ({
       // Confirm that property is an object
       // @ts-ignore
       if (found.value.properties) {
+        // If it is; just push to the properties
         // @ts-ignore
         found.value.properties.push(builderProperty);
       } else {
@@ -473,4 +693,39 @@ const addProperties = ({
     properties.push(builderProperty);
     return properties;
   }
+}
+
+const addProperty = (j: JSCodeshift, properties, identifier, value, isSupported) => {
+  const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : '';
+  return [
+    ...properties,
+    j.property(
+      'init',
+      j.identifier(prefix + identifier),
+      j.literal(value),
+    )
+  ]
+}
+
+const nodePathToString = (nodePath) => {
+  if (nodePath?.node?.loc) {
+    try {
+      const start = nodePath?.node?.loc?.start?.line - 1;
+      const end = nodePath?.node?.loc?.end?.line + 1;
+      const str = _.flow(
+        _.slice(start, end),
+        // @ts-ignore
+        _.map(o => o?.line),
+        _.map((o: string) => _.flow(
+          _.replace('/*', '//'),
+          _.replace('*/', '')
+        )(o)),
+        _.join('\n'),
+      )(nodePath?.node?.loc?.lines?.infos);
+      return str;
+    } catch (error) {
+      throw new Error(`nodePathToString error`)
+    }
+  }
+  return 'And error occurred';
 }

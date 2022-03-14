@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { primitive } from 'styles/constants/primitives';
 
 export const CartItemEditContainer = styled.div`
   color: ${props => props.color};
@@ -13,4 +14,11 @@ export const CartItemEditContainer = styled.div`
       color: ${Styles.color.black};
     }
   }
+`;
+
+export const Box = styled.div`
+  width: 40;
+  height: 4rem;
+  padding: 12px 4px 12px 1px;
+  margin: ${primitive.$spacing2} 0;
 `;
