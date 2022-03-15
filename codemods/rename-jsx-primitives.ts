@@ -1,4 +1,5 @@
 import { API, FileInfo } from "jscodeshift";
+import { logManualWork, commitManualLogs } from "../logger";
 import { registerUCLImportSpecifiers } from "./utils/register-ucl-import-specifiers";
 import { removeComponentLibaryImport } from "./utils/remove-component-library-import";
 
@@ -36,34 +37,22 @@ const conversions = [
   {
     from: "h2",
     to: "Header",
-    attributes: [
-      { name: "accessibilityLevel", value: 2 },
-      { name: "variant", value: "headerTwo" },
-    ],
+    attributes: [{ name: "variant", value: "headerTwo" }],
   },
   {
     from: "h3",
     to: "Header",
-    attributes: [
-      { name: "accessibilityLevel", value: 3 },
-      { name: "variant", value: "headerThree" },
-    ],
+    attributes: [{ name: "variant", value: "headerThree" }],
   },
   {
     from: "h4",
     to: "Header",
-    attributes: [
-      { name: "accessibilityLevel", value: 4 },
-      { name: "variant", value: "headerFour" },
-    ],
+    attributes: [{ name: "variant", value: "headerFour" }],
   },
   {
     from: "h5",
     to: "Header",
-    attributes: [
-      { name: "accessibilityLevel", value: 5 },
-      { name: "variant", value: "headerFive" },
-    ],
+    attributes: [{ name: "variant", value: "headerFive" }],
   },
   {
     from: "b",
@@ -126,6 +115,12 @@ export default function transformer(file: FileInfo, api: API) {
       if (insertComments) {
         node.value.comments = node.value.comments || [];
         if (node.parentPath.node.type === "JSXElement") {
+          logManualWork({
+            filePath: file.path,
+            helpfulMessage: `The codemod for renaming JSX primitives (<div> to <Box>) had some uncertainty when converting <${from}> to <${to}>.`,
+            startingLine: node.parentPath.node.loc.start.line,
+            endingLine: node.parentPath.node.loc.end.line,
+          });
           node.insertBefore(
             j.jsxExpressionContainer.from({
               expression: j.jsxEmptyExpression.from({
@@ -136,6 +131,12 @@ export default function transformer(file: FileInfo, api: API) {
             }),
           );
         } else {
+          logManualWork({
+            filePath: file.path,
+            helpfulMessage: `The codemod for renaming JSX primitives (<div> to <Box>) had some uncertainty when converting <${from}> to <${to}>.`,
+            startingLine: node.parentPath.node.loc.start.line,
+            endingLine: node.parentPath.node.loc.end.line,
+          });
           node.value.comments.push(
             j.commentLine(` TODO: RN - ${insertComments}`, false, true),
           );
@@ -160,5 +161,7 @@ export default function transformer(file: FileInfo, api: API) {
   // Add all the UCL imports we need
   registerUCLImportSpecifiers(root, j, verifyImports);
 
-  return root.toSource({ quote: "single" });
+  const source = root.toSource({ quote: "single" });
+  commitManualLogs(source);
+  return source;
 }

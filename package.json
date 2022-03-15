@@ -15,7 +15,8 @@
     "postcss": "^8.4.6",
     "postcss-js": "^4.0.0",
     "postcss-scss": "^4.0.3",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.0",
