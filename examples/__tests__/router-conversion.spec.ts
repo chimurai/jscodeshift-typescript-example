@@ -3,7 +3,7 @@ import { defineTest } from "jscodeshift/src/testUtils";
 describe("router conversion", () => {
   defineTest(
     __dirname,
-    "./router-conversion",
+    "../codemods/router-conversion",
     null,
     "router-conversion/members",
     {
@@ -12,7 +12,7 @@ describe("router conversion", () => {
   );
   defineTest(
     __dirname,
-    "./router-conversion",
+    "../codemods/router-conversion",
     null,
     "router-conversion/basic",
     {
@@ -21,7 +21,7 @@ describe("router conversion", () => {
   );
   defineTest(
     __dirname,
-    "./router-conversion",
+    "../codemods/router-conversion",
     null,
     "router-conversion/missing-location-import",
     {
@@ -30,7 +30,7 @@ describe("router conversion", () => {
   );
   defineTest(
     __dirname,
-    "./router-conversion",
+    "../codemods/router-conversion",
     null,
     "router-conversion/renamed-link",
     {

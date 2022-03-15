@@ -1,87 +1,87 @@
-import { JSCodeshift } from 'jscodeshift';
-import * as _ from 'lodash/fp';
+import { JSCodeshift } from "jscodeshift";
+import * as _ from "lodash/fp";
 
 const styleColorMap = {
-  'black': 'black',
-}
+  black: "black",
+};
 
 export const mediaPropertyNames = {
-  'mobile': { origProp: 'lg', newProp: 'base', },
-  'mobileTiny': { origProp: 'lg', newProp: 'base', },
-  'mobileSmall': { origProp: 'lg', newProp: 'base', },
-  'mobileFullscreen': { origProp: 'lg', newProp: 'base', },
-  'mobileLandscape': { origProp: 'lg', newProp: 'base', },
-  'desktop': { origProp: 'base', newProp: 'lg', },
-  'desktopLarge': { origProp: 'base', newProp: 'lg', },
+  mobile: { origProp: "lg", newProp: "base" },
+  mobileTiny: { origProp: "lg", newProp: "base" },
+  mobileSmall: { origProp: "lg", newProp: "base" },
+  mobileFullscreen: { origProp: "lg", newProp: "base" },
+  mobileLandscape: { origProp: "lg", newProp: "base" },
+  desktop: { origProp: "base", newProp: "lg" },
+  desktopLarge: { origProp: "base", newProp: "lg" },
 };
 
 const primitiveMap = {
-  '$spacing0': '$0',
-  '$spacing1': '$1',
-  '$spacing2': '$2',
-  '$spacing3': '$3',
-  '$spacing4': '$4',
-  '$spacing5': '$5',
-  '$spacing6': '$6',
-  '$spacing7': '$8',
-  '$spacing8': '$10',
-  '$spacing9': '$12',
-  '$spacing10': '$13.5',
-  '$spacing11': '$20',
-  '$black': 'black',
-  '$white': 'white',
-  '$error': 'errorRed',
-  '$disabledText': 'blackOpacity.50',
-  '$disabledTextReversed': 'whiteOpacity.50',
-  '$blackOpacity70': 'blackOpacity.70',
-  '$blackOpacity30': 'blackOpacity.30',
-  '$blackOpacity10': 'blackOpacity.10',
-  '$blackOpacity4': 'blackOpacity.5',
-  '$whiteOpacity30': 'whiteOpacity.30',
-  '$whiteOpacity10': 'whiteOpacity.10',
-  '$whiteOpacity4': 'whiteOpacity.5',
+  $spacing0: "$0",
+  $spacing1: "$1",
+  $spacing2: "$2",
+  $spacing3: "$3",
+  $spacing4: "$4",
+  $spacing5: "$5",
+  $spacing6: "$6",
+  $spacing7: "$8",
+  $spacing8: "$10",
+  $spacing9: "$12",
+  $spacing10: "$13.5",
+  $spacing11: "$20",
+  $black: "black",
+  $white: "white",
+  $error: "errorRed",
+  $disabledText: "blackOpacity.50",
+  $disabledTextReversed: "whiteOpacity.50",
+  $blackOpacity70: "blackOpacity.70",
+  $blackOpacity30: "blackOpacity.30",
+  $blackOpacity10: "blackOpacity.10",
+  $blackOpacity4: "blackOpacity.5",
+  $whiteOpacity30: "whiteOpacity.30",
+  $whiteOpacity10: "whiteOpacity.10",
+  $whiteOpacity4: "whiteOpacity.5",
 };
 
 const boxToTextProperties = [
-  'bold',
-  'color',
-  'font',
-  'font',
-  'fontSize',
-  'fontWeight',
-  'fontFamily',
-  'highlight',
-  'isTruncated',
-  'italic',
-  'lineHeight',
-  'lineSpacing',
-  'noOfLines',
-  'strickThrough',
-  'sub',
-  'textAlign',
-  'textTransform',
-  'underline',
-  'variant',
+  "bold",
+  "color",
+  "font",
+  "font",
+  "fontSize",
+  "fontWeight",
+  "fontFamily",
+  "highlight",
+  "isTruncated",
+  "italic",
+  "lineHeight",
+  "lineSpacing",
+  "noOfLines",
+  "strickThrough",
+  "sub",
+  "textAlign",
+  "textTransform",
+  "underline",
+  "variant",
 ];
 
-export const isATextProp = (p) => _.includes(p, boxToTextProperties)
+export const isATextProp = (p) => _.includes(p, boxToTextProperties);
 
 const brandFontMap = {
-  'hero': 'hero',
-  'headerOne': 'headerOne',
-  'headerTwo': 'headerTwo',
-  'headerThree': 'headerThree',
-  'headerFour': 'headerFour',
-  'copyOne': 'copyOne',
-  'copyTwo': 'copyTwo',
-  'formUtility': 'formUtility',
+  hero: "hero",
+  headerOne: "headerOne",
+  headerTwo: "headerTwo",
+  headerThree: "headerThree",
+  headerFour: "headerFour",
+  copyOne: "copyOne",
+  copyTwo: "copyTwo",
+  formUtility: "formUtility",
 };
 
 const styleFontFamilyMap = {
-  'base': 'heading',
-  'body': 'body',
-  'alternative': 'alternative',
-  'brand': 'heading',
+  base: "heading",
+  body: "body",
+  alternative: "alternative",
+  brand: "heading",
 };
 
 const removeProps = [
@@ -94,19 +94,18 @@ const removeProps = [
 ];
 
 const removeKeyValuePairs = [
-  { key: 'position', value: 'relative' },
-  { key: 'flexDirection', value: 'column' },
-  { key: 'flex-direction', value: 'column' },
-  { key: 'display', value: 'flex' },
+  { key: "position", value: "relative" },
+  { key: "flexDirection", value: "column" },
+  { key: "flex-direction", value: "column" },
+  { key: "display", value: "flex" },
 ];
 
-
 const unsupportedKeyValuePairs = [
-  { key: 'position', value: 'relative' },
-  { key: 'flexDirection', value: 'column' },
-  { key: 'flex-direction', value: 'column' },
-  { key: 'display', value: 'flex' },
-]
+  { key: "position", value: "relative" },
+  { key: "flexDirection", value: "column" },
+  { key: "flex-direction", value: "column" },
+  { key: "display", value: "flex" },
+];
 
 const unsupportedIdentifiers = [
   /^boxShadow$/,
@@ -121,28 +120,20 @@ const unsupportedIdentifiers = [
   /^grid/,
 ];
 
-const unsupportedValue = [
-  /^calc/,
-  /^max/,
-  /^min/,
-  /^relative$/,
-];
+const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
 
+const _isInReg = (test, regex) => _.some((re) => re.test(test), regex);
 
-const _isInReg = (test, regex) =>
-  _.some(re => re.test(test), regex);
-
-const _isRemovable = (property: string, value: string) => {
-
-  if (property === 'position' && value === 'relative') {
+export const _isRemovable = (property: string, value: string) => {
+  if (property === "position" && value === "relative") {
     return true;
   }
 
-  if (property === 'flexDirection' && value === 'column') {
+  if (property === "flexDirection" && value === "column") {
     return true;
   }
 
-  if (property === 'display' && value === 'flex') {
+  if (property === "display" && value === "flex") {
     return true;
   }
 
@@ -155,7 +146,7 @@ const _isRemovable = (property: string, value: string) => {
 
 export const _isSupported = (identifier: string, value: string) => {
   // anything but flex or none is not supported
-  if (identifier === 'display' && !['none', 'flex'].includes(value)) {
+  if (identifier === "display" && !["none", "flex"].includes(value)) {
     return false;
   }
   if (_isInReg(identifier, unsupportedIdentifiers)) {
@@ -165,7 +156,7 @@ export const _isSupported = (identifier: string, value: string) => {
     return false;
   }
   return true;
-}
+};
 
 // One-offs Pre toRN
 // -------
@@ -174,7 +165,7 @@ export const preToRNTransform = (identifier, value) => {
   let v = value;
   let isSupported = _isSupported(identifier, value);
   let isRemovable = _isRemovable(identifier, value);
-  let isSkipable = false
+  let isSkipable = false;
 
   // Mappings
   // --------
@@ -185,20 +176,18 @@ export const preToRNTransform = (identifier, value) => {
   //   isSkipable = true;
   //   isSupported = true;
   // }
-  if (identifier === 'margin' && _.includes('auto', value)) {
-    i = 'align-self';
-    v = 'center';
+  if (identifier === "margin" && _.includes("auto", value)) {
+    i = "align-self";
+    v = "center";
   }
-  if (identifier === 'textDecoration') {
-    i = 'underline'
-    v = (value === 'none')
-      ? false
-      : true
+  if (identifier === "textDecoration") {
+    i = "underline";
+    v = value === "none" ? false : true;
     isSkipable = true;
   }
 
   // Skip font because we are converting to a variant
-  if (identifier === 'font') {
+  if (identifier === "font") {
     isSkipable = true;
   }
 
@@ -210,7 +199,7 @@ export const preToRNTransform = (identifier, value) => {
     isSupported = false;
   }
 
-  if (identifier === 'position' && value === 'fixed') {
+  if (identifier === "position" && value === "fixed") {
     isSupported = false;
   }
 
@@ -220,8 +209,8 @@ export const preToRNTransform = (identifier, value) => {
     isSupported,
     isRemovable,
     isSkipable,
-  }
-}
+  };
+};
 
 // One-offs Post toRN
 // -------
@@ -231,9 +220,9 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
   let isSupported = _isSupported(identifier, value);
   let isRemovable = _isRemovable(identifier, value);
 
-  if (identifier === 'font') {
+  if (identifier === "font") {
     // The correct variant is set in utils/parseExpression
-    i = 'variant';
+    i = "variant";
   }
 
   // Objects are not supported
@@ -243,11 +232,11 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
 
   if (needsFlexRemapping) {
     switch (identifier) {
-      case 'justifyContent':
-        i = 'alignItems';
+      case "justifyContent":
+        i = "alignItems";
         break;
-      case 'alignItems':
-        i = 'justifyContent';
+      case "alignItems":
+        i = "justifyContent";
         break;
     }
   }
@@ -257,14 +246,14 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
     value: v,
     isSupported,
     isRemovable,
-  }
-}
+  };
+};
 
 const stylesToValue = (j: JSCodeshift, group, value) => {
   console.log(`group: `, group);
   console.log(`value: `, value);
   switch (group) {
-    case 'color':
+    case "color":
       return j.stringLiteral(styleColorMap[value]);
 
     default:
@@ -275,19 +264,18 @@ const stylesToValue = (j: JSCodeshift, group, value) => {
 
 const valueToType = (j: JSCodeshift, value) => {
   switch (typeof value) {
-    case 'string':
+    case "string":
       return j.tsStringKeyword();
-    case 'number':
+    case "number":
       return j.tsNumberKeyword();
-    case 'boolean':
+    case "boolean":
       return j.tsBooleanKeyword();
 
     default:
       return j.tsBooleanKeyword();
     // throw new Error('valueToType not found: ' + value)
   }
-}
-
+};
 
 interface IMapping {
   component: string;
@@ -296,83 +284,86 @@ interface IMapping {
 }
 
 const elementMap: Record<string, IMapping> = {
-  'div': { component: 'Box', notSupported: true },
-  'span': { component: 'Text' },
-  'section': { component: 'Box' },
-  'h1': { component: 'Header' },
-  'h2': { component: 'Header' },
-  'h3': { component: 'Header' },
-  'h4': { component: 'Header' },
-  'h5': { component: 'Header' },
-  'h6': { component: 'Header' },
-  'p': { component: 'Text' },
-  'header': { component: 'Box' },
-  'nav': { component: 'Box' },
-  'label': { component: 'Text', notSupported: 'use InputLabel' },
-  'button': { component: 'Button' },
-  'ul': { component: 'Box', notSupported: 'use ScrollView' },
-  'li': { component: 'Box', notSupported: 'use ScrollView' },
-  'a': { component: 'Box', notSupported: 'use /component/link' },
-  'form': { component: 'Box', notSupported: true },
+  div: { component: "Box", notSupported: true },
+  span: { component: "Text" },
+  section: { component: "Box" },
+  h1: { component: "Header" },
+  h2: { component: "Header" },
+  h3: { component: "Header" },
+  h4: { component: "Header" },
+  h5: { component: "Header" },
+  h6: { component: "Header" },
+  p: { component: "Text" },
+  header: { component: "Box" },
+  nav: { component: "Box" },
+  label: { component: "Text", notSupported: "use InputLabel" },
+  button: { component: "Button" },
+  ul: { component: "Box", notSupported: "use ScrollView" },
+  li: { component: "Box", notSupported: "use ScrollView" },
+  a: { component: "Box", notSupported: "use /component/link" },
+  form: { component: "Box", notSupported: true },
   // 'svg': { component: 'Icon' },
-  'fieldset': { component: 'Box', notSupported: true },
-  'input': { component: 'Box', notSupported: true },
-  'legend': { component: 'Box', notSupported: true },
-  'hr': { component: 'Divider' },
+  fieldset: { component: "Box", notSupported: true },
+  input: { component: "Box", notSupported: true },
+  legend: { component: "Box", notSupported: true },
+  hr: { component: "Divider" },
 };
 
 export const getElementMapping = (el: string) => {
   const found = elementMap[el];
 
   if (!found) {
-    throw new Error('element not found: ' + el);
+    throw new Error("element not found: " + el);
   }
   return found;
-}
+};
 
 const isType = (expression, t) =>
-(expression?.type === t ||
+  expression?.type === t ||
   expression?.object?.type === t ||
-  expression?.object?.object?.type === t);
+  expression?.object?.object?.type === t;
 
-const isName = (expression, n) => (
+const isName = (expression, n) =>
   expression?.object?.name === n ||
   expression?.object?.object?.name === n ||
-  expression?.object?.object?.object?.name === n
-);
+  expression?.object?.object?.object?.name === n;
 
-export const parseExpression = (j: JSCodeshift, expression, localImportNames?: string[]) => {
+export const parseExpression = (
+  j: JSCodeshift,
+  expression,
+  localImportNames?: string[],
+) => {
   const finalVars = [];
 
   // console.log(`expression.type: `, expression.type);
-  if (expression.type === 'MemberExpression') {
+  if (expression.type === "MemberExpression") {
     let v = expression;
     let includeTypes = true;
 
     // check if the expession is an import
-    if (_.contains('theme', localImportNames)) {
+    if (_.contains("theme", localImportNames)) {
       includeTypes = false;
     }
 
-    const isMember = isType(expression, 'MemberExpression');
-    const isPrimitive = isName(expression, 'primitive');
+    const isMember = isType(expression, "MemberExpression");
+    const isPrimitive = isName(expression, "primitive");
 
     if (isPrimitive) {
       includeTypes = false;
     }
 
     // Local variables
-    if (expression?.object?.type === 'Identifier') {
+    if (expression?.object?.type === "Identifier") {
       if (isPrimitive) {
-        const foundPrimitive = primitiveMap[expression.property.name]
+        const foundPrimitive = primitiveMap[expression.property.name];
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
           includeTypes = false;
         }
       }
-      const isBrandFont = isName(expression, 'brandFont');
+      const isBrandFont = isName(expression, "brandFont");
       if (isBrandFont) {
-        const foundPrimitive = brandFontMap[expression.property.name]
+        const foundPrimitive = brandFontMap[expression.property.name];
         if (foundPrimitive) {
           v = j.stringLiteral(foundPrimitive);
           includeTypes = false;
@@ -382,7 +373,7 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
 
     // TODO maps styles or maybe more this to a separate code mod
     // remove Styles
-    const isStyles = isName(expression, 'Styles');
+    const isStyles = isName(expression, "Styles");
 
     if (isMember && isStyles) {
       includeTypes = false;
@@ -394,23 +385,25 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
     const propertyName = expression?.property?.name;
     let vars;
     if (propertyName && includeTypes) {
-      vars = [{
-        name: propertyName,
-        type: valueToType(j, propertyName),
-      }];
+      vars = [
+        {
+          name: propertyName,
+          type: valueToType(j, propertyName),
+        },
+      ];
     }
     return {
       value: v,
       vars,
-    }
+    };
   }
-  if (expression.type === 'ArrowFunctionExpression') {
+  if (expression.type === "ArrowFunctionExpression") {
     let exp;
     // @ts-ignore
-    if (expression?.params?.[0].type === 'ObjectPattern') {
+    if (expression?.params?.[0].type === "ObjectPattern") {
       // convert children to use `p.xxx`
-      const vars = expression.params[0].properties?.map(p => p.key.name);
-      exp = j.memberExpression(j.identifier('p'), j.identifier(vars[0]));
+      const vars = expression.params[0].properties?.map((p) => p.key.name);
+      exp = j.memberExpression(j.identifier("p"), j.identifier(vars[0]));
       // @ts-ignore
       if (expression?.body?.test) {
         expression.body.test = exp;
@@ -418,11 +411,11 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
     }
 
     // And change `props` to `p`
-    if (expression.body?.object?.name === 'props') {
-      expression.body.object.name = 'p';
+    if (expression.body?.object?.name === "props") {
+      expression.body.object.name = "p";
     }
-    if (expression.body?.test?.object?.name === 'props') {
-      expression.body.test.object.name = 'p';
+    if (expression.body?.test?.object?.name === "props") {
+      expression.body.test.object.name = "p";
     }
     const { value, vars } = parseExpression(j, expression.body);
     expression.body = value;
@@ -430,21 +423,22 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
     return {
       value: expression.body,
       vars,
-    }
+    };
   }
 
-  if (expression.type === 'ConditionalExpression') {
+  if (expression.type === "ConditionalExpression") {
     const consequent = parseExpression(j, expression.consequent);
     expression.consequent = consequent.value;
     const alternate = parseExpression(j, expression.alternate);
     expression.alternate = alternate.value;
-    const conditionalVar = expression?.test?.property?.name || expression?.test?.name;
+    const conditionalVar =
+      expression?.test?.property?.name || expression?.test?.name;
     let localVars = [];
     if (conditionalVar) {
       localVars.push({
         name: conditionalVar,
         type: j.tsBooleanKeyword(),
-      })
+      });
     }
     return {
       value: expression,
@@ -452,39 +446,43 @@ export const parseExpression = (j: JSCodeshift, expression, localImportNames?: s
         ...(localVars || []),
         ...(consequent.vars || []),
         ...(alternate.vars || []),
-      ]
-    }
+      ],
+    };
   }
 
-  if (expression.type === 'CallExpression') {
+  if (expression.type === "CallExpression") {
     // Check for tokens
-    if (expression?.callee?.property?.name === 'token') {
+    if (expression?.callee?.property?.name === "token") {
       // if one is found then we should return a string instead of an arrow function
       // We also don't care about types in that case
       return {
-        value: j.stringLiteral('__legacyToken.' + expression.arguments[0]?.value),
+        value: j.stringLiteral(
+          "__legacyToken." + expression.arguments[0]?.value,
+        ),
         vars: null,
-      }
+      };
     } else {
       // on all other call expressions we want the name of the property so that we can
       // add it to the types
       const propertyName = expression?.property?.name;
       return {
         value: expression,
-        vars: [{
-          name: propertyName,
-          type: valueToType(j, propertyName),
-        }],
-      }
+        vars: [
+          {
+            name: propertyName,
+            type: valueToType(j, propertyName),
+          },
+        ],
+      };
     }
   }
 
-  if (expression.type === 'StringLiteral') {
+  if (expression.type === "StringLiteral") {
     return {
       value: j.stringLiteral(expression?.value),
       vars: null,
-    }
+    };
   }
 
-  throw new Error('Expression not implemented type: ' + expression.type)
+  throw new Error("Expression not implemented type: " + expression.type);
 };
