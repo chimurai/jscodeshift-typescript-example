@@ -1,45 +1,25 @@
-import { API, FileInfo } from "jscodeshift";
+import { Collection, FileInfo, JSCodeshift } from "jscodeshift";
 import {
   getElementMapping,
   styledComponentImportFunctionShouldBeRemove,
 } from "./utils/mappings";
 import { processElement } from "./utils/process-element";
 import * as _ from "lodash/fp";
+import { registerUCLImportSpecifiers } from "./utils/register-ucl-import-specifiers";
 
-export const parser = "tsx";
-export default function transformer(fileInfo: FileInfo, api: API) {
-  const j = api.jscodeshift;
-
-  const root = j(fileInfo.source);
-
+export function transformStyledCompoentsToUCL(
+  root: Collection<any>,
+  j: JSCodeshift,
+  fileInfo: FileInfo,
+) {
   const isJSFile = fileInfo.path.endsWith(".js");
-  const uclImports = [];
-  const localVariable = [];
   let localImportNames = [];
 
   root.find(j.ImportDeclaration).forEach((i) => {
-    // @ts-ignore
     localImportNames = localImportNames.concat(
-      i.value.specifiers.map((s) => s.local.name),
+      i.value.specifiers.map((s) => s.local?.name).filter(Boolean),
     );
   });
-
-  // Add all local variables
-  root
-    .findVariableDeclarators()
-    // @ts-ignore
-    .forEach((d) => localVariable.push(d.value.id.name));
-
-  const addUCLImport = (componentRealName) => {
-    // Prefix with UCL if there is a local variable with the same name
-    let name = componentRealName;
-    let alias = undefined;
-    if (_.includes(name, _.concat(localVariable, localImportNames))) {
-      alias = "UCL" + name;
-    }
-    uclImports.push([name, alias]);
-    return alias ? alias : name;
-  };
 
   const styledImport = root.find(j.ImportDeclaration, {
     source: {
@@ -54,6 +34,9 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   // Find the methods that are being called.
   // check to see if we are importing css
   let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
+
+  const addUCLImport = (importName) =>
+    registerUCLImportSpecifiers(root, j, importName);
 
   // other imports from styled-components
   // e.g. `css` `animate`
@@ -178,28 +161,4 @@ export default function transformer(fileInfo: FileInfo, api: API) {
   } else {
     styledImport.remove();
   }
-
-  // Replace Import with UCL
-  if (_.keys(uclImports).length) {
-    styledImport.insertBefore(
-      j.importDeclaration(
-        // All imports on the page
-        _.flow(
-          // dedupe
-          // First item in the tuple
-          _.uniqBy((arr) => arr[0]),
-          _.map((obj: Array<string>) =>
-            j.importSpecifier(
-              j.identifier(obj[0]),
-              obj[1] ? j.identifier(obj[1]) : null,
-            ),
-          ),
-          _.values,
-        )(uclImports),
-        j.stringLiteral("@rbilabs/universal-components"),
-      ),
-    );
-  }
-
-  return root.toSource({ quote: "single", trailingComma: true });
 }

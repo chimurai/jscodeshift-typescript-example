@@ -1,7 +1,8 @@
+import { Box } from '@rbilabs/universal-components';
 function C() {
   return (
-    <div style={{
-      justifyContent: 'center'
-    }}>hi</div>
+    <Box style={{
+      justifyContent: 'center',
+    }}>hi</Box>
   );
 }

@@ -1,3 +1,4 @@
+import { Text } from '@rbilabs/universal-components';
 import { style } from 'foo';
 import { StyleSheet } from 'react-native';
 
