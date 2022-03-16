@@ -10,7 +10,7 @@ import {
   addProperty,
   convertCssObject,
   needsFlexRemapping,
-} from "./covert-css-object";
+} from "./convert-css-object";
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
 
