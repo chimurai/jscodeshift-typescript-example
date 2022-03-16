@@ -30,4 +30,11 @@ describe("renaming a variable", () => {
     "inline-style-prop/flex-flip",
     { parser: "tsx" },
   );
+  defineTest(
+    __dirname,
+    "../codemods/inline-style-prop",
+    null,
+    "inline-style-prop/styles-with-spread",
+    { parser: "tsx" },
+  );
 });

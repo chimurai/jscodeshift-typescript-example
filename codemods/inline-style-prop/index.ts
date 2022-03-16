@@ -1,9 +1,18 @@
-import { API, FileInfo } from "jscodeshift";
+import {
+  API,
+  FileInfo,
+  ObjectMethod,
+  ObjectProperty,
+  Property,
+  SpreadElement,
+  SpreadProperty,
+} from "jscodeshift";
 import _ from "lodash";
 import {
   _isRemovable,
   _isSupported,
 } from "../utils/mappings";
+import { logManualWork, commitManualLogs } from "../../logger";
 import { convertObjectProperties } from "./convert-object-properties";
 
 export const parser = "tsx";
@@ -23,6 +32,7 @@ export default function transformer(file: FileInfo, api: API) {
         styleAttribute.value.expression.type === "ObjectExpression"
       ) {
         styleAttribute.value.expression.properties = convertObjectProperties(
+          file.path,
           j,
           styleAttribute.value.expression.properties,
           needsFlexRemapping(styleAttribute.value.expression.properties),
@@ -53,6 +63,7 @@ export default function transformer(file: FileInfo, api: API) {
               node.value.type === "ObjectExpression"
             ) {
               node.value.properties = convertObjectProperties(
+                file.path,
                 j,
                 node.value.properties,
                 needsFlexRemapping(node.value.properties),
@@ -70,11 +81,18 @@ export default function transformer(file: FileInfo, api: API) {
         styleAttribute.value.expression.type === "Identifier"
       ) {
         const objectName = styleAttribute.value.expression.name;
+
+        // Check to see if the object is a variable in the module scope
+        // if not, we handle it below
+        let foundVariables = false;
+
         root.findVariableDeclarators(objectName).forEach((path) => {
+          foundVariables = true;
           if (path.value.init.type === "ObjectExpression") {
             const node = path.value.init;
 
             node.properties = convertObjectProperties(
+              file.path,
               j,
               node.properties,
               needsFlexRemapping(node.properties),
@@ -82,22 +100,76 @@ export default function transformer(file: FileInfo, api: API) {
           }
         });
 
+        if (!foundVariables) {
+          const nodeName =
+            node.value.openingElement.name.type === "JSXIdentifier"
+              ? node.value.openingElement.name.name
+              : // not sure what to do here for JSXMemberExpression and JSXNamespaced
+              "UNKNOWN_NODE_NAME";
+
+          logManualWork({
+            filePath: file.path,
+            helpfulMessage: `The JSX node <${nodeName} style={${objectName}}> has a style attribute that references a variable this is not modable.
+The manual effort here is to track down the variable and verify/change all instances to ensure they are react native compatible.
+
+For example, if the \`${objectName}\` variable is an import, follow the import (and its respective brand overrides), and verify all of the keys are react native compatible.
+
+If the \`${objectName}\` variable is a prop coming in from the parent, find all usages of this component, and ensure the prop passed in is valid react native styles.
+`,
+            startingLine: node.value.loc.start.line,
+            endingLine: node.value.loc.end.line,
+          });
+        }
+
         return;
       }
 
-      // console.error(
-      //   "Not sure how to handle this `style` attribute with AST type of ",
-      //   styleAttribute.value.type,
-      // );
+      // This is for style={[ any ]}, which only happens in react native. so its safe to ignore
+      if (
+        styleAttribute.value.type === "JSXExpressionContainer" &&
+        styleAttribute.value.expression.type === "ArrayExpression"
+      )
+        return;
+
+      console.error(
+        "Not sure how to handle this `style` attribute with AST type of ",
+        styleAttribute.value.type,
+      );
     }
   });
 
-  return root.toSource({ quote: "single" });
+  const source = root.toSource({ quote: "single" });
+
+  commitManualLogs(source);
+  return source;
 }
 
-const needsFlexRemapping = (properties: any) =>
-  properties.some(
+// only needs to remap if the node had flex, but did not have a flex direction,
+// meaning that the flex direction is going to be implicitly flipped by switching to react-native
+const needsFlexRemapping = (
+  properties: (
+    | Property
+    | ObjectProperty
+    | SpreadElement
+    | SpreadProperty
+    | ObjectMethod
+  )[],
+) => {
+  const hasFlex = properties.some(
     (node) =>
-      // @ts-ignore
-      node.key.name === "display" && node.value.value === "flex",
+      node.type === "ObjectProperty" &&
+      node.key.type === "Identifier" &&
+      node.key.name === "display" &&
+      node.value.type === "StringLiteral" &&
+      node.value.value === "flex",
   );
+
+  const hasFlexDirection = properties.some(
+    (node) =>
+      node.type === "ObjectProperty" &&
+      node.key.type === "Identifier" &&
+      node.key.name === "flexDirection",
+  );
+
+  return hasFlex && !hasFlexDirection;
+};

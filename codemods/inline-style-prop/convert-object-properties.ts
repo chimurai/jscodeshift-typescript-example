@@ -11,16 +11,17 @@ import {
   _isRemovable,
   _isSupported,
 } from "../utils/mappings";
+import { logManualWork } from "../../logger";
 
 export function convertObjectProperties(
+  filePath: string,
   j: JSCodeshift,
   properties: Array<
     Property | ObjectProperty | SpreadElement | SpreadProperty | ObjectMethod
   >,
   needsFlexRemapping: boolean,
-): Array<ObjectProperty> {
+): Array<ObjectProperty | SpreadElement> {
   return properties.reduce((properties, node) => {
-    // TODO: Do we need to handle spread elements?
     if (
       node.type === "ObjectProperty" &&
       node.key.type === "Identifier" &&
@@ -72,6 +73,34 @@ export function convertObjectProperties(
           ),
         );
       });
+    } else if (node.type === "SpreadElement") {
+      const spreadName =
+        node.argument.type === "Identifier"
+          ? node.argument.name
+          : // is it ever not an identifier?
+          "UNKNOWN_IDENTIFIER";
+
+      logManualWork({
+        filePath,
+        helpfulMessage: `The codemod for handling inline style props found a style attribute with an object spread into it.
+We are unable to verify that this spread object contains entirely valid CSS for react native.
+
+The manual effort here is to track down the variable and verify/change all instances to ensure they are react native compatible.
+
+For example, if the \`${spreadName}\` variable is an import, follow the import (and its respective brand overrides), and verify all of the keys are react native compatible.
+
+If the \`${spreadName}\` variable is a prop coming in from the parent, find all usages of this component, and ensure the prop passed in is valid react native styles.`,
+        startingLine: node.loc.start.line,
+        endingLine: node.loc.end.line,
+      });
+
+      properties.push(
+        // @ts-ignore
+        j.commentLine(
+          " TODO: RN - Verify spread does not include invalid props or styles",
+        ),
+        node,
+      );
     } else {
       throw new Error(
         `Unexpected node type in object of style prop ${node.type}`,
@@ -79,5 +108,5 @@ export function convertObjectProperties(
     }
 
     return properties;
-  }, [] as ObjectProperty[]);
+  }, [] as (ObjectProperty | SpreadElement)[]);
 }
