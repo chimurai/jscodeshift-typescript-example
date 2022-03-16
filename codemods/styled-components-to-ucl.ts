@@ -13,6 +13,7 @@ export function transformStyledCompoentsToUCL(
   fileInfo: FileInfo,
 ) {
   const isJSFile = fileInfo.path.endsWith(".js");
+  const filePath = fileInfo.path;
   let localImportNames = [];
 
   root.find(j.ImportDeclaration).forEach((i) => {
@@ -71,6 +72,7 @@ export function transformStyledCompoentsToUCL(
           // This is for the styled-components `css`
           const expression = processElement({
             j,
+            filePath,
             nodePath,
             activeElement: { component: "noop" },
             addToImports: false,
@@ -99,6 +101,7 @@ export function transformStyledCompoentsToUCL(
       const activeElement = getElementMapping(elementPropName);
       const expression = processElement({
         j,
+        filePath,
         nodePath,
         activeElement,
         addToImports: true,
@@ -122,6 +125,7 @@ export function transformStyledCompoentsToUCL(
       const nameOfArg = node.tag?.arguments[0]?.name;
       const expression = processElement({
         j,
+        filePath,
         nodePath,
         activeElement: { component: nameOfArg },
         addToImports: false,
