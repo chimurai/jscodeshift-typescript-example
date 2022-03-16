@@ -36,4 +36,8 @@ describe("styled-components to UCL", () => {
   ].forEach(test => {
     defineTest(__dirname, '../codemods', null, test, { parser: 'tsx' });
   })
+
+
+  // WL components
+  defineTest(__dirname, '../codemods', null, 'wl-components/reward-categories/components/styled', { parser: 'tsx' });
 });

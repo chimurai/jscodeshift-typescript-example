@@ -7,6 +7,7 @@ type LogMeta = {
   helpfulMessage: string;
   startingLine: number;
   endingLine: number;
+  skipSource?: boolean;
 };
 
 let logs: LogMeta[] = [];
@@ -43,11 +44,16 @@ file: \`${m.filePath.replace(process.cwd(), "")}\`
 ### Information:
 ${m.helpfulMessage}
 
+${
+  m.skipSource
+    ? ""
+    : `
 _Verify that the conversion is correct. L${m.startingLine}:L${m.endingLine}_
 
 \`\`\`tsx
 ${printSource(source, m.startingLine, m.endingLine)}
-\`\`\`
+\`\`\``
+}
   `,
         )
         .join("\n"),
