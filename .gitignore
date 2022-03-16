@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# log file from tests
+manual-work.md

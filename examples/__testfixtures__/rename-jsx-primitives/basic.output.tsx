@@ -19,19 +19,19 @@ function H1() {
 }
 
 function H2() {
-  return <Header accessibilityLevel={2} variant='headerTwo'>Hi</Header>;
+  return <Header variant='headerTwo'>Hi</Header>;
 }
 
 function H3() {
-  return <Header accessibilityLevel={3} variant='headerThree'>Hi</Header>;
+  return <Header variant='headerThree'>Hi</Header>;
 }
 
 function H4() {
-  return <Header accessibilityLevel={4} variant='headerFour'>Hi</Header>;
+  return <Header variant='headerFour'>Hi</Header>;
 }
 
 function H5() {
-  return <Header accessibilityLevel={5} variant='headerFive'>Hi</Header>;
+  return <Header variant='headerFive'>Hi</Header>;
 }
 
 function InlineBR() {
