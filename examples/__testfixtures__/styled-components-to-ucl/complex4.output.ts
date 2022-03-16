@@ -1,4 +1,4 @@
-import { Box, Text as UCLText, Button } from '@rbilabs/universal-components';
+import { Box, Button, Text as UCLText } from '@rbilabs/universal-components';
 
 import { ModalContent } from '../styled';
 import { ModalHeading } from 'components/modal';

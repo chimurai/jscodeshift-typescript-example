@@ -1,4 +1,4 @@
-import { Text, Box } from '@rbilabs/universal-components';
+import { Box, Text } from '@rbilabs/universal-components';
 
 export const TierLabel = Text.withConfig({
   alignItems: 'center',

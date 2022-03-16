@@ -1,3 +1,5 @@
+import { Text } from '@rbilabs/universal-components';
+
 const styles = {
     foo: {
         height: '$4',
@@ -5,7 +7,7 @@ const styles = {
 }
 
 const textStyle = {
-    justifyContent: 'center'
+    justifyContent: 'center',
 }
 
 function C() {
