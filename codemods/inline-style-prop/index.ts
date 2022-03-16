@@ -1,10 +1,9 @@
-import { API, FileInfo, ObjectProperty } from "jscodeshift";
+import { API, FileInfo } from "jscodeshift";
 import _ from "lodash";
-import toRN from "css-to-react-native";
 import {
   _isRemovable,
   _isSupported,
-} from "../../examples/styled-components-to-ucl/utils";
+} from "../utils/mappings";
 import { convertObjectProperties } from "./convert-object-properties";
 
 export const parser = "tsx";

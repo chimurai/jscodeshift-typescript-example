@@ -10,7 +10,7 @@ import toRN from "css-to-react-native";
 import {
   _isRemovable,
   _isSupported,
-} from "../../examples/styled-components-to-ucl/utils";
+} from "../utils/mappings";
 
 export function convertObjectProperties(
   j: JSCodeshift,
