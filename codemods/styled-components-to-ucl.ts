@@ -3,7 +3,7 @@ import {
   getElementMapping,
   styledComponentImportFunctionShouldBeRemove,
 } from "./utils/mappings";
-import { processElement } from "./utils/parse-element";
+import { processElement } from "./utils/process-element";
 import * as _ from "lodash/fp";
 
 export const parser = "tsx";
