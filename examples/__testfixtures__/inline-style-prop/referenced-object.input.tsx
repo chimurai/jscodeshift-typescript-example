@@ -1,3 +1,5 @@
+import { Text } from '@rbilabs/universal-components';
+
 const styles = {
     foo: {
         height: '1rem',

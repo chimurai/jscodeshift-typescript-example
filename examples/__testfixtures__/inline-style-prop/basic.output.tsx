@@ -1,6 +1,7 @@
+import { Box } from '@rbilabs/universal-components';
 function C() {
   return (
-    <div style={{
+    <Box style={{
       height: '$4',
       width: '83px',
       paddingX: '$8',
@@ -9,7 +10,7 @@ function C() {
       // TODO: RN - Unsupported CSS,
       // objectFit: 'contain',
       // TODO: RN - Unsupported CSS,
-      // display: 'block'
-    }}>hi</div>
+      // display: 'block',
+    }}>hi</Box>
   );
 }

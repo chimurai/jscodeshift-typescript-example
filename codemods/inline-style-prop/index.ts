@@ -1,6 +1,7 @@
 import {
-  API,
+  Collection,
   FileInfo,
+  JSCodeshift,
   ObjectMethod,
   ObjectProperty,
   Property,
@@ -12,11 +13,11 @@ import { _isRemovable, _isSupported } from "../utils/mappings";
 import { logManualWork, commitManualLogs } from "../../logger";
 import { convertObjectProperties } from "./convert-object-properties";
 
-export const parser = "tsx";
-export default function transformer(file: FileInfo, api: API) {
-  const j = api.jscodeshift;
-  const root = j(file.source);
-
+export function transformInlineStyleProps(
+  root: Collection<any>,
+  j: JSCodeshift,
+  file: FileInfo,
+) {
   root.findJSXElements().forEach((node) => {
     const styleAttribute = node.value.openingElement.attributes.find(
       (a) => a.type === "JSXAttribute" && a.name.name === "style",
@@ -108,11 +109,10 @@ export default function transformer(file: FileInfo, api: API) {
             filePath: file.path,
             helpfulMessage: `The JSX node <${nodeName} style={${objectName}}> has a style attribute that references a variable this is not modable.
 The manual effort here is to track down the variable and verify/change all instances to ensure they are react native compatible.
-
+  
 For example, if the \`${objectName}\` variable is an import, follow the import (and its respective brand overrides), and verify all of the keys are react native compatible.
-
-If the \`${objectName}\` variable is a prop coming in from the parent, find all usages of this component, and ensure the prop passed in is valid react native styles.
-`,
+  
+If the \`${objectName}\` variable is a prop coming in from the parent, find all usages of this component, and ensure the prop passed in is valid react native styles.`,
             startingLine: node.value.loc.start.line,
             endingLine: node.value.loc.end.line,
           });
@@ -134,11 +134,6 @@ If the \`${objectName}\` variable is a prop coming in from the parent, find all 
       );
     }
   });
-
-  const source = root.toSource({ quote: "single" });
-
-  commitManualLogs(source);
-  return source;
 }
 
 // only needs to remap if the node had flex, but did not have a flex direction,

@@ -1,4 +1,4 @@
-import { API, FileInfo } from "jscodeshift";
+import { Collection, FileInfo, JSCodeshift } from "jscodeshift";
 import { logManualWork, commitManualLogs } from "../logger";
 import { registerUCLImportSpecifiers } from "./utils/register-ucl-import-specifiers";
 import { removeComponentLibaryImport } from "./utils/remove-component-library-import";
@@ -75,21 +75,21 @@ const conversions = [
   },
 ];
 
-export const parser = "tsx";
-export default function transformer(file: FileInfo, api: API) {
-  const j = api.jscodeshift;
-  const root = j(file.source);
-  const verifyImports = new Set<string>();
-
+export function transformRenameJSXPrimitives(
+  root: Collection<any>,
+  j: JSCodeshift,
+  file: FileInfo,
+) {
   conversions.forEach(({ from, to, attributes = [], insertComments }) => {
     root.findJSXElements(from).forEach((node) => {
-      verifyImports.add(to);
+      // Add all the UCL imports we need
+      const nodeName = registerUCLImportSpecifiers(root, j, to);
 
       if (node.value.openingElement.name.type === "JSXIdentifier") {
-        node.value.openingElement.name.name = to;
+        node.value.openingElement.name.name = nodeName;
       }
       if (node.value.closingElement.name.type === "JSXIdentifier") {
-        node.value.closingElement.name.name = to;
+        node.value.closingElement.name.name = nodeName;
       }
 
       // special handling if the attribute has a style prop
@@ -117,7 +117,7 @@ export default function transformer(file: FileInfo, api: API) {
         if (node.parentPath.node.type === "JSXElement") {
           logManualWork({
             filePath: file.path,
-            helpfulMessage: `The codemod for renaming JSX primitives (<div> to <Box>) had some uncertainty when converting <${from}> to <${to}>.`,
+            helpfulMessage: `The codemod for renaming JSX primitives (<div> to <Box>) had some uncertainty when converting <${from}> to <${nodeName}>.`,
             startingLine: node.parentPath.node.loc.start.line,
             endingLine: node.parentPath.node.loc.end.line,
           });
@@ -133,7 +133,7 @@ export default function transformer(file: FileInfo, api: API) {
         } else {
           logManualWork({
             filePath: file.path,
-            helpfulMessage: `The codemod for renaming JSX primitives (<div> to <Box>) had some uncertainty when converting <${from}> to <${to}>.`,
+            helpfulMessage: `The codemod for renaming JSX primitives (<div> to <Box>) had some uncertainty when converting <${from}> to <${nodeName}>.`,
             startingLine: node.parentPath.node.loc.start.line,
             endingLine: node.parentPath.node.loc.end.line,
           });
@@ -157,11 +157,4 @@ export default function transformer(file: FileInfo, api: API) {
 
   // Drop any component library imports
   removeComponentLibaryImport(root, j);
-
-  // Add all the UCL imports we need
-  registerUCLImportSpecifiers(root, j, verifyImports);
-
-  const source = root.toSource({ quote: "single" });
-  commitManualLogs(source);
-  return source;
 }
