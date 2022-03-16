@@ -7,10 +7,7 @@ import {
   SpreadProperty,
 } from "jscodeshift";
 import toRN from "css-to-react-native";
-import {
-  _isRemovable,
-  _isSupported,
-} from "../../examples/styled-components-to-ucl/utils";
+import { _isRemovable, _isSupported } from "../utils/mappings";
 import { logManualWork } from "../../logger";
 
 export function convertObjectProperties(

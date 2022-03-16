@@ -8,10 +8,7 @@ import {
   SpreadProperty,
 } from "jscodeshift";
 import _ from "lodash";
-import {
-  _isRemovable,
-  _isSupported,
-} from "../../examples/styled-components-to-ucl/utils";
+import { _isRemovable, _isSupported } from "../utils/mappings";
 import { logManualWork, commitManualLogs } from "../../logger";
 import { convertObjectProperties } from "./convert-object-properties";
 
