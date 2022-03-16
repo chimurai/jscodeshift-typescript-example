@@ -8,10 +8,7 @@ import {
   SpreadProperty,
 } from "jscodeshift";
 import _ from "lodash";
-import {
-  _isRemovable,
-  _isSupported,
-} from "../utils/mappings";
+import { _isRemovable, _isSupported } from "../utils/mappings";
 import { logManualWork, commitManualLogs } from "../../logger";
 import { convertObjectProperties } from "./convert-object-properties";
 
@@ -105,7 +102,7 @@ export default function transformer(file: FileInfo, api: API) {
             node.value.openingElement.name.type === "JSXIdentifier"
               ? node.value.openingElement.name.name
               : // not sure what to do here for JSXMemberExpression and JSXNamespaced
-              "UNKNOWN_NODE_NAME";
+                "UNKNOWN_NODE_NAME";
 
           logManualWork({
             filePath: file.path,

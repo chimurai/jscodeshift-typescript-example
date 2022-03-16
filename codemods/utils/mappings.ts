@@ -1,8 +1,9 @@
 import { JSCodeshift } from "jscodeshift";
 import * as _ from "lodash/fp";
 
-const styledComponentsImportsToRemove = ['keyframes'];
-export const styledComponentImportFunctionShouldBeRemove = (name) => _.contains(name, styledComponentsImportsToRemove);
+const styledComponentsImportsToRemove = ["keyframes"];
+export const styledComponentImportFunctionShouldBeRemove = (name) =>
+  _.contains(name, styledComponentsImportsToRemove);
 
 const styleColorMap = {
   black: "black",

@@ -1,24 +1,25 @@
-import { JSCodeshift } from 'jscodeshift';
-import {
-  mediaPropertyNames,
-  preToRNTransform,
-} from './mappings';
-import * as _ from 'lodash/fp';
+import { JSCodeshift } from "jscodeshift";
+import { mediaPropertyNames, preToRNTransform } from "./mappings";
+import * as _ from "lodash/fp";
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
-import { addProperties, addProperty, convertCssObject, needsFlexRemapping } from './covert-css-object';
+import {
+  addProperties,
+  addProperty,
+  convertCssObject,
+  needsFlexRemapping,
+} from "./covert-css-object";
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
 
 const tagTypes = {
-  Identifier: node => node,
-  CallExpression: node => node.callee,
-  MemberExpression: node => node.object,
+  Identifier: (node) => node,
+  CallExpression: (node) => node.callee,
+  MemberExpression: (node) => node.object,
 };
 
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
-
 
 export const processElement = ({
   j,
@@ -30,27 +31,31 @@ export const processElement = ({
   includeTypes = true,
   localImportNames = [],
 }: {
-  j: JSCodeshift,
-  nodePath: any,
-  activeElement: any,
-  addToImports: boolean,
-  addToUCLImportsFn: Function,
-  asObject?: boolean,
-  includeTypes?: boolean,
-  localImportNames?: string[]
+  j: JSCodeshift;
+  nodePath: any;
+  activeElement: any;
+  addToImports: boolean;
+  addToUCLImportsFn: Function;
+  asObject?: boolean;
+  includeTypes?: boolean;
+  localImportNames?: string[];
 }) => {
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.component)
     : activeElement.component;
 
-
   const { quasi, tag } = nodePath.node;
-  const { obj, cssText, substitutionMap, comments } = parseTemplate({ quasi, tag });
-  let {
-    properties,
-    localVars,
-    hasExpressionError,
-  } = convertCssObject({ j, obj, activeElement, substitutionMap, localImportNames });
+  const { obj, cssText, substitutionMap, comments } = parseTemplate({
+    quasi,
+    tag,
+  });
+  let { properties, localVars, hasExpressionError } = convertCssObject({
+    j,
+    obj,
+    activeElement,
+    substitutionMap,
+    localImportNames,
+  });
   const addToLocalVars = (v) => localVars.push(v);
 
   if (comments.length) {
@@ -60,7 +65,7 @@ export const processElement = ({
       if (exp) {
         // is the expression is an variable, spread it.
         // @ts-ignore
-        if (exp.type === 'Identifier') {
+        if (exp.type === "Identifier") {
           properties = [
             ...properties,
             // @ts-ignore
@@ -69,7 +74,10 @@ export const processElement = ({
         }
 
         // @ts-ignore
-        const { obj, substitutionMap } = parseTemplate({ quasi: exp.quasi, tag: exp.tag });
+        const { obj, substitutionMap } = parseTemplate({
+          quasi: exp.quasi,
+          tag: exp.tag,
+        });
         if (!obj) return;
 
         _.keys(obj).forEach((k) => {
@@ -86,13 +94,8 @@ export const processElement = ({
             return;
           }
 
-          const {
-            identifier,
-            isRemovable,
-            isSupported,
-            isSkipable,
-            value,
-          } = preToRNTransform(k, v);
+          const { identifier, isRemovable, isSupported, isSkipable, value } =
+            preToRNTransform(k, v);
           k = identifier;
           v = value;
           if (isRemovable) {
@@ -125,10 +128,10 @@ export const processElement = ({
                 originalPropertyNewName: origProp,
                 needsFlexRemapping: needsFlexRemapping(obj),
                 localImportNames,
-              })
+              });
             });
           } catch (error) {
-            console.error('toRN', error.message);
+            console.error("toRN", error.message);
             hasExpressionError = true;
           }
         });
@@ -141,20 +144,21 @@ export const processElement = ({
       const position = c.position - i;
       // Check to see if there is a comment at this lin
       const p = properties[position];
-      const comment = c.text.indexOf("\n") >= 0
-        ? j.commentBlock(' ' + c.text + '\n', true, true)
-        : j.commentLine(' ' + c.text, true);
+      const comment =
+        c.text.indexOf("\n") >= 0
+          ? j.commentBlock(" " + c.text + "\n", true, true)
+          : j.commentLine(" " + c.text, true);
       if (p) {
         p.comments = [comment];
       }
-    })
+    });
   }
 
   let asObjectOrFunction;
 
   if (localVars.length) {
     asObjectOrFunction = j.arrowFunctionExpression(
-      [j.identifier('p')],
+      [j.identifier("p")],
       j.parenthesizedExpression(j.objectExpression(properties)),
       false,
     );
@@ -170,7 +174,7 @@ export const processElement = ({
     exprs = j.callExpression(
       j.memberExpression(
         j.identifier(componentNameOrAlias),
-        j.identifier('withConfig'),
+        j.identifier("withConfig"),
       ),
       [asObjectOrFunction],
     );
@@ -179,27 +183,31 @@ export const processElement = ({
   if (hasExpressionError) {
     // Don't try to convert
     if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
-      throw new Error('Unable to convert');
+      throw new Error("Unable to convert");
     }
     let ct = cssText;
-    _.map(((k: string) => {
+    _.map((k: string) => {
       try {
         // Try to get a nice string
         ct = nodePathToString(nodePath);
       } catch (error) {
         console.log(`Comment extraction error: `, error);
       }
-    }))(
-      _.keys(substitutionMap)
-    )
-    ct = ct.replaceAll('/*', '//')
-    ct = ct.replaceAll('*/', '')
-    exprs.comments = [j.commentBlock(`
+    })(_.keys(substitutionMap));
+    ct = ct.replaceAll("/*", "//");
+    ct = ct.replaceAll("*/", "");
+    exprs.comments = [
+      j.commentBlock(
+        `
 ${TODO_RN_COMMENT}
 Some attributes were not converted.
 
 ${ct}
-`, false, true)];
+`,
+        false,
+        true,
+      ),
+    ];
   }
 
   // Map Types
@@ -210,18 +218,19 @@ ${ct}
       j.tsTypeLiteral(
         _.flow(
           _.flatten,
-          _.uniqBy('name'),
-          _.map((v: any) => j.tsPropertySignature(
-            j.identifier(v.name),
-            j.tsTypeAnnotation(v.type),
-          ))
-        )(localVars)
+          _.uniqBy("name"),
+          _.map((v: any) =>
+            j.tsPropertySignature(
+              j.identifier(v.name),
+              j.tsTypeAnnotation(v.type),
+            ),
+          ),
+        )(localVars),
       ),
     ]);
   }
   return exprs;
-}
-
+};
 
 const parseTemplate = ({ quasi, tag }) => {
   // Nested expressions
@@ -233,21 +242,25 @@ const parseTemplate = ({ quasi, tag }) => {
   // Note we aren't checking the name of the callee
   const callee = tagTypes[tag.type](tag);
 
-  if (callee.type !== 'Identifier') return;
+  if (callee.type !== "Identifier") return;
 
   const { quasis, expressions } = quasi;
   // Substitute all ${interpolations} with arbitrary test that we can find later
   // This is so we can shove it in postCSS
-  const substitutionNames = expressions.map((_value, index) => `/*__${index}substitution__*/`);
+  const substitutionNames = expressions.map(
+    (_value, index) => `/*__${index}substitution__*/`,
+  );
   let cssText =
     quasis[0].value.cooked +
-    substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
+    substitutionNames
+      .map((name, index) => name + quasis[index + 1].value.cooked)
+      .join("");
   // @ts-ignore
   let substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
 
   // Replace mixin interpolations as comments, but as ids if in properties
   let root = postcss.parse(cssText, {
-    map: { annotation: false }
+    map: { annotation: false },
   });
 
   const comments = [];
@@ -259,11 +272,14 @@ const parseTemplate = ({ quasi, tag }) => {
   });
 
   substitutionNames.forEach((name, index) => {
-    if (!notInPropertiesIndexes[index]) substitutionNames[index] = name.replace(/^\/\*(.+)\*\/$/, '$1');
+    if (!notInPropertiesIndexes[index])
+      substitutionNames[index] = name.replace(/^\/\*(.+)\*\/$/, "$1");
   });
   cssText =
     quasis[0].value.cooked +
-    substitutionNames.map((name, index) => name + quasis[index + 1].value.cooked).join('');
+    substitutionNames
+      .map((name, index) => name + quasis[index + 1].value.cooked)
+      .join("");
   // @ts-ignore
   substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
 
@@ -275,9 +291,8 @@ const parseTemplate = ({ quasi, tag }) => {
     obj,
     substitutionMap,
     comments,
-  }
-}
-
+  };
+};
 
 const nodePathToString = (nodePath) => {
   if (nodePath?.node?.loc) {
@@ -287,17 +302,16 @@ const nodePathToString = (nodePath) => {
       const str = _.flow(
         _.slice(start, end),
         // @ts-ignore
-        _.map(o => o?.line),
-        _.map((o: string) => _.flow(
-          _.replace('/*', '//'),
-          _.replace('*/', '')
-        )(o)),
-        _.join('\n'),
+        _.map((o) => o?.line),
+        _.map((o: string) =>
+          _.flow(_.replace("/*", "//"), _.replace("*/", ""))(o),
+        ),
+        _.join("\n"),
       )(nodePath?.node?.loc?.lines?.infos);
       return str;
     } catch (error) {
-      throw new Error(`nodePathToString error`)
+      throw new Error(`nodePathToString error`);
     }
   }
-  return 'And error occurred';
-}
+  return "And error occurred";
+};
