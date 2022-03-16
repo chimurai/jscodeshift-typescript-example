@@ -1,26 +1,42 @@
 import * as fs from "fs";
 import * as uuid from "uuid";
+import * as _ from "lodash";
 
-type Props = {
+type LogMeta = {
   filePath: string;
   helpfulMessage: string;
   startingLine: number;
   endingLine: number;
 };
 
-let logs: Props[] = [];
+let logs: LogMeta[] = [];
 
-export function logManualWork(props: Props) {
+export function logManualWork(props: LogMeta) {
   logs.push(props);
 }
 
+// remap an array of logs into a dictionary of {[filePath]: LogMeta[]}
+// then print the logs to a file in a directory like `./manual-work/file-path.md`
 export function commitManualLogs(source) {
-  fs.appendFileSync(
-    "./manual-work.md",
-    logs
-      .map(
-        (m) => `
-# Manual Work ID: ${uuid.v4()}
+  const fileLogs = logs.reduce((map, log) => {
+    map[log.filePath] = map[log.filePath] || [];
+    map[log.filePath].push(log);
+
+    return map;
+  }, {} as Record<string, LogMeta[]>);
+
+  // make sure directory exists so we don't crash writing the file.
+  try {
+    fs.mkdirSync("./manual-work");
+  } catch {}
+
+  for (const filePath in fileLogs) {
+    const filename = filePath.split("/").slice(-2).join("-");
+    fs.appendFileSync(
+      `./manual-work/${filename}.md`,
+      fileLogs[filePath]
+        .map(
+          (m) => `# Manual Work ID: ${uuid.v4()}
 -------------------------------------------------------
 file: \`${m.filePath.replace(process.cwd(), "")}\`
 
@@ -33,9 +49,10 @@ _Verify that the conversion is correct. L${m.startingLine}:L${m.endingLine}_
 ${printSource(source, m.startingLine, m.endingLine)}
 \`\`\`
   `,
-      )
-      .join("\n"),
-  );
+        )
+        .join("\n"),
+    );
+  }
 
   logs = [];
 }
