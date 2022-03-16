@@ -73,9 +73,10 @@ export const processElement = ({
           ];
         }
 
-        // @ts-ignore
         const { obj, substitutionMap } = parseTemplate({
+          // @ts-ignore
           quasi: exp.quasi,
+          // @ts-ignore
           tag: exp.tag,
         });
         if (!obj) return;
