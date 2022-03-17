@@ -52,7 +52,7 @@ export const ShortCodeErrorContainer = Box.withConfig({
   minWidth: 250,
   minHeight: 98,
 })/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const ShortCodeErrorContainer = styled.div`

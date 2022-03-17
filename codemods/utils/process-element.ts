@@ -12,7 +12,7 @@ import {
   needsFlexRemapping,
 } from "./convert-css-object";
 
-const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
+const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 
 const tagTypes = {
   Identifier: (node) => node,

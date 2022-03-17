@@ -25,7 +25,7 @@ export const MethodTypeWrapper = Box.withConfig<{
 
   cursor: p.$isClickable ? 'pointer' : 'auto',
 }))/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const MethodTypeWrapper = styled.div<IMethodContainer>`

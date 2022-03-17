@@ -10,7 +10,7 @@ import { parseExpression } from "./parse-expression";
 import * as _ from "lodash/fp";
 import toRN from "css-to-react-native";
 
-const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
+const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
 
 export const needsFlexRemapping = (obj) =>

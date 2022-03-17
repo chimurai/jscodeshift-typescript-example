@@ -8,7 +8,7 @@ export const CartItemEditContainer = UCLBox.withConfig<{
     color: p.color,
   },
 }))/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const CartItemEditContainer = styled.div`

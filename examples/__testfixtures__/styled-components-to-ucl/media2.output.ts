@@ -64,7 +64,7 @@ export const TextHalf = EqualHalves.withConfig({
     lg: '$20',
   },
 })/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const TextHalf = styled(EqualHalves)`
