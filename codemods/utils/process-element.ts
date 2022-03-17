@@ -34,7 +34,7 @@ export const processElement = ({
   localImportNames = [],
 }: {
   j: JSCodeshift;
-  filePath: string,
+  filePath: string;
   nodePath: any;
   activeElement: IElementMapping;
   addToImports: boolean;
@@ -48,10 +48,11 @@ export const processElement = ({
     : activeElement.to;
 
   const { quasi, tag } = nodePath.node;
-  const { obj, cssText, substitutionMap, comments } = parseTemplate({
-    quasi,
-    tag,
-  });
+  const { obj, cssText, substitutionMap, comments, hasParsingError } =
+    parseTemplate({
+      quasi,
+      tag,
+    });
   let { properties, localVars, hasExpressionError } = convertCssObject({
     j,
     obj,
@@ -59,6 +60,7 @@ export const processElement = ({
     substitutionMap,
     localImportNames,
   });
+  let hasBailingError = hasExpressionError || hasParsingError;
   const addToLocalVars = (v) => localVars.push(v);
 
   if (comments.length) {
@@ -106,8 +108,12 @@ export const processElement = ({
             return;
           }
           if (!isSupported) {
-            properties = addProperty(j, properties, k, v, isSupported);
-            return;
+            try {
+              properties = addProperty(j, properties, k, v, isSupported);
+              return;
+            } catch (e) {
+              hasBailingError = true;
+            }
           }
 
           // Convert
@@ -136,7 +142,7 @@ export const processElement = ({
             });
           } catch (error) {
             console.error("toRN", error.message);
-            hasExpressionError = true;
+            hasBailingError = true;
           }
         });
         // Return so that comment is not added to the object
@@ -184,7 +190,7 @@ export const processElement = ({
     );
   }
 
-  if (hasExpressionError) {
+  if (hasBailingError) {
     // Don't try to convert
     if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
       throw new Error("Unable to convert");
@@ -227,12 +233,7 @@ Some attributes were not converted.
 
 ${ct}
 `;
-    exprs.comments = [
-      j.commentBlock(comment,
-        false,
-        true,
-      ),
-    ];
+    exprs.comments = [j.commentBlock(comment, false, true)];
   }
 
   // Insert comments above the JSX Node
@@ -297,9 +298,20 @@ const parseTemplate = ({ quasi, tag }) => {
   let substitutionMap = _.fromPairs(_.zip(substitutionNames, expressions));
 
   // Replace mixin interpolations as comments, but as ids if in properties
-  let root = postcss.parse(cssText, {
-    map: { annotation: false },
-  });
+  let root;
+  try {
+    root = postcss.parse(cssText, {
+      map: { annotation: false },
+    });
+  } catch (e) {
+    return {
+      hasParsingError: true,
+      cssText,
+      obj: {},
+      substitutionMap,
+      comments: [],
+    };
+  }
 
   const comments = [];
   const notInPropertiesIndexes = {};
@@ -325,6 +337,7 @@ const parseTemplate = ({ quasi, tag }) => {
 
   const obj = postcssJs.objectify(root);
   return {
+    hasParsingError: false,
     cssText,
     obj,
     substitutionMap,

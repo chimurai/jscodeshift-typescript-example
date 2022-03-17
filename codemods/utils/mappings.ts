@@ -294,10 +294,10 @@ export interface IElementMapping {
   to: string;
   insertComments?: string | boolean;
   attributes?: {
-    name: string,
-    value?: number | string | boolean,
-    comment?: string,
-  }[]
+    name: string;
+    value?: number | string | boolean;
+    comment?: string;
+  }[];
   customImport?: {
     path: string;
     isDefault?: boolean;
@@ -307,16 +307,16 @@ export interface IElementMapping {
 }
 
 const ActionButtonImport = {
-  path: 'components/action-button',
+  path: "components/action-button",
   isDefault: true,
-  specifier: 'ActionButton'
-}
+  specifier: "ActionButton",
+};
 
 const LinkImport = {
-  path: 'components/link',
+  path: "components/link",
   isDefault: true,
-  specifier: 'Link'
-}
+  specifier: "Link",
+};
 
 export const elementArray: Array<IElementMapping> = [
   {
@@ -343,18 +343,14 @@ export const elementArray: Array<IElementMapping> = [
     // remove most properties and set the default thickness
     customPostProcessing: (obj) => {
       const res = _.pickBy((_value, key) => {
-        const shouldKeep = _isInReg(key, [
-          /^width/,
-          /^padding/,
-          /^margin/,
-        ]);
+        const shouldKeep = _isInReg(key, [/^width/, /^padding/, /^margin/]);
         return shouldKeep;
       })(obj);
 
       // @ts-ignore
-      res.thickness = '1';
+      res.thickness = "1";
       return res;
-    }
+    },
   },
   {
     from: "h1",
@@ -411,17 +407,29 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: "section",
     to: "Box",
-    attributes: [{ name: "accessibilityRole", value: 'section', comment: '@ts-ignore web only attribute' }],
+    attributes: [
+      {
+        name: "accessibilityRole",
+        value: "section",
+        comment: "@ts-ignore web only attribute",
+      },
+    ],
   },
   {
     from: "header",
     to: "Box",
-    attributes: [{ name: "accessibilityRole", value: 'header' }],
+    attributes: [{ name: "accessibilityRole", value: "header" }],
   },
   {
     from: "nav",
     to: "Box",
-    attributes: [{ name: "accessibilityRole", value: 'header', comment: '@ts-ignore web only attribute' }],
+    attributes: [
+      {
+        name: "accessibilityRole",
+        value: "header",
+        comment: "@ts-ignore web only attribute",
+      },
+    ],
     insertComments: "This was a <nav> tag. Verify its styled properly",
   },
   {
@@ -453,7 +461,8 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: "label",
     to: "Text",
-    insertComments: "This was a <label> tag. This should be converted to a UL <FormControl.Label>",
+    insertComments:
+      "This was a <label> tag. This should be converted to a UL <FormControl.Label>",
   },
   {
     from: "legend",
@@ -468,7 +477,7 @@ export const elementArray: Array<IElementMapping> = [
 ];
 
 export const getElementMapping = (el: string) => {
-  const found = elementArray.find(e => e.from === el);
+  const found = elementArray.find((e) => e.from === el);
 
   if (!found) {
     throw new Error("element not found: " + el);

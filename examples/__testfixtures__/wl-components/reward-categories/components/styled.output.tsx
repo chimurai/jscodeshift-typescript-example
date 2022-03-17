@@ -74,7 +74,7 @@ export const CategoryContainer = Box.withConfig<{
     ? primitive.th.$alwaysRedDarken10
     : '__legacyToken.background-pattern',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // boxShadow: '0px 0px 4px rgba(0, 0, 0, 0.1)',
 }));
 
@@ -126,7 +126,7 @@ export const Title = ClickableContainer.withConfig<{
   width: '100%',
   paddingBottom: '$2',
 }))/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const Title = styled(ClickableContainer)<
@@ -160,7 +160,7 @@ export const Title = styled(ClickableContainer)<
 export const overlayStyle = p => ({
   position: 'absolute',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // width: 'calc(100% + 2px)',
 
   left: -1,
