@@ -4,12 +4,13 @@ import * as _ from "lodash/fp";
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
 import toRN from "css-to-react-native";
+import { logManualWork } from "../../logger";
 import {
   addProperties,
   addProperty,
   convertCssObject,
   needsFlexRemapping,
-} from "./covert-css-object";
+} from "./convert-css-object";
 
 const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
 
@@ -23,6 +24,7 @@ const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
 
 export const processElement = ({
   j,
+  filePath,
   nodePath,
   activeElement,
   addToImports,
@@ -32,10 +34,11 @@ export const processElement = ({
   localImportNames = [],
 }: {
   j: JSCodeshift;
+  filePath: string,
   nodePath: any;
   activeElement: any;
   addToImports: boolean;
-  addToUCLImportsFn: Function;
+  addToUCLImportsFn: (name: string) => void;
   asObject?: boolean;
   includeTypes?: boolean;
   localImportNames?: string[];
@@ -197,14 +200,33 @@ export const processElement = ({
     })(_.keys(substitutionMap));
     ct = ct.replaceAll("/*", "//");
     ct = ct.replaceAll("*/", "");
-    exprs.comments = [
-      j.commentBlock(
-        `
+    logManualWork({
+      filePath,
+      helpfulMessage: `
+The codemod for handling styled-components was not able to convert this element.
+
+It can fail for a few reasons:
+- Unsupported attributes
+- Nested attributes
+- Complex logic
+
+The unsupported element:
+
+\`\`\`tsx
+${ct}
+\`\`\`
+`,
+      startingLine: nodePath.node.loc.start.line,
+      endingLine: nodePath.node.loc.end.line,
+    });
+    const comment = `
 ${TODO_RN_COMMENT}
 Some attributes were not converted.
 
 ${ct}
-`,
+`;
+    exprs.comments = [
+      j.commentBlock(comment,
         false,
         true,
       ),
