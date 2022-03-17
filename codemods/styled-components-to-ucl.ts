@@ -127,7 +127,6 @@ export function transformStyledCompoentsToUCL(
       const { node } = nodePath;
       // @ts-ignore
       const nameOfArg = node.tag?.arguments[0]?.name;
-      console.log(`>>>>>>>> nameOfArg: `, nameOfArg);
       const expression = processElement({
         j,
         filePath,

@@ -43,12 +43,9 @@ export const processElement = ({
   includeTypes?: boolean;
   localImportNames?: string[];
 }) => {
-  console.log(`>>>>>> activeElement: `, activeElement);
   const componentNameOrAlias = addToImports
     ? addToUCLImportsFn(activeElement.to)
     : activeElement.to;
-
-  console.log(`>>>>>>> componentNameOrAlias: `, componentNameOrAlias);
 
   const { quasi, tag } = nodePath.node;
   const { obj, cssText, substitutionMap, comments } = parseTemplate({
