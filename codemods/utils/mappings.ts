@@ -435,6 +435,11 @@ export const elementArray: Array<IElementMapping> = [
     insertComments: "This was a <input> tag. Verify its styled properly",
   },
   {
+    from: "label",
+    to: "Text",
+    insertComments: "This was a <label> tag. This should be converted to a UL <FormControl.Label>",
+  },
+  {
     from: "legend",
     to: "Box",
     insertComments: "This was a <legend> tag. Verify its styled properly",

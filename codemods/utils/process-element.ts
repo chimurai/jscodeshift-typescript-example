@@ -235,6 +235,19 @@ ${ct}
     ];
   }
 
+  // Insert comments above the JSX Node
+  if (activeElement.insertComments) {
+    exprs.comments = exprs.comments || [];
+    exprs.comments.push(
+      j.commentBlock(` TODO: RN - ${activeElement.insertComments}`, false, true),
+    );
+    logManualWork({
+      filePath,
+      helpfulMessage: `The codemod for renaming JSX primitives (<${activeElement.from}> to <${activeElement.to}>) had some uncertainty.`,
+      startingLine: nodePath.parentPath.node.loc.start.line,
+      endingLine: nodePath.parentPath.node.loc.end.line,
+    });
+  }
   // Map Types
   if (localVars.length && includeTypes) {
     // Add types

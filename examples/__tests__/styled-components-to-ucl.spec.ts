@@ -19,6 +19,7 @@ describe("styled-components to UCL", () => {
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/should-ignore', { parser: 'tsx' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/single', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/spacing', { parser: 'ts' });
+  defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/unsupported', { parser: 'ts' });
   // @ts-ignore
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/js-file', { parser: 'js' });
 
