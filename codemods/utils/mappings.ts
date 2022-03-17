@@ -292,6 +292,24 @@ export interface IElementMapping {
     name: string,
     value?: number | string | boolean,
   }[]
+  customImport?: {
+    path: string;
+    isDefault?: boolean;
+    specifier?: string;
+  };
+  customPostProcessing?: (obj: object) => object;
+}
+
+const ActionButtonImport = {
+  path: 'components/action-button',
+  isDefault: true,
+  specifier: 'ActionButton'
+}
+
+const LinkImport = {
+  path: 'components/link',
+  isDefault: true,
+  specifier: 'Link'
 }
 
 export const elementArray: Array<IElementMapping> = [
@@ -316,6 +334,8 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: "hr",
     to: "Divider",
+    // TODO change `height` to `thickness`
+    customPostProcessing: (obj) => obj,
   },
   {
     from: "h1",
@@ -346,6 +366,11 @@ export const elementArray: Array<IElementMapping> = [
     attributes: [{ name: "variant", value: "headerFive" }],
   },
   {
+    from: "h6",
+    to: "Header",
+    attributes: [{ name: "variant", value: "headerFive" }],
+  },
+  {
     from: "b",
     to: "Text",
     attributes: [{ name: "fontWeight", value: "bold" }],
@@ -364,29 +389,62 @@ export const elementArray: Array<IElementMapping> = [
     from: "strong",
     to: "Text",
   },
+  {
+    from: "section",
+    to: "Box",
+    // TODO I think we need to `@ts-ignore`
+    attributes: [{ name: "accessibilityRole", value: 'section' }],
+  },
+  {
+    from: "header",
+    to: "Box",
+    // TODO I think we need to `@ts-ignore`
+    attributes: [{ name: "accessibilityRole", value: 'header' }],
+  },
+  {
+    from: "nav",
+    to: "Box",
+    // TODO I think we need to `@ts-ignore`
+    attributes: [{ name: "accessibilityRole", value: 'header' }],
+    insertComments: "This was a <nav> tag. Verify its styled properly",
+  },
+  {
+    from: "button",
+    to: "ActionButton",
+    customImport: ActionButtonImport,
+    // TODO post processing
+    customPostProcessing: (obj) => obj,
+  },
+  {
+    from: "a",
+    to: "Link",
+    customImport: LinkImport,
+    // TODO change:
+    // - `href` to `to`
+    // - nest text
+    customPostProcessing: (obj) => obj,
+  },
+  {
+    from: "fieldset",
+    to: "FormControl",
+    insertComments: "This was a <input> tag. Verify its styled properly",
+  },
+  {
+    from: "input",
+    to: "Input",
+    insertComments: "This was a <input> tag. Verify its styled properly",
+  },
+  {
+    from: "legend",
+    to: "Box",
+    insertComments: "This was a <legend> tag. Verify its styled properly",
+  },
+  {
+    from: "svg",
+    to: "Svg",
+    insertComments: "This was a <svg> tag. Verify its styled properly",
+  },
 ];
-
-//   {
-//   span: { component: "Text" },
-//   section: { component: "Box" },
-//   h4: { component: "Header" },
-//   h5: { component: "Header" },
-//   h6: { component: "Header" },
-//   p: { component: "Text" },
-//   header: { component: "Box" },
-//   nav: { component: "Box" },
-//   label: { component: "Text", notSupported: "use InputLabel" },
-//   button: { component: "Button" },
-//   ul: { component: "Box", notSupported: "use ScrollView" },
-//   li: { component: "Box", notSupported: "use ScrollView" },
-//   a: { component: "Box", notSupported: "use /component/link" },
-//   form: { component: "Box", notSupported: true },
-//   // 'svg': { component: 'Icon' },
-//   fieldset: { component: "Box", notSupported: true },
-//   input: { component: "Box", notSupported: true },
-//   legend: { component: "Box", notSupported: true },
-//   hr: { component: "Divider" },
-// };
 
 export const getElementMapping = (el: string) => {
   const found = elementArray.find(e => e.from === el);
