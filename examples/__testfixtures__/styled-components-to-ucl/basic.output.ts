@@ -45,11 +45,16 @@ export const Tokens = Box.withConfig({
   borderWidth: 2,
   borderColor: Styles.color.primary,
   borderStyle: 'solid',
+
+  // @ts-ignore web only attribute
+  accessibilityRole: 'header',
 });
 
 export const Header = UCLHeader.withConfig({
   color: '__legacyToken.text-reversed',
   underline: false,
+  accessibilityLevel: 1,
+  variant: 'headerOne',
 });
 
 export const Conditional = Box.withConfig<{

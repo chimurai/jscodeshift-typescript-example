@@ -291,6 +291,7 @@ export interface IElementMapping {
   attributes?: {
     name: string,
     value?: number | string | boolean,
+    comment?: string,
   }[]
   customImport?: {
     path: string;
@@ -334,8 +335,21 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: "hr",
     to: "Divider",
-    // TODO change `height` to `thickness`
-    customPostProcessing: (obj) => obj,
+    // remove most properties and set the default thickness
+    customPostProcessing: (obj) => {
+      const res = _.pickBy((_value, key) => {
+        const shouldKeep = _isInReg(key, [
+          /^width/,
+          /^padding/,
+          /^margin/,
+        ]);
+        return shouldKeep;
+      })(obj);
+
+      // @ts-ignore
+      res.thickness = '1';
+      return res;
+    }
   },
   {
     from: "h1",
@@ -392,20 +406,17 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: "section",
     to: "Box",
-    // TODO I think we need to `@ts-ignore`
-    attributes: [{ name: "accessibilityRole", value: 'section' }],
+    attributes: [{ name: "accessibilityRole", value: 'section', comment: '@ts-ignore web only attribute' }],
   },
   {
     from: "header",
     to: "Box",
-    // TODO I think we need to `@ts-ignore`
-    attributes: [{ name: "accessibilityRole", value: 'header' }],
+    attributes: [{ name: "accessibilityRole", value: 'header', comment: '@ts-ignore web only attribute' }],
   },
   {
     from: "nav",
     to: "Box",
-    // TODO I think we need to `@ts-ignore`
-    attributes: [{ name: "accessibilityRole", value: 'header' }],
+    attributes: [{ name: "accessibilityRole", value: 'header', comment: '@ts-ignore web only attribute' }],
     insertComments: "This was a <nav> tag. Verify its styled properly",
   },
   {

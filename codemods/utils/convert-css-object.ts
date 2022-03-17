@@ -63,6 +63,10 @@ export const convertCssObject = ({
             } else {
               convertedObj = toRN([[k, v]]);
             }
+            // Run custom post processing
+            if (activeElement.customPostProcessing) {
+              convertedObj = activeElement.customPostProcessing(convertedObj);
+            }
             _.keys(convertedObj).forEach((k) => {
               const v = convertedObj[k];
               properties = addProperties({
@@ -130,6 +134,11 @@ export const convertCssObject = ({
       } else {
         convertedObj = toRN([[key, value]]);
       }
+
+      // Run custom post processing
+      if (activeElement.customPostProcessing) {
+        convertedObj = activeElement.customPostProcessing(convertedObj);
+      }
       _.keys(convertedObj).forEach((k) => {
         const v = convertedObj[k];
         properties = addProperties({
@@ -152,6 +161,16 @@ export const convertCssObject = ({
       return;
     }
   })(_.keys(obj));
+
+  // Add the custom properties
+  if (activeElement.attributes) {
+    activeElement.attributes.forEach(x => {
+      properties = addProperty(j, properties, x.name, x.value, true, x.comment);
+    })
+  }
+
+  // Remove duplicate keys
+  properties = _.uniqBy('key.name')(properties);
   return {
     properties,
     localVars,
@@ -165,11 +184,18 @@ export const addProperty = (
   identifier,
   value,
   isSupported,
+  comment?: string,
 ) => {
   const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : "";
+  const prop = j.property("init", j.identifier(prefix + identifier), j.literal(value));
+  if (comment) {
+    prop.comments = [
+      j.commentLine(' ' + comment)
+    ]
+  }
   return [
     ...properties,
-    j.property("init", j.identifier(prefix + identifier), j.literal(value)),
+    prop,
   ];
 };
 
