@@ -34,7 +34,7 @@ export const ShortCodeErrorContainer = Box.withConfig({
   minWidth: 250,
   minHeight: 98,
 })/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const ShortCodeErrorContainer = styled.div`
@@ -68,7 +68,7 @@ export const ShortCodeErrorContainer = styled.div`
 const LinkStyles = {
   color: Styles.color.black,
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // display: 'block',
 
   fontFamily: Styles.fontFamily.base,
@@ -105,7 +105,7 @@ const LinkStyles = {
     lg: '$8',
   },
 }/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 const LinkStyles = css`

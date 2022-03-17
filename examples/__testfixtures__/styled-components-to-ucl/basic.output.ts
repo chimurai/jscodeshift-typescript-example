@@ -10,10 +10,10 @@ export const Basic = Box.withConfig<{
 }>(p => ({
   alignSelf: 'center',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // transform: 'rotate(180deg) translateX(50%)',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // boxShadow: 'inset 0px 1px 3px 0px rgba(0, 0, 0, 0.1)',
 
   alignItems: 'space-between',
@@ -31,7 +31,7 @@ export const Basic = Box.withConfig<{
 }));
 
 export const Tokens = Box.withConfig({
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // display: 'block',
 
   alignSelf: 'center',
@@ -45,11 +45,14 @@ export const Tokens = Box.withConfig({
   borderWidth: 2,
   borderColor: Styles.color.primary,
   borderStyle: 'solid',
+  accessibilityRole: 'header',
 });
 
 export const Header = UCLHeader.withConfig({
   color: '__legacyToken.text-reversed',
   underline: false,
+  accessibilityLevel: 1,
+  variant: 'headerOne',
 });
 
 export const Conditional = Box.withConfig<{

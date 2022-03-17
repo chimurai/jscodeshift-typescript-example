@@ -78,7 +78,7 @@ export const TertiaryButton = styled.button`
 `;
 
 export const focusStyle = css`
-  /* https://ghinda.net/article/mimic-native-focus-css/ */
+  /* https://ghinda.net/article/mimic-native-focus-css/*/
   outline: 2px solid Highlight;
   @media (-webkit-min-device-pixel-ratio: 0) {
     outline: -webkit-focus-ring-color auto 5px;

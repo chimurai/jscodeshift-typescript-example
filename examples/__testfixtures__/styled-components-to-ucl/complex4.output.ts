@@ -45,7 +45,7 @@ export const StyledModalHeader = ModalHeading.withConfig({
     lg: 0,
   },
 })/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const StyledModalHeader = styled(ModalHeading)`
@@ -69,7 +69,7 @@ export const LoadingText = UCLText.withConfig({
   paddingX: '$10',
   paddingY: '7px',
 })/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const LoadingText = styled.p`
@@ -95,7 +95,7 @@ export const LoadingGraphicWrapper = Box.withConfig({
   justifyContent: 'center',
   alignItems: 'center',
 })/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 export const LoadingGraphicWrapper = styled.div`
@@ -114,10 +114,10 @@ export const LoadingGraphicWrapper = styled.div`
 */;
 
 export const GraphicTextWrapper = Box.withConfig({
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // display: 'grid',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // gridTemplateRows: 'auto 1fr',
 });
 
@@ -154,11 +154,11 @@ export const focusStyle = {
   // https://ghinda.net/article/mimic-native-focus-css/
   outline: '2px solid Highlight',
 }/*
-TODO RN: unsupported CSS
+TODO: RN - unsupported CSS
 Some attributes were not converted.
 
 
-  // https://ghinda.net/article/mimic-native-focus-css/ 
+  // https://ghinda.net/article/mimic-native-focus-css/
   outline: 2px solid Highlight;
   @media (-webkit-min-device-pixel-ratio: 0) {
     outline: -webkit-focus-ring-color auto 5px;

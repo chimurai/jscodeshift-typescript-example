@@ -10,7 +10,7 @@ import { parseExpression } from "./parse-expression";
 import * as _ from "lodash/fp";
 import toRN from "css-to-react-native";
 
-const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
+const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
 
 export const needsFlexRemapping = (obj) =>
@@ -63,6 +63,10 @@ export const convertCssObject = ({
             } else {
               convertedObj = toRN([[k, v]]);
             }
+            // Run custom post processing
+            if (activeElement.customPostProcessing) {
+              convertedObj = activeElement.customPostProcessing(convertedObj);
+            }
             _.keys(convertedObj).forEach((k) => {
               const v = convertedObj[k];
               properties = addProperties({
@@ -110,7 +114,7 @@ export const convertCssObject = ({
     // if the element is a box we have to next the text properties under _text
     if (
       isATextProp(key) &&
-      _.includes(activeElement.component, ["Box", "Button"])
+      _.includes(activeElement.to, ["Box", "Button"])
     ) {
       parent = "_text";
     }
@@ -129,6 +133,11 @@ export const convertCssObject = ({
         convertedObj = { [key]: value };
       } else {
         convertedObj = toRN([[key, value]]);
+      }
+
+      // Run custom post processing
+      if (activeElement.customPostProcessing) {
+        convertedObj = activeElement.customPostProcessing(convertedObj);
       }
       _.keys(convertedObj).forEach((k) => {
         const v = convertedObj[k];
@@ -152,6 +161,16 @@ export const convertCssObject = ({
       return;
     }
   })(_.keys(obj));
+
+  // Add the custom properties
+  if (activeElement.attributes) {
+    activeElement.attributes.forEach(x => {
+      properties = addProperty(j, properties, x.name, x.value, true, x.comment);
+    })
+  }
+
+  // Remove duplicate keys
+  properties = _.uniqBy('key.name')(properties);
   return {
     properties,
     localVars,
@@ -165,11 +184,18 @@ export const addProperty = (
   identifier,
   value,
   isSupported,
+  comment?: string,
 ) => {
   const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : "";
+  const prop = j.property("init", j.identifier(prefix + identifier), j.literal(value));
+  if (comment) {
+    prop.comments = [
+      j.commentLine(' ' + comment)
+    ]
+  }
   return [
     ...properties,
-    j.property("init", j.identifier(prefix + identifier), j.literal(value)),
+    prop,
   ];
 };
 

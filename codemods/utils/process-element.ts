@@ -1,5 +1,5 @@
 import { JSCodeshift } from "jscodeshift";
-import { mediaPropertyNames, preToRNTransform } from "./mappings";
+import { IElementMapping, mediaPropertyNames, preToRNTransform } from "./mappings";
 import * as _ from "lodash/fp";
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
@@ -12,7 +12,7 @@ import {
   needsFlexRemapping,
 } from "./convert-css-object";
 
-const TODO_RN_COMMENT = `TODO RN: unsupported CSS`;
+const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 
 const tagTypes = {
   Identifier: (node) => node,
@@ -36,16 +36,16 @@ export const processElement = ({
   j: JSCodeshift;
   filePath: string,
   nodePath: any;
-  activeElement: any;
+  activeElement: IElementMapping;
   addToImports: boolean;
-  addToUCLImportsFn: (name: string) => void;
+  addToUCLImportsFn: Function;
   asObject?: boolean;
   includeTypes?: boolean;
   localImportNames?: string[];
 }) => {
   const componentNameOrAlias = addToImports
-    ? addToUCLImportsFn(activeElement.component)
-    : activeElement.component;
+    ? addToUCLImportsFn(activeElement.to)
+    : activeElement.to;
 
   const { quasi, tag } = nodePath.node;
   const { obj, cssText, substitutionMap, comments } = parseTemplate({
@@ -198,8 +198,10 @@ export const processElement = ({
         console.log(`Comment extraction error: `, error);
       }
     })(_.keys(substitutionMap));
-    ct = ct.replaceAll("/*", "//");
-    ct = ct.replaceAll("*/", "");
+    ct = _.flow(
+      _.replace("/*", "//"),
+      _.replace("*/", ""),
+    )(ct);
     logManualWork({
       filePath,
       helpfulMessage: `
@@ -233,6 +235,19 @@ ${ct}
     ];
   }
 
+  // Insert comments above the JSX Node
+  if (activeElement.insertComments) {
+    exprs.comments = exprs.comments || [];
+    exprs.comments.push(
+      j.commentBlock(` TODO: RN - ${activeElement.insertComments}`, false, true),
+    );
+    logManualWork({
+      filePath,
+      helpfulMessage: `The codemod for renaming JSX primitives (<${activeElement.from}> to <${activeElement.to}>) had some uncertainty.`,
+      startingLine: nodePath.parentPath.node.loc.start.line,
+      endingLine: nodePath.parentPath.node.loc.end.line,
+    });
+  }
   // Map Types
   if (localVars.length && includeTypes) {
     // Add types
@@ -327,7 +342,11 @@ const nodePathToString = (nodePath) => {
         // @ts-ignore
         _.map((o) => o?.line),
         _.map((o: string) =>
-          _.flow(_.replace("/*", "//"), _.replace("*/", ""))(o),
+          _.flow(
+            _.replace("/*", "//"),
+            _.replace("*/", ""),
+            _.trimEnd,
+          )(o),
         ),
         _.join("\n"),
       )(nodePath?.node?.loc?.lines?.infos);

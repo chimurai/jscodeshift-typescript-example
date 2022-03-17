@@ -7,9 +7,9 @@ export const StyledContainer = Box.withConfig({
   paddingY: '$4',
   margin: '$13.5',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // objectFit: 'contain',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // display: 'block',
 });

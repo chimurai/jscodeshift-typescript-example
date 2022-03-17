@@ -75,7 +75,7 @@ export function transformStyledCompoentsToUCL(
             j,
             filePath,
             nodePath,
-            activeElement: { component: "noop" },
+            activeElement: { to: "noop", from: "css" },
             addToImports: false,
             addToUCLImportsFn: _.noop,
             asObject: true,
@@ -87,6 +87,8 @@ export function transformStyledCompoentsToUCL(
     });
   }
 
+  // styled object, e.g.
+  // styled.div`
   root
     .find(j.MemberExpression, {
       object: {
@@ -122,6 +124,8 @@ export function transformStyledCompoentsToUCL(
       j(nodePath).replaceWith(expression);
     });
 
+  // styled CallExpressions, e.g.
+  // styled(MyCustomComponent)
   root
     .find(j.CallExpression, {
       callee: {
@@ -181,7 +185,7 @@ ${j(variable).toSource()}
         j,
         filePath,
         nodePath,
-        activeElement: { component: nameOfArg },
+        activeElement: { to: nameOfArg, from: "noop" },
         addToImports: false,
         addToUCLImportsFn: addUCLImport,
         includeTypes: !isJSFile,

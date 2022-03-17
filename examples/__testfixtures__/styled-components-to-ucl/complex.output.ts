@@ -7,13 +7,13 @@ import { primitive } from 'styles/constants/primitives';
 export const ModalCloseButton = CloseButton.withConfig({
   paddingTop: '$20',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // left: 'calc(1.25rem + env(safe-area-inset-left))',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // position: 'fixed',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // top: 'calc(1rem + env(safe-area-inset-top))',
 
   zIndex: Styles.zIndex.below,
@@ -35,7 +35,7 @@ export const AllModalContent = Box.withConfig({
 export const RewardCategoriesContainer = Box.withConfig({
   paddingTop: '$20',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // paddingBottom: 'calc(env(safe-area-inset-bottom) + __0substitution__ + 2rem)',
 });
 
@@ -46,10 +46,10 @@ export const StyledContainer = Box.withConfig({
   paddingY: '$4',
   margin: '$13.5',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // objectFit: 'contain',
 
-  // TODO RN: unsupported CSS
+  // TODO: RN - unsupported CSS
   // display: 'block',
 });
 
