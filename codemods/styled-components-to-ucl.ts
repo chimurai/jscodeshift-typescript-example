@@ -1,4 +1,4 @@
-import { Collection, FileInfo, JSCodeshift } from "jscodeshift";
+import { Collection, FileInfo, JSCodeshift, types } from "jscodeshift";
 import {
   getElementMapping,
   styledComponentImportFunctionShouldBeRemove,
@@ -6,6 +6,7 @@ import {
 import { processElement } from "./utils/process-element";
 import * as _ from "lodash/fp";
 import { registerUCLImportSpecifiers } from "./utils/register-ucl-import-specifiers";
+import { logManualWork } from "../logger";
 
 export function transformStyledCompoentsToUCL(
   root: Collection<any>,
@@ -94,10 +95,19 @@ export function transformStyledCompoentsToUCL(
     })
     .closest(j.TaggedTemplateExpression)
     .forEach((nodePath) => {
-      // @ts-ignore
+      if (
+        !(
+          nodePath.node.tag.type === "MemberExpression" &&
+          nodePath.node.tag.property.type === "Identifier"
+        )
+      ) {
+        // TODO: Replace node with mocked component, log manual work?
+        throw new Error("Error #jj43");
+        return;
+      }
+
       const elementPropName = nodePath.node.tag.property.name;
       // styled.XXX
-      // @ts-ignore
       const activeElement = getElementMapping(elementPropName);
       const expression = processElement({
         j,
@@ -121,8 +131,52 @@ export function transformStyledCompoentsToUCL(
     .closest(j.TaggedTemplateExpression)
     .forEach((nodePath) => {
       const { node } = nodePath;
-      // @ts-ignore
-      const nameOfArg = node.tag?.arguments[0]?.name;
+      if (node.tag.type !== "CallExpression") {
+        throw new Error(
+          "this should always be call expression based on the find/closest calls.",
+        );
+      }
+
+      if (node.tag.arguments[0]?.type !== "Identifier") {
+        const variable = walkUpToFind(nodePath, j, "VariableDeclarator");
+
+        if (!variable) throw new Error("coudlnt find the variable");
+
+        logManualWork({
+          filePath: fileInfo.path,
+          helpfulMessage: `The codemod to convert styled components to UCL nodes could not guarantee the correctness when encountering the variable for \`${
+            variable.id.name
+          }\`.
+
+Please manually convert the following styled component code into UCL and replace the null arrow function.
+
+\`\`\`tsx
+${j(variable).toSource()}
+\`\`\`
+`,
+          startingLine: 0,
+          endingLine: 0,
+          skipSource: true,
+        });
+
+        j(nodePath).replaceWith(
+          j.arrowFunctionExpression.from({
+            comments: [
+              j.commentLine(
+                " TODO: RN - This styled component could not be codemoded. Check manual-work/*.md for guidance",
+                false,
+                true,
+              ),
+            ],
+            params: [],
+            body: j.nullLiteral(),
+          }),
+        );
+
+        return;
+      }
+
+      const nameOfArg = node.tag.arguments[0].name;
       const expression = processElement({
         j,
         filePath,
@@ -165,4 +219,31 @@ export function transformStyledCompoentsToUCL(
   } else {
     styledImport.remove();
   }
+}
+
+type ASTTypes = typeof types.namedTypes;
+
+function walkUpToFind<T extends keyof ASTTypes>(
+  node: any,
+  j: JSCodeshift,
+  type: T,
+  // ): ASTTypes[T] | null {
+): any | null {
+  let foundNode;
+  j(node).forEach((path) => {
+    if (foundNode) return;
+
+    if (path.value.type === type) {
+      foundNode = path.value;
+      return;
+    }
+
+    if (!path.parentPath) {
+      return;
+    }
+
+    foundNode = walkUpToFind(path.parentPath.value, j, type);
+  });
+
+  return foundNode || null;
 }
