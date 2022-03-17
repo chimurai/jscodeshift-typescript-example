@@ -124,6 +124,11 @@ const unsupportedIdentifiers = [
   /^shadow-offset$/,
   /^shadowOffset$/,
   /^span$/,
+  /^list-style$/,
+  /^listStyle$/,
+  /^overflow-x$/,
+  /^overflowX$/,
+  /^overflowY$/,
   /^grid/,
 ];
 

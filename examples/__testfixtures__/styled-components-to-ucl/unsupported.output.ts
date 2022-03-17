@@ -1,7 +1,8 @@
 import { Box, FormControl, Input, Text } from '@rbilabs/universal-components';
 
 export const Scrollable = Box.withConfig({
-  overflowX: 'auto',
+  // TODO: RN - unsupported CSS
+  // overflowX: 'auto',
 });
 
 export const Fieldset = FormControl.withConfig({
@@ -16,7 +17,8 @@ export const Label = Text.withConfig({
 })/* TODO: RN - This was a <label> tag. This should be converted to a UL <FormControl.Label>*/;
 
 export const Group = Box.withConfig({
-  listStyle: 'none',
+  // TODO: RN - unsupported CSS
+  // listStyle: 'none',
 })/* TODO: RN - This was a <li> tag. Verify its styled properly*/;
 
 export const Radio = Input.withConfig({
