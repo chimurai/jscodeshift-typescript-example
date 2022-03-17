@@ -1,4 +1,4 @@
-import { ActionButton, Box, Text as UCLText } from '@rbilabs/universal-components';
+import { Box, Button, Text as UCLText } from '@rbilabs/universal-components';
 
 import { ModalContent } from '../styled';
 import { ModalHeading } from 'components/modal';
@@ -122,7 +122,7 @@ export const GraphicTextWrapper = Box.withConfig({
 });
 
 
-export const TertiaryButton = ActionButton.withConfig({
+export const TertiaryButton = Button.withConfig({
   backgroundColor: 'none',
   borderWidth: 1,
   borderColor: Styles.color.grey.four,
@@ -131,9 +131,13 @@ export const TertiaryButton = ActionButton.withConfig({
   borderTopRightRadius: Styles.borderRadius,
   borderBottomRightRadius: Styles.borderRadius,
   borderBottomLeftRadius: Styles.borderRadius,
-  color: Styles.color.black,
-  fontFamily: Styles.fontFamily.body,
-  fontSize: 15,
+
+  _text: {
+    color: Styles.color.black,
+    fontFamily: Styles.fontFamily.body,
+    fontSize: 15,
+  },
+
   paddingX: '$4',
   paddingY: '9px',
   width: '100%',

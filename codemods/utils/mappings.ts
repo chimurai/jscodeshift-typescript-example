@@ -421,10 +421,10 @@ export const elementArray: Array<IElementMapping> = [
   },
   {
     from: "button",
-    to: "ActionButton",
-    customImport: ActionButtonImport,
+    to: "Button",
+    // customImport: ActionButtonImport,
     // TODO post processing
-    customPostProcessing: (obj) => obj,
+    // customPostProcessing: (obj) => obj,
   },
   {
     from: "a",
@@ -433,7 +433,7 @@ export const elementArray: Array<IElementMapping> = [
     // TODO change:
     // - `href` to `to`
     // - nest text
-    customPostProcessing: (obj) => obj,
+    // customPostProcessing: (obj) => obj,
   },
   {
     from: "fieldset",
