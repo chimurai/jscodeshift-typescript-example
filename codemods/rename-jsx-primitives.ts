@@ -1,86 +1,16 @@
 import { Collection, FileInfo, JSCodeshift } from "jscodeshift";
-import { logManualWork, commitManualLogs } from "../logger";
+import { logManualWork } from "../logger";
+import { elementArray } from "./utils/mappings";
 import { registerUCLImportSpecifiers } from "./utils/register-ucl-import-specifiers";
 import { removeComponentLibaryImport } from "./utils/remove-component-library-import";
 
-const conversions = [
-  {
-    from: "div",
-    to: "Box",
-  },
-  {
-    from: "span",
-    to: "Box",
-  },
-  {
-    insertComments: "This was a <ul> tag. Verify its styled properly",
-    from: "ul",
-    to: "Box",
-  },
-  {
-    insertComments: "This was a <li> tag. Verify its styled properly",
-    from: "li",
-    to: "Box",
-  },
-  {
-    from: "hr",
-    to: "Divider",
-  },
-  {
-    from: "h1",
-    to: "Header",
-    attributes: [
-      { name: "accessibilityLevel", value: 1 },
-      { name: "variant", value: "headerOne" },
-    ],
-  },
-  {
-    from: "h2",
-    to: "Header",
-    attributes: [{ name: "variant", value: "headerTwo" }],
-  },
-  {
-    from: "h3",
-    to: "Header",
-    attributes: [{ name: "variant", value: "headerThree" }],
-  },
-  {
-    from: "h4",
-    to: "Header",
-    attributes: [{ name: "variant", value: "headerFour" }],
-  },
-  {
-    from: "h5",
-    to: "Header",
-    attributes: [{ name: "variant", value: "headerFive" }],
-  },
-  {
-    from: "b",
-    to: "Text",
-    attributes: [{ name: "fontWeight", value: "bold" }],
-  },
-  {
-    from: "p",
-    to: "Text",
-  },
-  {
-    from: "i",
-    to: "Text",
-    attributes: [{ name: "italic", value: true }],
-  },
-  {
-    // TODO: Any attributes?
-    from: "strong",
-    to: "Text",
-  },
-];
 
 export function transformRenameJSXPrimitives(
   root: Collection<any>,
   j: JSCodeshift,
   file: FileInfo,
 ) {
-  conversions.forEach(({ from, to, attributes = [], insertComments }) => {
+  elementArray.forEach(({ from, to, attributes = [], insertComments }) => {
     root.findJSXElements(from).forEach((node) => {
       // Add all the UCL imports we need
       const nodeName = registerUCLImportSpecifiers(root, j, to);

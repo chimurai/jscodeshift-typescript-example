@@ -285,39 +285,111 @@ export const valueToType = (j: JSCodeshift, value) => {
 };
 
 export interface IElementMapping {
-  component: string;
-  notSupported?: string | boolean;
-  moveText?: boolean;
+  from: string;
+  to: string;
+  insertComments?: string | boolean;
+  attributes?: {
+    name: string,
+    value?: number | string | boolean,
+  }[]
 }
 
-const elementMap: Record<string, IElementMapping> = {
-  div: { component: "Box", notSupported: true },
-  span: { component: "Text" },
-  section: { component: "Box" },
-  h1: { component: "Header" },
-  h2: { component: "Header" },
-  h3: { component: "Header" },
-  h4: { component: "Header" },
-  h5: { component: "Header" },
-  h6: { component: "Header" },
-  p: { component: "Text" },
-  header: { component: "Box" },
-  nav: { component: "Box" },
-  label: { component: "Text", notSupported: "use InputLabel" },
-  button: { component: "Button" },
-  ul: { component: "Box", notSupported: "use ScrollView" },
-  li: { component: "Box", notSupported: "use ScrollView" },
-  a: { component: "Box", notSupported: "use /component/link" },
-  form: { component: "Box", notSupported: true },
-  // 'svg': { component: 'Icon' },
-  fieldset: { component: "Box", notSupported: true },
-  input: { component: "Box", notSupported: true },
-  legend: { component: "Box", notSupported: true },
-  hr: { component: "Divider" },
-};
+export const elementArray: Array<IElementMapping> = [
+  {
+    from: "div",
+    to: "Box",
+  },
+  {
+    from: "span",
+    to: "Box",
+  },
+  {
+    insertComments: "This was a <ul> tag. Verify its styled properly",
+    from: "ul",
+    to: "Box",
+  },
+  {
+    insertComments: "This was a <li> tag. Verify its styled properly",
+    from: "li",
+    to: "Box",
+  },
+  {
+    from: "hr",
+    to: "Divider",
+  },
+  {
+    from: "h1",
+    to: "Header",
+    attributes: [
+      { name: "accessibilityLevel", value: 1 },
+      { name: "variant", value: "headerOne" },
+    ],
+  },
+  {
+    from: "h2",
+    to: "Header",
+    attributes: [{ name: "variant", value: "headerTwo" }],
+  },
+  {
+    from: "h3",
+    to: "Header",
+    attributes: [{ name: "variant", value: "headerThree" }],
+  },
+  {
+    from: "h4",
+    to: "Header",
+    attributes: [{ name: "variant", value: "headerFour" }],
+  },
+  {
+    from: "h5",
+    to: "Header",
+    attributes: [{ name: "variant", value: "headerFive" }],
+  },
+  {
+    from: "b",
+    to: "Text",
+    attributes: [{ name: "fontWeight", value: "bold" }],
+  },
+  {
+    from: "p",
+    to: "Text",
+  },
+  {
+    from: "i",
+    to: "Text",
+    attributes: [{ name: "italic", value: true }],
+  },
+  {
+    // TODO: Any attributes?
+    from: "strong",
+    to: "Text",
+  },
+];
+
+//   {
+//   span: { component: "Text" },
+//   section: { component: "Box" },
+//   h4: { component: "Header" },
+//   h5: { component: "Header" },
+//   h6: { component: "Header" },
+//   p: { component: "Text" },
+//   header: { component: "Box" },
+//   nav: { component: "Box" },
+//   label: { component: "Text", notSupported: "use InputLabel" },
+//   button: { component: "Button" },
+//   ul: { component: "Box", notSupported: "use ScrollView" },
+//   li: { component: "Box", notSupported: "use ScrollView" },
+//   a: { component: "Box", notSupported: "use /component/link" },
+//   form: { component: "Box", notSupported: true },
+//   // 'svg': { component: 'Icon' },
+//   fieldset: { component: "Box", notSupported: true },
+//   input: { component: "Box", notSupported: true },
+//   legend: { component: "Box", notSupported: true },
+//   hr: { component: "Divider" },
+// };
 
 export const getElementMapping = (el: string) => {
-  const found = elementMap[el];
+  const found = elementArray.find(e => e.from === el);
 
   if (!found) {
     throw new Error("element not found: " + el);

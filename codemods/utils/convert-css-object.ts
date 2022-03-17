@@ -110,7 +110,7 @@ export const convertCssObject = ({
     // if the element is a box we have to next the text properties under _text
     if (
       isATextProp(key) &&
-      _.includes(activeElement.component, ["Box", "Button"])
+      _.includes(activeElement.to, ["Box", "Button"])
     ) {
       parent = "_text";
     }

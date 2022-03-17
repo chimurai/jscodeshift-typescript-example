@@ -1,5 +1,5 @@
 import { JSCodeshift } from "jscodeshift";
-import { mediaPropertyNames, preToRNTransform } from "./mappings";
+import { IElementMapping, mediaPropertyNames, preToRNTransform } from "./mappings";
 import * as _ from "lodash/fp";
 import * as postcss from "postcss-scss";
 import * as postcssJs from "postcss-js";
@@ -36,16 +36,19 @@ export const processElement = ({
   j: JSCodeshift;
   filePath: string,
   nodePath: any;
-  activeElement: any;
+  activeElement: IElementMapping;
   addToImports: boolean;
-  addToUCLImportsFn: (name: string) => void;
+  addToUCLImportsFn: Function;
   asObject?: boolean;
   includeTypes?: boolean;
   localImportNames?: string[];
 }) => {
+  console.log(`>>>>>> activeElement: `, activeElement);
   const componentNameOrAlias = addToImports
-    ? addToUCLImportsFn(activeElement.component)
-    : activeElement.component;
+    ? addToUCLImportsFn(activeElement.to)
+    : activeElement.to;
+
+  console.log(`>>>>>>> componentNameOrAlias: `, componentNameOrAlias);
 
   const { quasi, tag } = nodePath.node;
   const { obj, cssText, substitutionMap, comments } = parseTemplate({
