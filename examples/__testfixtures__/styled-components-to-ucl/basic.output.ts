@@ -45,8 +45,6 @@ export const Tokens = Box.withConfig({
   borderWidth: 2,
   borderColor: Styles.color.primary,
   borderStyle: 'solid',
-
-  // @ts-ignore web only attribute
   accessibilityRole: 'header',
 });
 

@@ -416,7 +416,7 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: "header",
     to: "Box",
-    attributes: [{ name: "accessibilityRole", value: 'header', comment: '@ts-ignore web only attribute' }],
+    attributes: [{ name: "accessibilityRole", value: 'header' }],
   },
   {
     from: "nav",
