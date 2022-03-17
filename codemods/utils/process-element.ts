@@ -202,7 +202,16 @@ export const processElement = ({
     ct = ct.replaceAll("*/", "");
     logManualWork({
       filePath,
-      helpfulMessage: `The codemod for handling styled-components was not able to convert the following element: \n
+      helpfulMessage: `
+The codemod for handling styled-components was not able to convert this element.
+
+It can fail for a few reasons:
+- Unsupported attributes
+- Nested attributes
+- Complex logic
+
+The unsupported element:
+
 \`\`\`tsx
 ${ct}
 \`\`\`
