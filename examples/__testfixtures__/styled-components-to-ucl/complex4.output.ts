@@ -1,4 +1,4 @@
-import { Box, Button, Text as UCLText } from '@rbilabs/universal-components';
+import { ActionButton, Box, Text as UCLText } from '@rbilabs/universal-components';
 
 import { ModalContent } from '../styled';
 import { ModalHeading } from 'components/modal';
@@ -122,7 +122,7 @@ export const GraphicTextWrapper = Box.withConfig({
 });
 
 
-export const TertiaryButton = Button.withConfig({
+export const TertiaryButton = ActionButton.withConfig({
   backgroundColor: 'none',
   borderWidth: 1,
   borderColor: Styles.color.grey.four,
@@ -131,13 +131,9 @@ export const TertiaryButton = Button.withConfig({
   borderTopRightRadius: Styles.borderRadius,
   borderBottomRightRadius: Styles.borderRadius,
   borderBottomLeftRadius: Styles.borderRadius,
-
-  _text: {
-    color: Styles.color.black,
-    fontFamily: Styles.fontFamily.body,
-    fontSize: 15,
-  },
-
+  color: Styles.color.black,
+  fontFamily: Styles.fontFamily.body,
+  fontSize: 15,
   paddingX: '$4',
   paddingY: '9px',
   width: '100%',
@@ -158,7 +154,7 @@ TODO RN: unsupported CSS
 Some attributes were not converted.
 
 
-  // https://ghinda.net/article/mimic-native-focus-css/ 
+  // https://ghinda.net/article/mimic-native-focus-css/
   outline: 2px solid Highlight;
   @media (-webkit-min-device-pixel-ratio: 0) {
     outline: -webkit-focus-ring-color auto 5px;

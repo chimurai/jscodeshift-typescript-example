@@ -198,8 +198,10 @@ export const processElement = ({
         console.log(`Comment extraction error: `, error);
       }
     })(_.keys(substitutionMap));
-    ct = ct.replaceAll("/*", "//");
-    ct = ct.replaceAll("*/", "");
+    ct = _.flow(
+      _.replace("/*", "//"),
+      _.replace("*/", ""),
+    )(ct);
     logManualWork({
       filePath,
       helpfulMessage: `
@@ -327,7 +329,11 @@ const nodePathToString = (nodePath) => {
         // @ts-ignore
         _.map((o) => o?.line),
         _.map((o: string) =>
-          _.flow(_.replace("/*", "//"), _.replace("*/", ""))(o),
+          _.flow(
+            _.replace("/*", "//"),
+            _.replace("*/", ""),
+            _.trimEnd,
+          )(o),
         ),
         _.join("\n"),
       )(nodePath?.node?.loc?.lines?.infos);
