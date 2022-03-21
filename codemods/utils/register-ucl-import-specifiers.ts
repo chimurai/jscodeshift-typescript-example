@@ -1,20 +1,21 @@
-import { Collection, JSCodeshift } from "jscodeshift";
-import * as _ from "lodash";
+import { Collection, JSCodeshift } from 'jscodeshift';
+import * as _ from 'lodash';
 
 // This makes sure we are importing all of the components from the UCL.
 // We first check to see if the file has an import first, and if it is we need to preserve it.
 // Otherwise we have to create one and make sure all specifiers are imported
-export function registerUCLImportSpecifiers(
+export function registerImportSpecifiers(
   root: Collection<any>,
   j: JSCodeshift,
   specifier: string,
+  importIdentifier = '@rbilabs/universal-components'
 ) {
   const specifiers = new Set<string>([specifier]);
 
-  const addUCLImport = (componentRealName) => {
+  const addUCLImport = componentRealName => {
     // Prefix with UCL if there is a local variable with the same name
-    if (hasScopeConflict(root, j, componentRealName)) {
-      return "UCL" + componentRealName;
+    if (hasScopeConflict(root, j, componentRealName, importIdentifier)) {
+      return 'UCL' + componentRealName;
     }
     return componentRealName;
   };
@@ -22,14 +23,11 @@ export function registerUCLImportSpecifiers(
   // 1. make sure we have all the imports already imported from the ucl,
   // but then delete it so we can idompotently add the new ones as a fresh new import
   root
-    .find(
-      j.ImportDeclaration,
-      (node) => node.source.value === "@rbilabs/universal-components",
-    )
-    .forEach((node) => {
+    .find(j.ImportDeclaration, node => node.source.value === importIdentifier)
+    .forEach(node => {
       j(node)
         .find(j.ImportSpecifier)
-        .forEach((path) => {
+        .forEach(path => {
           specifiers.add(path.value.imported.name);
         });
     })
@@ -37,25 +35,20 @@ export function registerUCLImportSpecifiers(
     .remove();
 
   // 2. Add import to UCL with all the specifiers
-  root.find(j.Program).forEach((path) => {
+  root.find(j.Program).forEach(path => {
     const importSpecifiers = Array.from(specifiers)
       .sort((a, b) => a.localeCompare(b))
-      .map((specifier) => {
+      .map(specifier => {
         const needsImportRenaming = addUCLImport(specifier) !== specifier;
 
         return j.importSpecifier.from({
           imported: j.identifier(specifier),
-          ...(needsImportRenaming
-            ? { local: j.identifier(addUCLImport(specifier)) }
-            : {}),
+          ...(needsImportRenaming ? { local: j.identifier(addUCLImport(specifier)) } : {}),
         });
       });
 
     path.node.body.unshift(
-      j.importDeclaration(
-        importSpecifiers,
-        j.stringLiteral("@rbilabs/universal-components"),
-      ),
+      j.importDeclaration(importSpecifiers, j.stringLiteral(importIdentifier))
     );
   });
 
@@ -66,6 +59,7 @@ function hasScopeConflict(
   root: Collection<any>,
   j: JSCodeshift,
   specifier: string,
+  importIdentifier: string
 ) {
   // some variable exists that interferes.
   if (root.findVariableDeclarators(specifier).size() !== 0) {
@@ -75,13 +69,8 @@ function hasScopeConflict(
   // some import already exists that interferes
   if (
     root
-      .find(
-        j.ImportDeclaration,
-        (node) => node.source.value !== "@rbilabs/universal-components",
-      )
-      .filter((i) =>
-        i.value.specifiers?.some((s) => s.local?.name === specifier),
-      )
+      .find(j.ImportDeclaration, node => node.source.value !== importIdentifier)
+      .filter(i => i.value.specifiers?.some(s => s.local?.name === specifier))
       .size() !== 0
   ) {
     return true;
