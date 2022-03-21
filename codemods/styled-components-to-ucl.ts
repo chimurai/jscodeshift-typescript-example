@@ -1,31 +1,28 @@
-import { Collection, FileInfo, JSCodeshift, types } from "jscodeshift";
-import {
-  getElementMapping,
-  styledComponentImportFunctionShouldBeRemove,
-} from "./utils/mappings";
-import { processElement } from "./utils/process-element";
-import * as _ from "lodash/fp";
-import { registerUCLImportSpecifiers } from "./utils/register-ucl-import-specifiers";
-import { logManualWork } from "../logger";
+import { Collection, FileInfo, JSCodeshift, types } from 'jscodeshift';
+import { getElementMapping, styledComponentImportFunctionShouldBeRemove } from './utils/mappings';
+import { processElement } from './utils/process-element';
+import * as _ from 'lodash/fp';
+import { registerImportSpecifiers } from './utils/register-ucl-import-specifiers';
+import { logManualWork } from '../logger';
 
 export function transformStyledCompoentsToUCL(
   root: Collection<any>,
   j: JSCodeshift,
-  fileInfo: FileInfo,
+  fileInfo: FileInfo
 ) {
-  const isJSFile = fileInfo.path.endsWith(".js");
+  const isJSFile = fileInfo.path.endsWith('.js');
   const filePath = fileInfo.path;
   let localImportNames = [];
 
-  root.find(j.ImportDeclaration).forEach((i) => {
+  root.find(j.ImportDeclaration).forEach(i => {
     localImportNames = localImportNames.concat(
-      i.value.specifiers.map((s) => s.local?.name).filter(Boolean),
+      i.value.specifiers.map(s => s.local?.name).filter(Boolean)
     );
   });
 
   const styledImport = root.find(j.ImportDeclaration, {
     source: {
-      value: "styled-components",
+      value: 'styled-components',
     },
   });
 
@@ -37,29 +34,22 @@ export function transformStyledCompoentsToUCL(
   // check to see if we are importing css
   let styledLocal = styledImport.find(j.Identifier).get(0).node.name;
 
-  const addUCLImport = (importName) =>
-    registerUCLImportSpecifiers(root, j, importName);
+  const addUCLImport = importName => registerImportSpecifiers(root, j, importName);
 
   // other imports from styled-components
   // e.g. `css` `animate`
   const otherImports = styledImport
     .get(0)
-    .node.specifiers.filter((p) => p.type === "ImportSpecifier")
-    .map((p) => p.imported.name);
+    .node.specifiers.filter(p => p.type === 'ImportSpecifier')
+    .map(p => p.imported.name);
 
   if (otherImports.length) {
-    otherImports.forEach((name) => {
+    otherImports.forEach(name => {
       if (styledComponentImportFunctionShouldBeRemove(name)) {
         // Remove the export
-        root
-          .find(j.Identifier, { name: name })
-          .closest(j.ExportNamedDeclaration)
-          .remove();
+        root.find(j.Identifier, { name: name }).closest(j.ExportNamedDeclaration).remove();
         // Or the local var if there is no export
-        root
-          .find(j.Identifier, { name: name })
-          .closest(j.VariableDeclaration)
-          .remove();
+        root.find(j.Identifier, { name: name }).closest(j.VariableDeclaration).remove();
         return;
       }
 
@@ -69,13 +59,13 @@ export function transformStyledCompoentsToUCL(
             name: name,
           },
         })
-        .forEach((nodePath) => {
+        .forEach(nodePath => {
           // This is for the styled-components `css`
           const expression = processElement({
             j,
             filePath,
             nodePath,
-            activeElement: { to: "noop", from: "css" },
+            activeElement: { to: 'noop', from: 'css' },
             addToImports: false,
             addToUCLImportsFn: _.noop,
             asObject: true,
@@ -96,15 +86,15 @@ export function transformStyledCompoentsToUCL(
       },
     })
     .closest(j.TaggedTemplateExpression)
-    .forEach((nodePath) => {
+    .forEach(nodePath => {
       if (
         !(
-          nodePath.node.tag.type === "MemberExpression" &&
-          nodePath.node.tag.property.type === "Identifier"
+          nodePath.node.tag.type === 'MemberExpression' &&
+          nodePath.node.tag.property.type === 'Identifier'
         )
       ) {
         // TODO: Replace node with mocked component, log manual work?
-        throw new Error("Error #jj43");
+        throw new Error('Error #jj43');
         return;
       }
 
@@ -133,18 +123,16 @@ export function transformStyledCompoentsToUCL(
       },
     })
     .closest(j.TaggedTemplateExpression)
-    .forEach((nodePath) => {
+    .forEach(nodePath => {
       const { node } = nodePath;
-      if (node.tag.type !== "CallExpression") {
-        throw new Error(
-          "this should always be call expression based on the find/closest calls.",
-        );
+      if (node.tag.type !== 'CallExpression') {
+        throw new Error('this should always be call expression based on the find/closest calls.');
       }
 
-      if (node.tag.arguments[0]?.type !== "Identifier") {
-        const variable = walkUpToFind(nodePath, j, "VariableDeclarator");
+      if (node.tag.arguments[0]?.type !== 'Identifier') {
+        const variable = walkUpToFind(nodePath, j, 'VariableDeclarator');
 
-        if (!variable) throw new Error("coudlnt find the variable");
+        if (!variable) throw new Error('coudlnt find the variable');
 
         logManualWork({
           filePath: fileInfo.path,
@@ -167,14 +155,14 @@ ${j(variable).toSource()}
           j.arrowFunctionExpression.from({
             comments: [
               j.commentLine(
-                " TODO: RN - This styled component could not be codemoded. Check manual-work/*.md for guidance",
+                ' TODO: RN - This styled component could not be codemoded. Check manual-work/*.md for guidance',
                 false,
-                true,
+                true
               ),
             ],
             params: [],
             body: j.nullLiteral(),
-          }),
+          })
         );
 
         return;
@@ -185,7 +173,7 @@ ${j(variable).toSource()}
         j,
         filePath,
         nodePath,
-        activeElement: { to: nameOfArg, from: "noop" },
+        activeElement: { to: nameOfArg, from: 'noop' },
         addToImports: false,
         addToUCLImportsFn: addUCLImport,
         includeTypes: !isJSFile,
@@ -200,9 +188,9 @@ ${j(variable).toSource()}
   // Remove the 'styled-components' import
   if (otherImports.length) {
     let specifiers = styledImport.get(0).node.specifiers;
-    specifiers = _.filter((s) => {
+    specifiers = _.filter(s => {
       // @ts-ignore
-      if (s?.type === "ImportDefaultSpecifier") {
+      if (s?.type === 'ImportDefaultSpecifier') {
         return false;
       }
       // @ts-ignore
@@ -210,7 +198,7 @@ ${j(variable).toSource()}
         return false;
       }
       // @ts-ignore
-      if (_.contains(s?.imported?.name, ["css"])) {
+      if (_.contains(s?.imported?.name, ['css'])) {
         return false;
       }
       return true;
@@ -230,11 +218,11 @@ type ASTTypes = typeof types.namedTypes;
 function walkUpToFind<T extends keyof ASTTypes>(
   node: any,
   j: JSCodeshift,
-  type: T,
+  type: T
   // ): ASTTypes[T] | null {
 ): any | null {
   let foundNode;
-  j(node).forEach((path) => {
+  j(node).forEach(path => {
     if (foundNode) return;
 
     if (path.value.type === type) {
