@@ -5,29 +5,27 @@ import {
   Property,
   SpreadElement,
   SpreadProperty,
-} from "jscodeshift";
-import toRN from "css-to-react-native";
-import { _isRemovable, _isSupported } from "../utils/mappings";
-import { logManualWork } from "../../logger";
+} from 'jscodeshift';
+import toRN from 'css-to-react-native';
+import { _isRemovable, _isSupported } from '../utils/mappings';
+import { logManualWork } from '../../logger';
 
 export function convertObjectProperties(
   filePath: string,
   j: JSCodeshift,
-  properties: Array<
-    Property | ObjectProperty | SpreadElement | SpreadProperty | ObjectMethod
-  >,
-  needsFlexRemapping: boolean,
+  properties: Array<Property | ObjectProperty | SpreadElement | SpreadProperty | ObjectMethod>,
+  needsFlexDirection: boolean
 ): Array<ObjectProperty | SpreadElement> {
   return properties.reduce((properties, node) => {
     if (
-      node.type === "ObjectProperty" &&
-      node.key.type === "Identifier" &&
-      node.value.type === "StringLiteral"
+      node.type === 'ObjectProperty' &&
+      node.key.type === 'Identifier' &&
+      node.value.type === 'StringLiteral'
     ) {
       const attr = toRN([[node.key.name, node.value.value]]);
 
       Object.entries(attr).forEach(([key, value]) => {
-        if (typeof value !== "string" && typeof value !== "number") {
+        if (typeof value !== 'string' && typeof value !== 'number') {
           // TODO: Handle nested styles
           return;
         }
@@ -38,8 +36,8 @@ export function convertObjectProperties(
         if (!isSupported) {
           properties.push(
             // @ts-ignore
-            j.commentLine(" TODO: RN - Unsupported CSS"),
-            j.commentLine(` ${key}: '${value}'`),
+            j.commentLine(' TODO: RN - Unsupported CSS'),
+            j.commentLine(` ${key}: '${value}'`)
           );
           return;
         }
@@ -50,32 +48,23 @@ export function convertObjectProperties(
 
         let identifier = key;
 
-        if (needsFlexRemapping) {
-          switch (identifier) {
-            case "justifyContent":
-              identifier = "alignItems";
-              break;
-            case "alignItems":
-              identifier = "justifyContent";
-              break;
-          }
+        if (needsFlexDirection) {
+          properties.push(j.objectProperty(j.identifier('flexDirection'), j.stringLiteral('row')));
         }
 
         properties.push(
           j.objectProperty(
             j.identifier(identifier),
-            typeof value === "string"
-              ? j.stringLiteral(value)
-              : j.literal(value),
-          ),
+            typeof value === 'string' ? j.stringLiteral(value) : j.literal(value)
+          )
         );
       });
-    } else if (node.type === "SpreadElement") {
+    } else if (node.type === 'SpreadElement') {
       const spreadName =
-        node.argument.type === "Identifier"
+        node.argument.type === 'Identifier'
           ? node.argument.name
           : // is it ever not an identifier?
-            "UNKNOWN_IDENTIFIER";
+            'UNKNOWN_IDENTIFIER';
 
       logManualWork({
         filePath,
@@ -93,15 +82,11 @@ If the \`${spreadName}\` variable is a prop coming in from the parent, find all 
 
       properties.push(
         // @ts-ignore
-        j.commentLine(
-          " TODO: RN - Verify spread does not include invalid props or styles",
-        ),
-        node,
+        j.commentLine(' TODO: RN - Verify spread does not include invalid props or styles'),
+        node
       );
     } else {
-      throw new Error(
-        `Unexpected node type in object of style prop ${node.type}`,
-      );
+      throw new Error(`Unexpected node type in object of style prop ${node.type}`);
     }
 
     return properties;

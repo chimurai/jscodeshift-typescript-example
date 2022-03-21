@@ -28,18 +28,6 @@ describe("styled-components to UCL", () => {
   // rename-jsx-primitives
   defineTest(__dirname, '../codemods', null, 'rename-jsx-primitives/basic', { parser: 'tsx' });
 
-  // inline-style-props
-  [
-    'inline-style-prop/dont-crash-on-these',
-    'inline-style-prop/referenced-object',
-    'inline-style-prop/basic',
-    'inline-style-prop/flex-flip',
-    'inline-style-prop/styles-with-spread',
-  ].forEach(test => {
-    defineTest(__dirname, '../codemods', null, test, { parser: 'tsx' });
-  })
-
-
   // WL components
   defineTest(__dirname, '../codemods', null, 'wl-components/reward-categories/components/styled', { parser: 'tsx' });
   defineTest(__dirname, '../codemods', null, 'wl-components/account-orders/styled.base', { parser: 'ts' });

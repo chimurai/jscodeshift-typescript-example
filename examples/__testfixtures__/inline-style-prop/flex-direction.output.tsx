@@ -2,7 +2,8 @@ import { Box } from '@rbilabs/universal-components';
 function C() {
   return (
     <Box style={{
-      justifyContent: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
     }}>hi</Box>
   );
 }

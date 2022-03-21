@@ -7,7 +7,7 @@ const styles = {
 }
 
 const textStyle = {
-    justifyContent: 'center',
+    fontSize: 16
 }
 
 function C() {
