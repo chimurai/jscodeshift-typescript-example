@@ -4,8 +4,8 @@ import { transformInlineStyleProps } from './/inline-style-prop';
 import { commitManualLogs } from '../logger';
 import { transformRenameJSXPrimitives } from './rename-jsx-primitives';
 import { transformStyledCompoentsToUCL } from './styled-components-to-ucl';
-import { removeComponentLibaryImport } from './utils/remove-component-library-import';
 import { transformRenameOnclick } from './rename-onclick';
+import { transformComponentLibImports } from './components-lib-imports';
 
 export const parser = 'tsx';
 export default function transformer(fileInfo: FileInfo, api: API) {
@@ -13,8 +13,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
 
   const root = j(fileInfo.source);
 
-  removeComponentLibaryImport(root, j);
-
+  transformComponentLibImports(root, j, fileInfo);
   transformInlineStyleProps(root, j, fileInfo);
   transformRenameJSXPrimitives(root, j, fileInfo);
   transformStyledCompoentsToUCL(root, j, fileInfo);
