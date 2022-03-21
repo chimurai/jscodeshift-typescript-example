@@ -7,8 +7,7 @@ const styles = {
 }
 
 const textStyle = {
-    display: 'flex',
-    alignItems: 'center',
+    fontSize: '16px'
 }
 
 function C() {
