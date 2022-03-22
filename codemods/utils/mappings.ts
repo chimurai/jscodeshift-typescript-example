@@ -1,5 +1,6 @@
 import { JSCodeshift } from 'jscodeshift';
 import * as _ from 'lodash/fp';
+import lodash from 'lodash';
 import { clearConfigCache } from 'prettier';
 
 const styledComponentsImportsToRemove = ['keyframes'];
@@ -222,21 +223,28 @@ export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementM
   return { newObject, newMapping, hasBetterMapping };
 };
 
-const convertLineHeight = (currentValue: string, obj: object) => {
-  return currentValue;
+function isFloat(n) {
+  return Number(n) === n && n % 1 !== 0;
 }
-
 const identifierMapping = {
   'lineHeight': (currentValue: string, obj: object) => {
+    let newValue = currentValue;
+    if (isFloat(currentValue)) {
+      newValue = 'sm';
+    }
     return {
-      newValue: currentValue,
+      newValue,
       isSkipable: true,
+      isRemovable: false,
+      isSupported: true,
     }
   },
   'textDecoration': (currentValue: string, obj: object) => {
     return {
       newValue: currentValue,
       isSkipable: true,
+      isRemovable: false,
+      isSupported: true,
     }
   },
 }
@@ -256,10 +264,14 @@ export const preToRNTransform = (identifier, value, obj) => {
   if (found) {
     const {
       newValue,
-      isSkipable: _isSkipable,
+      isSkipable: _skip,
+      isRemovable: _remove,
+      isSupported: _supported,
     } = found(v, obj);
     v = newValue;
-    isSkipable = _isSkipable;
+    isSkipable = _skip;
+    isRemovable = _remove;
+    isSupported = _supported;
   }
 
   // if (identifier === 'boxShadow') {

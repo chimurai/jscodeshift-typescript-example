@@ -119,13 +119,18 @@ export const processElement = ({
           }
 
           // Convert
+          let convertedObj;
           try {
-            let convertedObj;
             if (isSkipable) {
               convertedObj = { [k]: v };
             } else {
               convertedObj = toRN([[k, v]]);
             }
+          } catch (error) {
+            console.error('toRN', k, v, error.message);
+            hasBailingError = true;
+          }
+          try {
             _.keys(convertedObj).forEach(k => {
               const v = convertedObj[k];
               properties = addProperties({
@@ -143,7 +148,7 @@ export const processElement = ({
               });
             });
           } catch (error) {
-            console.error('toRN', error.message);
+            console.error('addProperties', convertedObj, error.message);
             hasBailingError = true;
           }
         });
