@@ -7,7 +7,6 @@ export const TierLabel = Text.withConfig({
   left: 0,
   variant: 'headerTwo',
   margin: 0,
-  lineHeight: 1,
   color: '__legacyToken.text-button-secondary',
   zIndex: Styles.zIndex.below,
   height: '$8',

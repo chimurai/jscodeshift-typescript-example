@@ -35,7 +35,7 @@ export const Container = ModalContent.withConfig({
 
 export const StyledModalHeader = ModalHeading.withConfig({
   alignSelf: 'center',
-  lineHeight: 40,
+  lineHeight: '3xl',
   paddingBottom: 0,
   borderBottomWidth: 0,
   borderBottomColor: 'black',
@@ -65,22 +65,11 @@ export const StyledModalHeader = styled(ModalHeading)`
 export const LoadingText = UCLText.withConfig({
   textAlign: 'center',
   fontSize: 15,
+  lineHeight: 'md',
   fontFamily: Styles.fontFamily.body,
   paddingX: '$10',
   paddingY: '7px',
-})/*
-TODO: RN - unsupported CSS
-Some attributes were not converted.
-
-export const LoadingText = styled.p`
-  text-align: center;
-  font-size: 0.9375rem;
-  line-height: 1.33;
-  font-family: ${Styles.fontFamily.body};
-  padding: 0.4375rem 2.5rem;
-`;
-
-*/;
+});
 
 export const LoadingGraphicWrapper = Box.withConfig({
   height: '240px',

@@ -1,7 +1,5 @@
 import { JSCodeshift } from 'jscodeshift';
 import * as _ from 'lodash/fp';
-import lodash from 'lodash';
-import { clearConfigCache } from 'prettier';
 
 const styledComponentsImportsToRemove = ['keyframes'];
 export const styledComponentImportFunctionShouldBeRemove = name =>
@@ -226,11 +224,93 @@ export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementM
 function isFloat(n) {
   return Number(n) === n && n % 1 !== 0;
 }
+
+const lineHeightArray = [
+  // note: ignoring anything smaller then 1.0
+  { key: 1, value: '2xs' },
+  { key: 1.125, value: 'xs' },
+  { key: 1.25, value: 'sm' },
+  { key: 1.375, value: 'md' },
+  { key: 1.5, value: 'lg' },
+  { key: 1.75, value: 'xl' },
+  { key: 2.0, value: '2xl' },
+  { key: 2.5, value: '3xl' },
+  { key: 3.0, value: '4xl' },
+  { key: 4.0, value: '5xl' },
+  // note: ignoring anything larger then 4.0
+  { key: 10000, value: '5xl' },
+]
+
+
+const numberOrLengthRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)((?:px|rem|%))?$/i
+const subRe = /^(.*?)(substitution)(.*?)/i
+
+
+export const parseValueToPx = (value) => {
+  if (String(value).match(subRe)) {
+    throw Error('cant parse ' + value);
+  }
+  let v = value
+  const p = String(value).match(numberOrLengthRe)
+  if (p && p[1]) {
+    // Convert rem to pixel
+    if (p[2] === 'rem') {
+      const asNum = parseFloat(String(p[1]))
+      if (!isNaN(asNum)) {
+        v = Math.floor(asNum * 16)
+      }
+    } else {
+      v = parseFloat(p[1])
+    }
+  }
+  return v
+}
+
 const identifierMapping = {
   'lineHeight': (currentValue: string, obj: object) => {
     let newValue = currentValue;
-    if (isFloat(currentValue)) {
-      newValue = 'sm';
+    let valueAsRem;
+
+    // if it's a float assume it's something like `line-height: 1.3`
+    if (_.isNumber(currentValue)) {
+      // options
+      valueAsRem = currentValue;
+    }
+
+    const p = String(currentValue).match(numberOrLengthRe)
+    if (!valueAsRem && p && p[1]) {
+      if (p[2] === 'rem') {
+        valueAsRem = parseFloat(String(p[1]));
+      }
+      if (p[2] === '%') {
+        valueAsRem = Number(p[1]) / 100;
+      }
+      if (p[2] === 'px') {
+        // we need to convert to a percentage
+        // If we have the font size we can use it otherwise just return
+        // the 'md' value
+        try {
+          // @ts-ignore
+          let fontSizeAsPx = parseValueToPx(obj.fontSize);
+          const denominator = Number(p[1]);
+          // Hack because people are setting line height to `1px`??
+          if (!fontSizeAsPx || (denominator === 1)) {
+            valueAsRem = 1.375;
+          } else {
+            valueAsRem = fontSizeAsPx / denominator;
+          }
+        } catch (error) {
+          console.log(`fontSize error: `, error);
+          valueAsRem = 1.375;
+        }
+      }
+    }
+
+    const res = _.find((l: { key: string, value: string }) =>
+      valueAsRem <= l.key)(lineHeightArray);
+
+    if (res) {
+      newValue = res.value;
     }
     return {
       newValue,
@@ -260,7 +340,7 @@ export const preToRNTransform = (identifier, value, obj) => {
 
   // Mappings
   // --------
-  const found = identifierMapping[value];
+  const found = identifierMapping[identifier];
   if (found) {
     const {
       newValue,
