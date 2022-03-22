@@ -9,7 +9,6 @@ export const TierLabel = styled.p`
   left: 0;
   font: ${brandFont.headerTwo};
   margin: 0;
-  line-height: 1px;
   color: ${({ theme }) => theme.token('text-button-secondary')};
   z-index: ${Styles.zIndex.below};
   height: 2rem;

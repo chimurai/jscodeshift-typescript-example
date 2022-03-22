@@ -35,7 +35,7 @@ export const Container = ModalContent.withConfig({
 
 export const StyledModalHeader = ModalHeading.withConfig({
   alignSelf: 'center',
-  lineHeight: 40,
+  lineHeight: '3xl',
   paddingBottom: 0,
   borderBottomWidth: 0,
   borderBottomColor: 'black',
@@ -65,22 +65,11 @@ export const StyledModalHeader = styled(ModalHeading)`
 export const LoadingText = UCLText.withConfig({
   textAlign: 'center',
   fontSize: 15,
+  lineHeight: 'md',
   fontFamily: Styles.fontFamily.body,
   paddingX: '$10',
   paddingY: '7px',
-})/*
-TODO: RN - unsupported CSS
-Some attributes were not converted.
-
-export const LoadingText = styled.p`
-  text-align: center;
-  font-size: 0.9375rem;
-  line-height: 1.33;
-  font-family: ${Styles.fontFamily.body};
-  padding: 0.4375rem 2.5rem;
-`;
-
-*/;
+});
 
 export const LoadingGraphicWrapper = Box.withConfig({
   height: '240px',
@@ -91,27 +80,11 @@ export const LoadingGraphicWrapper = Box.withConfig({
   borderBottomLeftRadius: '50%',
   alignSelf: 'center',
   marginTop: '$4',
+  backgroundColor: IMAGE_BACKGROUND_COLOR,
   overflow: 'hidden',
   justifyContent: 'center',
   alignItems: 'center',
-})/*
-TODO: RN - unsupported CSS
-Some attributes were not converted.
-
-export const LoadingGraphicWrapper = styled.div`
-  height: 15rem;
-  width: 15rem;
-  border-radius: 50%;
-  margin: 0 auto;
-  margin-top: 16px;
-  background: ${IMAGE_BACKGROUND_COLOR};
-  display: flex;
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-`;
-
-*/;
+});
 
 export const GraphicTextWrapper = Box.withConfig({
   // TODO: RN - unsupported CSS

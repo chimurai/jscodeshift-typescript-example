@@ -1,6 +1,6 @@
 import { defineTest } from 'jscodeshift/src/testUtils';
 
-jest.spyOn(console, "error").mockImplementation(() => { });
+// jest.spyOn(console, "error").mockImplementation(() => { });
 
 describe("styled-components to UCL", () => {
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/bad', { parser: 'ts' });
@@ -14,6 +14,7 @@ describe("styled-components to UCL", () => {
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/complex6', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/css-template', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/media', { parser: 'ts' });
+  defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/line-height', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/mapping-custom-processing', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/media2', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/pseudo', { parser: 'ts' });

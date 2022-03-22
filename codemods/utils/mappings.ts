@@ -89,7 +89,19 @@ const styleFontFamilyMap = {
   brand: 'heading',
 };
 
-const removeProps = [
+// Remove
+// ------
+
+// Must match both property and value
+const removePropertyValuePairs = [
+  { property: /^position/, value: /^relative/ },
+  { property: /^flexDirection/, value: /^column/ },
+  { property: /^flex-direction/, value: /^column/ },
+  { property: /^display/, value: /^flex/ },
+];
+
+// Props only
+const removeProperties = [
   /^animation/,
   /^transition/,
   /^text-shadow$/,
@@ -100,21 +112,14 @@ const removeProps = [
   /^font-stretch$/,
 ];
 
-const removeKeyValuePairs = [
-  { key: 'position', value: 'relative' },
-  { key: 'flexDirection', value: 'column' },
-  { key: 'flex-direction', value: 'column' },
-  { key: 'display', value: 'flex' },
+// Unsupported
+// -----------
+const unsupportedPropertyValuePairs = [
+  // anything but flex or none is not supported
+  { property: /^display/, value: /^(?!.*(none|flex)).*/ },
 ];
 
-const unsupportedKeyValuePairs = [
-  { key: 'position', value: 'relative' },
-  { key: 'flexDirection', value: 'column' },
-  { key: 'flex-direction', value: 'column' },
-  { key: 'display', value: 'flex' },
-];
-
-const unsupportedIdentifiers = [
+const unsupportedProperties = [
   /^boxShadow$/,
   /^box-shadow$/,
   /^objectFit$/,
@@ -132,47 +137,201 @@ const unsupportedIdentifiers = [
   /^grid/,
 ];
 
-const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
+const unsupportedValue = [
+  /^calc/,
+  /^max/,
+  /^min/,
+  /^relative$/,
+];
 
 const _isInReg = (test, regex) => _.some(re => re.test(test), regex);
 
 export const _isRemovable = (property: string, value: string) => {
-  if (property === 'position' && value === 'relative') {
+
+  // Remove by property and value matches
+  const found = _.some(({ property: _p, value: _v }) =>
+    _p.test(property) && _v.test(value))(removePropertyValuePairs);
+
+  if (found) {
     return true;
   }
 
-  if (property === 'flexDirection' && value === 'column') {
+  // Remove by property
+  if (_isInReg(property, removeProperties)) {
     return true;
   }
-
-  if (property === 'display' && value === 'flex') {
-    return true;
-  }
-
-  if (_isInReg(property, removeProps)) {
+  // Remove by value
+  if (_isInReg(property, removeProperties)) {
     return true;
   }
 
   return false;
 };
 
-export const _isSupported = (identifier: string, value: string) => {
-  // anything but flex or none is not supported
-  if (identifier === 'display' && !['none', 'flex'].includes(value)) {
+export const _isSupported = (property: string, value: string) => {
+  // Unsupported by property and value matches
+  const found = _.some(({ property: _p, value: _v }) =>
+    _p.test(property) && _v.test(value))(unsupportedPropertyValuePairs);
+
+  if (found) {
     return false;
   }
-  if (_isInReg(identifier, unsupportedIdentifiers)) {
+  // Unsupported by property
+  if (_isInReg(property, unsupportedProperties)) {
     return false;
   }
+  // Unsupported by value
   if (_isInReg(value, unsupportedValue)) {
     return false;
   }
   return true;
 };
 
+// Css Processing order
+// -------------------
+
+// 1. Select a mapping based on the element or import e.g. `div` -> `Box`
+// 2. PostCSS - turns the CSS string into CSS Object
+// 3. Pre css-to-react-native
+//   a. Check for mapping based on the object properties search for a better mapping.
+//   b. if new mapping  add/remove properties.
+//   c. if mapping changed re-run the pre process
+// 4. css-to-react-native property conversion
+// 5. Cleanup - convert (NB props) e.g. fontFamily: ‘$4’
+// 6. Convert to AST
+// 7. Convert expressions
+//   a. steps 3-6..
+export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementMapping, obj: object): {
+  newObject: object,
+  newMapping: IElementMapping,
+  hasBetterMapping: boolean,
+} => {
+  let newObject = null;
+  let hasBetterMapping = false;
+  let newMapping = currentMapping;
+
+  // Based on properties
+  _.flow(
+    _.entries,
+    // _.forEach((key, value) => {
+    //   console.log(`key, value: `, key, value);
+    // }),
+  )(obj)
+
+  return { newObject, newMapping, hasBetterMapping };
+};
+
+function isFloat(n) {
+  return Number(n) === n && n % 1 !== 0;
+}
+
+const lineHeightArray = [
+  // note: ignoring anything smaller then 1.0
+  { key: 1, value: '2xs' },
+  { key: 1.125, value: 'xs' },
+  { key: 1.25, value: 'sm' },
+  { key: 1.375, value: 'md' },
+  { key: 1.5, value: 'lg' },
+  { key: 1.75, value: 'xl' },
+  { key: 2.0, value: '2xl' },
+  { key: 2.5, value: '3xl' },
+  { key: 3.0, value: '4xl' },
+  { key: 4.0, value: '5xl' },
+  // note: ignoring anything larger then 4.0
+  { key: 10000, value: '5xl' },
+]
+
+
+const numberOrLengthRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)((?:px|rem|%))?$/i
+const subRe = /^(.*?)(substitution)(.*?)/i
+
+
+export const parseValueToPx = (value) => {
+  if (String(value).match(subRe)) {
+    throw Error('cant parse ' + value);
+  }
+  let v = value
+  const p = String(value).match(numberOrLengthRe)
+  if (p && p[1]) {
+    // Convert rem to pixel
+    if (p[2] === 'rem') {
+      const asNum = parseFloat(String(p[1]))
+      if (!isNaN(asNum)) {
+        v = Math.floor(asNum * 16)
+      }
+    } else {
+      v = parseFloat(p[1])
+    }
+  }
+  return v
+}
+
+const identifierMapping = {
+  'lineHeight': (currentValue: string, obj: object) => {
+    let newValue = currentValue;
+    let valueAsRem;
+
+    // if it's a float assume it's something like `line-height: 1.3`
+    if (_.isNumber(currentValue)) {
+      // options
+      valueAsRem = currentValue;
+    }
+
+    const p = String(currentValue).match(numberOrLengthRe)
+    if (!valueAsRem && p && p[1]) {
+      if (p[2] === 'rem') {
+        valueAsRem = parseFloat(String(p[1]));
+      }
+      if (p[2] === '%') {
+        valueAsRem = Number(p[1]) / 100;
+      }
+      if (p[2] === 'px') {
+        // we need to convert to a percentage
+        // If we have the font size we can use it otherwise just return
+        // the 'md' value
+        try {
+          // @ts-ignore
+          let fontSizeAsPx = parseValueToPx(obj.fontSize);
+          const denominator = Number(p[1]);
+          // Hack because people are setting line height to `1px`??
+          if (!fontSizeAsPx || (denominator === 1)) {
+            valueAsRem = 1.375;
+          } else {
+            valueAsRem = fontSizeAsPx / denominator;
+          }
+        } catch (error) {
+          console.log(`fontSize error: `, error);
+          valueAsRem = 1.375;
+        }
+      }
+    }
+
+    const res = _.find((l: { key: string, value: string }) =>
+      valueAsRem <= l.key)(lineHeightArray);
+
+    if (res) {
+      newValue = res.value;
+    }
+    return {
+      newValue,
+      isSkipable: true,
+      isRemovable: false,
+      isSupported: true,
+    }
+  },
+  'textDecoration': (currentValue: string, obj: object) => {
+    return {
+      newValue: currentValue,
+      isSkipable: true,
+      isRemovable: false,
+      isSupported: true,
+    }
+  },
+}
+
 // One-offs Pre toRN
 // -------
-export const preToRNTransform = (identifier, value) => {
+export const preToRNTransform = (identifier, value, obj) => {
   let i = identifier;
   let v = value;
   let isSupported = _isSupported(identifier, value);
@@ -181,6 +340,19 @@ export const preToRNTransform = (identifier, value) => {
 
   // Mappings
   // --------
+  const found = identifierMapping[identifier];
+  if (found) {
+    const {
+      newValue,
+      isSkipable: _skip,
+      isRemovable: _remove,
+      isSupported: _supported,
+    } = found(v, obj);
+    v = newValue;
+    isSkipable = _skip;
+    isRemovable = _remove;
+    isSupported = _supported;
+  }
 
   // if (identifier === 'boxShadow') {
   //   i = 'boxShadow';
@@ -303,6 +475,7 @@ export interface IElementMapping {
     isDefault?: boolean;
     specifier?: string;
   };
+  customPreProcessing?: (obj: object) => object;
   customPostProcessing?: (obj: object) => object;
 }
 
@@ -318,10 +491,33 @@ const LinkImport = {
   specifier: 'Link',
 };
 
+const BoxPostProcessing = obj => {
+  // const res = _.pickBy((_value, key) => {
+  //   const shouldKeep = _isInReg(key, [/^width/, /^padding/, /^margin/]);
+  //   return shouldKeep;
+  // })(obj);
+  let hasText = false;
+  Object.keys(obj).map(k => {
+    if (!isATextProp(k)) {
+      return;
+    }
+    const v = obj[k];
+    hasText = true;
+    // Mvoe
+    obj._text = obj._text = {};
+    obj._text[k] = v;
+    // remove the property
+    delete obj[k];
+  })
+  return obj;
+};
+
 export const elementArray: Array<IElementMapping> = [
   {
     from: 'div',
     to: 'Box',
+    // customPreProcessing: BoxPostProcessing,
+    customPostProcessing: BoxPostProcessing,
   },
   {
     from: 'span',
@@ -475,11 +671,12 @@ export const elementArray: Array<IElementMapping> = [
   },
 ];
 
-export const getElementMapping = (el: string) => {
-  const found = elementArray.find(e => e.from === el);
+export const getElementMapping = (el: string, attr = 'from') => {
+  const found = elementArray.find(e => e[attr] === el);
 
   if (!found) {
-    throw new Error('element not found: ' + el);
+    throw new Error("element not found: " + el);
   }
   return found;
 };
+

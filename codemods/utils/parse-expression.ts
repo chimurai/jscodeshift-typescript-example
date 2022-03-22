@@ -168,5 +168,12 @@ export const parseExpression = (
     };
   }
 
+  if (expression?.type === "Identifier") {
+    return {
+      value: expression,
+      vars: null,
+    };
+  }
+
   throw new Error("Expression not implemented type: " + expression.type);
 };

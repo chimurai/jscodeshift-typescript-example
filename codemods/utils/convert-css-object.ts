@@ -12,6 +12,7 @@ import toRN from "css-to-react-native";
 
 const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
+const SHOULD_THROW_ON_NESTED_OBJECT = false;
 
 export const needsFlexRemapping = (obj) =>
   obj.display === "flex" && !obj.flexDirection;
@@ -45,11 +46,12 @@ export const convertCssObject = ({
       if (key === "&:hover") {
         _.map((k: string) => {
           let v = value[k];
+          let convertedObj;
           try {
-            const { identifier, isRemovable, isSupported, isSkipable, value } =
-              preToRNTransform(k, v);
+            const { identifier, isRemovable, isSupported, isSkipable, value: _value } =
+              preToRNTransform(k, v, value);
             k = identifier;
-            v = value;
+            v = _value;
             if (isRemovable) {
               return;
             }
@@ -57,12 +59,19 @@ export const convertCssObject = ({
               properties = addProperty(j, properties, k, v, isSupported);
               return;
             }
-            let convertedObj;
             if (isSkipable) {
               convertedObj = { [k]: v };
             } else {
               convertedObj = toRN([[k, v]]);
             }
+          } catch (error) {
+            console.error("toRN", convertedObj, error.message);
+            hasExpressionError = true;
+            if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+              throw error;
+            }
+          }
+          try {
             // Run custom post processing
             if (activeElement.customPostProcessing) {
               convertedObj = activeElement.customPostProcessing(convertedObj);
@@ -84,15 +93,17 @@ export const convertCssObject = ({
               });
             });
           } catch (error) {
-            console.error("toRN", error.message);
+            console.error("addProperties", convertedObj, error.message);
             hasExpressionError = true;
-            throw error;
+            if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+              throw error;
+            }
           }
         })(_.keys(value));
         // Unsupported
       } else {
         hasExpressionError = true;
-        if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+        if (SHOULD_THROW_ON_NESTED_OBJECT) {
           throw new Error("Contains object - " + value);
         }
       }
@@ -107,10 +118,11 @@ export const convertCssObject = ({
       isSupported,
       isSkipable,
       value: _value,
-    } = preToRNTransform(key, value);
+    } = preToRNTransform(key, value, obj);
     key = identifier;
     value = _value;
 
+    // TODO Move to post processing
     // if the element is a box we have to next the text properties under _text
     if (
       isATextProp(key) &&
@@ -127,14 +139,23 @@ export const convertCssObject = ({
       return;
     }
 
+    let convertedObj;
     try {
-      let convertedObj;
       if (isSkipable) {
         convertedObj = { [key]: value };
       } else {
         convertedObj = toRN([[key, value]]);
       }
 
+    } catch (error) {
+      console.error("toRN", convertedObj, key, value, error.message);
+      hasExpressionError = true;
+      if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+        throw error;
+      }
+      return;
+    }
+    try {
       // Run custom post processing
       if (activeElement.customPostProcessing) {
         convertedObj = activeElement.customPostProcessing(convertedObj);
@@ -156,8 +177,11 @@ export const convertCssObject = ({
         });
       });
     } catch (error) {
-      console.error("toRN", error.message);
+      console.error("addProperties", convertedObj, error.message);
       hasExpressionError = true;
+      if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
+        throw error;
+      }
       return;
     }
   })(_.keys(obj));
@@ -206,13 +230,44 @@ export const addProperties = ({
   addToLocalVars,
   identifier,
   initialValue,
-  parent,
-  newPropertyName,
+  parent: _parent,
+  newPropertyName: _newPropertyName,
   originalPropertyNewName,
-  needsFlexRemapping,
+  needsFlexRemapping: _needFlexRemapping,
   localImportNames,
 }) => {
   let value = initialValue;
+  let parent = _parent;
+  let newPropertyName = _newPropertyName;
+
+  // If the initialValue is an object, iterate over the keys
+  if (_.isObject(initialValue)) {
+    // Check for supported object properties
+    // TODO
+
+    // Set the parent to the
+    parent = identifier;
+    newPropertyName = value;
+    let obj = value;
+    _.keys(obj).forEach((k) => {
+      const v = obj[k];
+      properties = addProperties({
+        j,
+        properties,
+        substitutionMap,
+        addToLocalVars,
+        identifier: k,
+        initialValue: v,
+        parent: parent,
+        newPropertyName: k,
+        originalPropertyNewName: null,
+        needsFlexRemapping: needsFlexRemapping(obj),
+        localImportNames,
+      });
+    });
+    return properties;
+  }
+
   // If the value is is an expression
   const foundExpression = substitutionMap[value];
 
@@ -233,7 +288,7 @@ export const addProperties = ({
     value: _value,
     isSupported,
     isRemovable,
-  } = postToRNTransform(identifier, value.value, needsFlexRemapping);
+  } = postToRNTransform(identifier, value.value, _needFlexRemapping);
 
   value.value = _value;
   identifier = _identifier;
