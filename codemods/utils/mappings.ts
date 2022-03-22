@@ -1,5 +1,6 @@
 import { JSCodeshift } from 'jscodeshift';
 import * as _ from 'lodash/fp';
+import { clearConfigCache } from 'prettier';
 
 const styledComponentsImportsToRemove = ['keyframes'];
 export const styledComponentImportFunctionShouldBeRemove = name =>
@@ -89,7 +90,19 @@ const styleFontFamilyMap = {
   brand: 'heading',
 };
 
-const removeProps = [
+// Remove
+// ------
+
+// Must match both property and value
+const removePropertyValuePairs = [
+  { property: /^position/, value: /^relative/ },
+  { property: /^flexDirection/, value: /^column/ },
+  { property: /^flex-direction/, value: /^column/ },
+  { property: /^display/, value: /^flex/ },
+];
+
+// Props only
+const removeProperties = [
   /^animation/,
   /^transition/,
   /^text-shadow$/,
@@ -100,21 +113,14 @@ const removeProps = [
   /^font-stretch$/,
 ];
 
-const removeKeyValuePairs = [
-  { key: 'position', value: 'relative' },
-  { key: 'flexDirection', value: 'column' },
-  { key: 'flex-direction', value: 'column' },
-  { key: 'display', value: 'flex' },
+// Unsupported
+// -----------
+const unsupportedPropertyValuePairs = [
+  // anything but flex or none is not supported
+  { property: /^display/, value: /^(?!.*(none|flex)).*/ },
 ];
 
-const unsupportedKeyValuePairs = [
-  { key: 'position', value: 'relative' },
-  { key: 'flexDirection', value: 'column' },
-  { key: 'flex-direction', value: 'column' },
-  { key: 'display', value: 'flex' },
-];
-
-const unsupportedIdentifiers = [
+const unsupportedProperties = [
   /^boxShadow$/,
   /^box-shadow$/,
   /^objectFit$/,
@@ -132,47 +138,112 @@ const unsupportedIdentifiers = [
   /^grid/,
 ];
 
-const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
+const unsupportedValue = [
+  /^calc/,
+  /^max/,
+  /^min/,
+  /^relative$/,
+];
 
 const _isInReg = (test, regex) => _.some(re => re.test(test), regex);
 
 export const _isRemovable = (property: string, value: string) => {
-  if (property === 'position' && value === 'relative') {
+
+  // Remove by property and value matches
+  const found = _.some(({ property: _p, value: _v }) =>
+    _p.test(property) && _v.test(value))(removePropertyValuePairs);
+
+  if (found) {
     return true;
   }
 
-  if (property === 'flexDirection' && value === 'column') {
+  // Remove by property
+  if (_isInReg(property, removeProperties)) {
     return true;
   }
-
-  if (property === 'display' && value === 'flex') {
-    return true;
-  }
-
-  if (_isInReg(property, removeProps)) {
+  // Remove by value
+  if (_isInReg(property, removeProperties)) {
     return true;
   }
 
   return false;
 };
 
-export const _isSupported = (identifier: string, value: string) => {
-  // anything but flex or none is not supported
-  if (identifier === 'display' && !['none', 'flex'].includes(value)) {
+export const _isSupported = (property: string, value: string) => {
+  // Unsupported by property and value matches
+  const found = _.some(({ property: _p, value: _v }) =>
+    _p.test(property) && _v.test(value))(unsupportedPropertyValuePairs);
+
+  if (found) {
     return false;
   }
-  if (_isInReg(identifier, unsupportedIdentifiers)) {
+  // Unsupported by property
+  if (_isInReg(property, unsupportedProperties)) {
     return false;
   }
+  // Unsupported by value
   if (_isInReg(value, unsupportedValue)) {
     return false;
   }
   return true;
 };
 
+// Css Processing order
+// -------------------
+
+// 1. Select a mapping based on the element or import e.g. `div` -> `Box`
+// 2. PostCSS - turns the CSS string into CSS Object
+// 3. Pre css-to-react-native
+//   a. Check for mapping based on the object properties search for a better mapping.
+//   b. if new mapping  add/remove properties.
+//   c. if mapping changed re-run the pre process
+// 4. css-to-react-native property conversion
+// 5. Cleanup - convert (NB props) e.g. fontFamily: ‘$4’
+// 6. Convert to AST
+// 7. Convert expressions
+//   a. steps 3-6..
+export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementMapping, obj: object): {
+  newObject: object,
+  newMapping: IElementMapping,
+  hasBetterMapping: boolean,
+} => {
+  let newObject = null;
+  let hasBetterMapping = false;
+  let newMapping = currentMapping;
+
+  // Based on properties
+  _.flow(
+    _.entries,
+    // _.forEach((key, value) => {
+    //   console.log(`key, value: `, key, value);
+    // }),
+  )(obj)
+
+  return { newObject, newMapping, hasBetterMapping };
+};
+
+const convertLineHeight = (currentValue: string, obj: object) => {
+  return currentValue;
+}
+
+const identifierMapping = {
+  'lineHeight': (currentValue: string, obj: object) => {
+    return {
+      newValue: currentValue,
+      isSkipable: true,
+    }
+  },
+  'textDecoration': (currentValue: string, obj: object) => {
+    return {
+      newValue: currentValue,
+      isSkipable: true,
+    }
+  },
+}
+
 // One-offs Pre toRN
 // -------
-export const preToRNTransform = (identifier, value) => {
+export const preToRNTransform = (identifier, value, obj) => {
   let i = identifier;
   let v = value;
   let isSupported = _isSupported(identifier, value);
@@ -181,6 +252,15 @@ export const preToRNTransform = (identifier, value) => {
 
   // Mappings
   // --------
+  const found = identifierMapping[value];
+  if (found) {
+    const {
+      newValue,
+      isSkipable: _isSkipable,
+    } = found(v, obj);
+    v = newValue;
+    isSkipable = _isSkipable;
+  }
 
   // if (identifier === 'boxShadow') {
   //   i = 'boxShadow';
@@ -303,6 +383,7 @@ export interface IElementMapping {
     isDefault?: boolean;
     specifier?: string;
   };
+  customPreProcessing?: (obj: object) => object;
   customPostProcessing?: (obj: object) => object;
 }
 
@@ -318,10 +399,33 @@ const LinkImport = {
   specifier: 'Link',
 };
 
+const BoxPostProcessing = obj => {
+  // const res = _.pickBy((_value, key) => {
+  //   const shouldKeep = _isInReg(key, [/^width/, /^padding/, /^margin/]);
+  //   return shouldKeep;
+  // })(obj);
+  let hasText = false;
+  Object.keys(obj).map(k => {
+    if (!isATextProp(k)) {
+      return;
+    }
+    const v = obj[k];
+    hasText = true;
+    // Mvoe
+    obj._text = obj._text = {};
+    obj._text[k] = v;
+    // remove the property
+    delete obj[k];
+  })
+  return obj;
+};
+
 export const elementArray: Array<IElementMapping> = [
   {
     from: 'div',
     to: 'Box',
+    // customPreProcessing: BoxPostProcessing,
+    customPostProcessing: BoxPostProcessing,
   },
   {
     from: 'span',
@@ -475,11 +579,12 @@ export const elementArray: Array<IElementMapping> = [
   },
 ];
 
-export const getElementMapping = (el: string) => {
-  const found = elementArray.find(e => e.from === el);
+export const getElementMapping = (el: string, attr = 'from') => {
+  const found = elementArray.find(e => e[attr] === el);
 
   if (!found) {
-    throw new Error('element not found: ' + el);
+    throw new Error("element not found: " + el);
   }
   return found;
 };
+

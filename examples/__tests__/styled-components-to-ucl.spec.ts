@@ -1,6 +1,6 @@
 import { defineTest } from 'jscodeshift/src/testUtils';
 
-jest.spyOn(console, "error").mockImplementation(() => { });
+// jest.spyOn(console, "error").mockImplementation(() => { });
 
 describe("styled-components to UCL", () => {
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/bad', { parser: 'ts' });

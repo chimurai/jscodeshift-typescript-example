@@ -101,7 +101,8 @@ export const processElement = ({
 
           const { identifier, isRemovable, isSupported, isSkipable, value } = preToRNTransform(
             k,
-            v
+            v,
+            obj,
           );
           k = identifier;
           v = value;
