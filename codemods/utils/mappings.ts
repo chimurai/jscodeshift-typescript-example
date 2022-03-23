@@ -116,8 +116,6 @@ const removeProperties = [
   /^text-overflow$/,
   /^whiteSpace/,
   /^white-space/,
-  /^overflowX$/,
-  /^overflowY$/,
 ];
 
 // Unsupported
@@ -141,6 +139,8 @@ const unsupportedProperties = [
   /^listStyle$/,
   /^overflow-x$/,
   /^grid/,
+  /^overflowX$/,
+  /^overflowY$/,
 ];
 
 const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];

@@ -1,6 +1,9 @@
 import { Box, FormControl, Input, Text } from '@rbilabs/universal-components';
 
-export const Scrollable = Box.withConfig({});
+export const Scrollable = Box.withConfig({
+  // TODO: RN - unsupported CSS
+  // overflowX: 'auto',
+});
 
 export const Fieldset = FormControl.withConfig({
   padding: 0,
