@@ -1,21 +1,15 @@
-import { JSCodeshift } from "jscodeshift";
-import {
-  IElementMapping,
-  isATextProp,
-  postToRNTransform,
-  preToRNTransform,
-} from "./mappings";
+import { JSCodeshift } from 'jscodeshift';
+import { IElementMapping, isATextProp, postToRNTransform, preToRNTransform } from './mappings';
 
-import { parseExpression } from "./parse-expression";
-import * as _ from "lodash/fp";
-import toRN from "css-to-react-native";
+import { parseExpression } from './parse-expression';
+import * as _ from 'lodash/fp';
+import toRN from 'css-to-react-native';
 
 const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
 const SHOULD_THROW_ON_NESTED_OBJECT = false;
 
-export const needsFlexRemapping = (obj) =>
-  obj.display === "flex" && !obj.flexDirection;
+export const needsFlexRemapping = obj => obj.display === 'flex' && !obj.flexDirection;
 
 interface IConvertCssObject {
   j: JSCodeshift;
@@ -36,20 +30,25 @@ export const convertCssObject = ({
   let hasExpressionError = false;
   const localVars = [];
 
-  const addToLocalVars = (v) => localVars.push(v);
+  const addToLocalVars = v => localVars.push(v);
 
   _.map((key: string) => {
     let value = obj[key];
     // Nested objects as values
     if (_.isObject(value)) {
       // Supported properties that can have objects as key
-      if (key === "&:hover") {
+      if (key === '&:hover') {
         _.map((k: string) => {
           let v = value[k];
           let convertedObj;
           try {
-            const { identifier, isRemovable, isSupported, isSkipable, value: _value } =
-              preToRNTransform(k, v, value);
+            const {
+              identifier,
+              isRemovable,
+              isSupported,
+              isSkipable,
+              value: _value,
+            } = preToRNTransform(k, v, value);
             k = identifier;
             v = _value;
             if (isRemovable) {
@@ -65,7 +64,7 @@ export const convertCssObject = ({
               convertedObj = toRN([[k, v]]);
             }
           } catch (error) {
-            console.error("toRN", convertedObj, error.message);
+            console.error('toRN', convertedObj, error.message);
             hasExpressionError = true;
             if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
               throw error;
@@ -76,7 +75,7 @@ export const convertCssObject = ({
             if (activeElement.customPostProcessing) {
               convertedObj = activeElement.customPostProcessing(convertedObj);
             }
-            _.keys(convertedObj).forEach((k) => {
+            _.keys(convertedObj).forEach(k => {
               const v = convertedObj[k];
               properties = addProperties({
                 j,
@@ -85,7 +84,7 @@ export const convertCssObject = ({
                 addToLocalVars,
                 identifier: k,
                 initialValue: v,
-                parent: "_hover",
+                parent: '_hover',
                 newPropertyName: null,
                 originalPropertyNewName: null,
                 needsFlexRemapping: needsFlexRemapping(value),
@@ -93,7 +92,7 @@ export const convertCssObject = ({
               });
             });
           } catch (error) {
-            console.error("addProperties", convertedObj, error.message);
+            console.error('addProperties', convertedObj, error.message);
             hasExpressionError = true;
             if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
               throw error;
@@ -104,7 +103,7 @@ export const convertCssObject = ({
       } else {
         hasExpressionError = true;
         if (SHOULD_THROW_ON_NESTED_OBJECT) {
-          throw new Error("Contains object - " + value);
+          throw new Error('Contains object - ' + value);
         }
       }
       return;
@@ -124,11 +123,8 @@ export const convertCssObject = ({
 
     // TODO Move to post processing
     // if the element is a box we have to next the text properties under _text
-    if (
-      isATextProp(key) &&
-      _.includes(activeElement.to, ["Box", "Button"])
-    ) {
-      parent = "_text";
+    if (isATextProp(key) && _.includes(activeElement.to, ['Box', 'Button'])) {
+      parent = '_text';
     }
 
     if (isRemovable) {
@@ -146,9 +142,8 @@ export const convertCssObject = ({
       } else {
         convertedObj = toRN([[key, value]]);
       }
-
     } catch (error) {
-      console.error("toRN", convertedObj, key, value, error.message);
+      console.error('toRN', convertedObj, key, value, error.message);
       hasExpressionError = true;
       if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
         throw error;
@@ -160,7 +155,7 @@ export const convertCssObject = ({
       if (activeElement.customPostProcessing) {
         convertedObj = activeElement.customPostProcessing(convertedObj);
       }
-      _.keys(convertedObj).forEach((k) => {
+      _.keys(convertedObj).forEach(k => {
         const v = convertedObj[k];
         properties = addProperties({
           j,
@@ -177,7 +172,7 @@ export const convertCssObject = ({
         });
       });
     } catch (error) {
-      console.error("addProperties", convertedObj, error.message);
+      console.error('addProperties', convertedObj, error.message);
       hasExpressionError = true;
       if (SHOULD_THROW_ON_CONVERSION_ISSUES) {
         throw error;
@@ -190,7 +185,7 @@ export const convertCssObject = ({
   if (activeElement.attributes) {
     activeElement.attributes.forEach(x => {
       properties = addProperty(j, properties, x.name, x.value, true, x.comment);
-    })
+    });
   }
 
   // Remove duplicate keys
@@ -208,19 +203,14 @@ export const addProperty = (
   identifier,
   value,
   isSupported,
-  comment?: string,
+  comment?: string
 ) => {
-  const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : "";
-  const prop = j.property("init", j.identifier(prefix + identifier), j.literal(value));
+  const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : '';
+  const prop = j.property('init', j.identifier(prefix + identifier), j.literal(value));
   if (comment) {
-    prop.comments = [
-      j.commentLine(' ' + comment)
-    ]
+    prop.comments = [j.commentLine(' ' + comment)];
   }
-  return [
-    ...properties,
-    prop,
-  ];
+  return [...properties, prop];
 };
 
 export const addProperties = ({
@@ -249,7 +239,7 @@ export const addProperties = ({
     parent = identifier;
     newPropertyName = value;
     let obj = value;
-    _.keys(obj).forEach((k) => {
+    _.keys(obj).forEach(k => {
       const v = obj[k];
       properties = addProperties({
         j,
@@ -290,6 +280,7 @@ export const addProperties = ({
     isRemovable,
   } = postToRNTransform(identifier, value.value, _needFlexRemapping);
 
+  let isChangingIdentifier = identifier !== _identifier;
   value.value = _value;
   identifier = _identifier;
 
@@ -299,24 +290,24 @@ export const addProperties = ({
   }
 
   // Change property name if this going to be an attribute of a nested object
-  if (parent && newPropertyName) {
+  if (parent && newPropertyName && !isChangingIdentifier) {
     identifier = newPropertyName;
   }
 
   // Comment the others
   if (!isSupported) {
-    identifier = "// " + identifier;
+    identifier = '// ' + identifier;
   }
-  const builderProperty = j.property("init", j.identifier(identifier), value);
+  const builderProperty = j.property('init', j.identifier(identifier), value);
 
   if (!isSupported) {
     // Add comment
-    builderProperty.comments = [j.commentLine(" " + TODO_RN_COMMENT, true)];
+    builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
   }
   if (parent) {
     // find the parent
     // @ts-ignore
-    const found = _.find((p) => p?.key?.name === parent)(properties);
+    const found = _.find(p => p?.key?.name === parent)(properties);
     if (found) {
       // Confirm that property is an object
       // @ts-ignore
@@ -330,32 +321,28 @@ export const addProperties = ({
         const originalValue = found.value;
         // Remove
         // @ts-ignore
-        properties = _.remove((p) => p?.key?.name === parent)(properties);
+        properties = _.remove(p => p?.key?.name === parent)(properties);
 
         const originalProperty = j.property(
-          "init",
+          'init',
           j.identifier(originalPropertyNewName),
-          originalValue,
+          originalValue
         );
         // Change the property name
         builderProperty.key.name = newPropertyName;
         properties.push(
           j.property(
-            "init",
+            'init',
             j.identifier(parent),
-            j.objectExpression([originalProperty, builderProperty]),
-          ),
+            j.objectExpression([originalProperty, builderProperty])
+          )
         );
       }
       return properties;
     } else {
       // Create a new object with the parent as the key
       properties.push(
-        j.property(
-          "init",
-          j.identifier(parent),
-          j.objectExpression([builderProperty]),
-        ),
+        j.property('init', j.identifier(parent), j.objectExpression([builderProperty]))
       );
       return properties;
     }
