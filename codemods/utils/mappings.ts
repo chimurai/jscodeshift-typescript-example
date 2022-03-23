@@ -697,15 +697,6 @@ export const elementArray: Array<IElementMapping> = [
   },
 ];
 
-// export const getElementMapping = (el: string, attr = 'from') => {
-//   const found = elementArray.find(e => e[attr] === el);
-
-//   if (!found) {
-//     throw new Error("element not found: " + el);
-//   }
-//   return found;
-// };
-
 export const getElementMapping = (from: string, to?: string) => {
   // `noop` are special case
   // just return the values
