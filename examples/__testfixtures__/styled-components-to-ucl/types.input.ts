@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import Modal from 'modal'
 
 type Baz = true
 
@@ -6,3 +7,4 @@ type Baz = true
 export const DivWithType = styled.div<Baz>``
 export const DivWithoutType = styled.div``
 export const DivWithInlineType = styled.div<{key: 'property'}>``
+export const DivFnWithInlineType = styled(Modal)<{key: 'property'}>``
