@@ -1,5 +1,11 @@
 import { JSCodeshift } from 'jscodeshift';
-import { IElementMapping, isATextProp, postToRNTransform, preToRNTransform, checkForBetterMappingBasedOnProperties } from './mappings';
+import {
+  IElementMapping,
+  isATextProp,
+  postToRNTransform,
+  preToRNTransform,
+  checkForBetterMappingBasedOnProperties,
+} from './mappings';
 
 import { parseExpression } from './parse-expression';
 import * as _ from 'lodash/fp';
@@ -35,10 +41,7 @@ export const convertCssObject = ({
   const addToLocalVars = v => localVars.push(v);
 
   // Check for better mapping. Clean object
-  const {
-    newMapping,
-    newObject,
-  } = checkForBetterMappingBasedOnProperties(activeElement, obj);
+  const { newMapping, newObject } = checkForBetterMappingBasedOnProperties(activeElement, obj);
   obj = newObject;
   activeElement = newMapping;
 

@@ -150,9 +150,7 @@ const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
 // We don't need the to be processed by css-to-react-native
 // -----------
 const skipablePropertyValuePairs = [];
-const skipableProperties = [
-  /^isTruncated$/,
-];
+const skipableProperties = [/^isTruncated$/];
 const skipableValue = [];
 
 const _isInReg = (test, regex) => _.some(re => re.test(test), regex);
@@ -201,8 +199,9 @@ export const _isSupported = (property: string, value: string) => {
 
 export const _isSkipable = (property: string, value: string) => {
   // skipable by property and value matches
-  const found = _.some(({ property: _p, value: _v }) =>
-    _p.test(property) && _v.test(value))(skipablePropertyValuePairs);
+  const found = _.some(({ property: _p, value: _v }) => _p.test(property) && _v.test(value))(
+    skipablePropertyValuePairs
+  );
 
   if (found) {
     return true;
@@ -232,9 +231,12 @@ export const _isSkipable = (property: string, value: string) => {
 // 6. Convert to AST
 // 7. Convert expressions
 //   a. steps 3-6..
-export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementMapping, obj: object): {
-  newObject: object,
-  newMapping: IElementMapping,
+export const checkForBetterMappingBasedOnProperties = (
+  currentMapping: IElementMapping,
+  obj: object
+): {
+  newObject: object;
+  newMapping: IElementMapping;
 } => {
   let newObject = obj;
   let to = currentMapping.to;
@@ -249,15 +251,14 @@ export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementM
         case 'textOverflow':
           newObject = _.assign(newObject, {
             isTruncated: true,
-          })
+          });
           break;
 
         default:
           break;
       }
-
-    }),
-  )(newObject)
+    })
+  )(newObject);
 
   const newMapping = getElementMapping(from, to);
   return { newObject, newMapping };
@@ -695,7 +696,6 @@ export const elementArray: Array<IElementMapping> = [
     to: 'noop',
   },
 ];
-
 
 // export const getElementMapping = (el: string, attr = 'from') => {
 //   const found = elementArray.find(e => e[attr] === el);
