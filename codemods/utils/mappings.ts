@@ -116,7 +116,7 @@ const removeProperties = [
 // -----------
 const unsupportedPropertyValuePairs = [
   // anything but flex or none is not supported
-  { property: /^display/, value: /^(?!.*(none|flex)).*/ },
+  { property: /^display/, value: /^(?!.*(^none|^flex)).*/ },
 ];
 
 const unsupportedProperties = [
@@ -137,20 +137,15 @@ const unsupportedProperties = [
   /^grid/,
 ];
 
-const unsupportedValue = [
-  /^calc/,
-  /^max/,
-  /^min/,
-  /^relative$/,
-];
+const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
 
 const _isInReg = (test, regex) => _.some(re => re.test(test), regex);
 
 export const _isRemovable = (property: string, value: string) => {
-
   // Remove by property and value matches
-  const found = _.some(({ property: _p, value: _v }) =>
-    _p.test(property) && _v.test(value))(removePropertyValuePairs);
+  const found = _.some(({ property: _p, value: _v }) => _p.test(property) && _v.test(value))(
+    removePropertyValuePairs
+  );
 
   if (found) {
     return true;
@@ -170,8 +165,9 @@ export const _isRemovable = (property: string, value: string) => {
 
 export const _isSupported = (property: string, value: string) => {
   // Unsupported by property and value matches
-  const found = _.some(({ property: _p, value: _v }) =>
-    _p.test(property) && _v.test(value))(unsupportedPropertyValuePairs);
+  const found = _.some(({ property: _p, value: _v }) => _p.test(property) && _v.test(value))(
+    unsupportedPropertyValuePairs
+  );
 
   if (found) {
     return false;
@@ -201,10 +197,13 @@ export const _isSupported = (property: string, value: string) => {
 // 6. Convert to AST
 // 7. Convert expressions
 //   a. steps 3-6..
-export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementMapping, obj: object): {
-  newObject: object,
-  newMapping: IElementMapping,
-  hasBetterMapping: boolean,
+export const checkForBetterMappingBasedOnProperties = (
+  currentMapping: IElementMapping,
+  obj: object
+): {
+  newObject: object;
+  newMapping: IElementMapping;
+  hasBetterMapping: boolean;
 } => {
   let newObject = null;
   let hasBetterMapping = false;
@@ -212,11 +211,11 @@ export const checkForBetterMappingBasedOnProperties = (currentMapping: IElementM
 
   // Based on properties
   _.flow(
-    _.entries,
+    _.entries
     // _.forEach((key, value) => {
     //   console.log(`key, value: `, key, value);
     // }),
-  )(obj)
+  )(obj);
 
   return { newObject, newMapping, hasBetterMapping };
 };
@@ -239,35 +238,33 @@ const lineHeightArray = [
   { key: 4.0, value: '5xl' },
   // note: ignoring anything larger then 4.0
   { key: 10000, value: '5xl' },
-]
+];
 
+const numberOrLengthRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)((?:px|rem|%))?$/i;
+const subRe = /^(.*?)(substitution)(.*?)/i;
 
-const numberOrLengthRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)((?:px|rem|%))?$/i
-const subRe = /^(.*?)(substitution)(.*?)/i
-
-
-export const parseValueToPx = (value) => {
+export const parseValueToPx = value => {
   if (String(value).match(subRe)) {
     throw Error('cant parse ' + value);
   }
-  let v = value
-  const p = String(value).match(numberOrLengthRe)
+  let v = value;
+  const p = String(value).match(numberOrLengthRe);
   if (p && p[1]) {
     // Convert rem to pixel
     if (p[2] === 'rem') {
-      const asNum = parseFloat(String(p[1]))
+      const asNum = parseFloat(String(p[1]));
       if (!isNaN(asNum)) {
-        v = Math.floor(asNum * 16)
+        v = Math.floor(asNum * 16);
       }
     } else {
-      v = parseFloat(p[1])
+      v = parseFloat(p[1]);
     }
   }
-  return v
-}
+  return v;
+};
 
 const identifierMapping = {
-  'lineHeight': (currentValue: string, obj: object) => {
+  lineHeight: (currentValue: string, obj: object) => {
     let newValue = currentValue;
     let valueAsRem;
 
@@ -277,7 +274,7 @@ const identifierMapping = {
       valueAsRem = currentValue;
     }
 
-    const p = String(currentValue).match(numberOrLengthRe)
+    const p = String(currentValue).match(numberOrLengthRe);
     if (!valueAsRem && p && p[1]) {
       if (p[2] === 'rem') {
         valueAsRem = parseFloat(String(p[1]));
@@ -294,7 +291,7 @@ const identifierMapping = {
           let fontSizeAsPx = parseValueToPx(obj.fontSize);
           const denominator = Number(p[1]);
           // Hack because people are setting line height to `1px`??
-          if (!fontSizeAsPx || (denominator === 1)) {
+          if (!fontSizeAsPx || denominator === 1) {
             valueAsRem = 1.375;
           } else {
             valueAsRem = fontSizeAsPx / denominator;
@@ -306,8 +303,7 @@ const identifierMapping = {
       }
     }
 
-    const res = _.find((l: { key: string, value: string }) =>
-      valueAsRem <= l.key)(lineHeightArray);
+    const res = _.find((l: { key: string; value: string }) => valueAsRem <= l.key)(lineHeightArray);
 
     if (res) {
       newValue = res.value;
@@ -317,17 +313,17 @@ const identifierMapping = {
       isSkipable: true,
       isRemovable: false,
       isSupported: true,
-    }
+    };
   },
-  'textDecoration': (currentValue: string, obj: object) => {
+  textDecoration: (currentValue: string, obj: object) => {
     return {
       newValue: currentValue,
       isSkipable: true,
       isRemovable: false,
       isSupported: true,
-    }
+    };
   },
-}
+};
 
 // One-offs Pre toRN
 // -------
@@ -508,7 +504,7 @@ const BoxPostProcessing = obj => {
     obj._text[k] = v;
     // remove the property
     delete obj[k];
-  })
+  });
   return obj;
 };
 
@@ -675,8 +671,7 @@ export const getElementMapping = (el: string, attr = 'from') => {
   const found = elementArray.find(e => e[attr] === el);
 
   if (!found) {
-    throw new Error("element not found: " + el);
+    throw new Error('element not found: ' + el);
   }
   return found;
 };
-
