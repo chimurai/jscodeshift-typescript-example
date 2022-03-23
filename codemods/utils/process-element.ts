@@ -102,7 +102,7 @@ export const processElement = ({
           const { identifier, isRemovable, isSupported, isSkipable, value } = preToRNTransform(
             k,
             v,
-            obj,
+            obj
           );
           k = identifier;
           v = value;
@@ -249,18 +249,10 @@ ${ct}
     });
   }
   // Map Types
-  if (localVars.length && includeTypes) {
-    // Add types
-    // @ts-ignore
-    exprs.typeArguments = j.tsTypeParameterInstantiation([
-      j.tsTypeLiteral(
-        _.flow(
-          _.flatten,
-          _.uniqBy('name'),
-          _.map((v: any) => j.tsPropertySignature(j.identifier(v.name), j.tsTypeAnnotation(v.type)))
-        )(localVars)
-      ),
-    ]);
+  if (includeTypes) {
+    try {
+      exprs.typeArguments = j.tsTypeParameterInstantiation([getTypeParameter(nodePath, j)]);
+    } catch (e) {}
   }
   return exprs;
 };
@@ -352,3 +344,11 @@ const nodePathToString = nodePath => {
   }
   return 'And error occurred';
 };
+
+// tries to grab the type parameter from `styled.div<foo>` if it can
+function getTypeParameter(nodePath: any, j: JSCodeshift) {
+  const typeParameters = nodePath.node.typeParameters;
+  const typeRef = typeParameters?.params[0];
+
+  return typeRef;
+}

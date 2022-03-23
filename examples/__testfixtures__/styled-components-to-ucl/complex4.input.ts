@@ -5,7 +5,7 @@ import { ModalHeading } from 'components/modal';
 import { Text } from './somthing';
 import theme from './theme';
 
-export const AnotherOne = styled.div`
+export const AnotherOne = styled.div<{ secondary: boolean }>`
   width: 40;
   height: 4rem;
   top: ${p => (p.secondary ? '5vh' : '10vh')};

@@ -1,4 +1,4 @@
-import { Box, Header } from '@rbilabs/universal-components';
+import { Box, FormControl, Header } from '@rbilabs/universal-components';
 
 import { ClickableContainer } from 'components/clickable-container';
 import { brandFont } from 'components/layout/brand-font';
@@ -11,9 +11,7 @@ import { RewardsStyleVariant, WithStyleVariant } from '../types';
 
 import { CategoryDropdownProps, OptionsContainerProps } from './types';
 
-export const CategoryTitle = Header.withConfig<{
-  variant: boolean
-}>(p => ({
+export const CategoryTitle = Header.withConfig<WithStyleVariant>(p => ({
   height: '$12',
   flexWrap: 'wrap',
   margin: 0,
@@ -24,6 +22,7 @@ export const CategoryTitle = Header.withConfig<{
     : '__legacyToken.text-default',
 
   fontWeight: p.variant ? Styles.fontWeight.normal : 'inherit',
+  variant: 'headerFive',
 
   fontSize: {
     lg: 19,
@@ -38,9 +37,7 @@ export const noBottomBorder = {
   borderBottomRightRadius: 0,
 };
 
-export const CategoryContainer = Box.withConfig<{
-  variant: boolean
-}>(p => ({
+export const CategoryContainer = Box.withConfig<WithStyleVariant>(p => ({
   paddingX: '$4',
   paddingY: 0,
   borderTopWidth: 1,
@@ -78,7 +75,7 @@ export const CategoryContainer = Box.withConfig<{
   // boxShadow: '0px 0px 4px rgba(0, 0, 0, 0.1)',
 }));
 
-export const Fieldset = Box.withConfig({
+export const Fieldset = FormControl.withConfig({
   borderWidth: 0,
   borderColor: 'black',
   borderStyle: 'solid',
@@ -88,13 +85,13 @@ export const Fieldset = Box.withConfig({
   margin: 0,
   padding: 0,
   width: '100%',
-});
+})/* TODO: RN - This was a <input> tag. Verify its styled properly*/;
 
 export const HiddenLegend = Box.withConfig({
   ...screenReaderOnly,
-});
+})/* TODO: RN - This was a <legend> tag. Verify its styled properly*/;
 
-export const CategoryDropdownContainer = CategoryContainer.withConfig({
+export const CategoryDropdownContainer = CategoryContainer.withConfig<Pick<CategoryDropdownProps, 'optionsVisible' | 'overlay'>>({
   width: '100%',
   padding: 0,
   // ${({ optionsVisible, overlay }) => overlay && optionsVisible && noBottomBorder};
@@ -108,17 +105,14 @@ export const TitleContainer = Box.withConfig({
   width: '100%',
 });
 
-export const Title = ClickableContainer.withConfig<{
-  showBorder: boolean,
-  variant: boolean
-}>(p => ({
+export const Title = ClickableContainer.withConfig<{ isUsingTabNavigation: boolean; showBorder: boolean; bold: boolean } & WithStyleVariant>(p => ({
   alignItems: 'space-between',
   justifyContent: 'center',
   borderBottomWidth: 1,
   borderBottomColor: p.showBorder ? '1px' : '0px',
   borderBottomStyle: 'solid',
-  borderBottomStyle: 'solid',
 
+  // This should be commented out i think and kept
   borderBottomColor: p.variant
     ? 'blackOpacity.30'
     : '__legacyToken.border-color-default',
@@ -194,12 +188,11 @@ export const overlayStyle = p => ({
 
   borderWidth: 0,
   borderColor: 'black',
-  borderStyle: 'solid',
   borderBottomLeftRadius: 8,
   borderBottomRightRadius: 8,
 });
 
-export const OptionsContainer = Box.withConfig({
+export const OptionsContainer = Box.withConfig<OptionsContainerProps>({
   paddingX: '$4',
   paddingY: 0,
   zIndex: Styles.zIndex.normal,

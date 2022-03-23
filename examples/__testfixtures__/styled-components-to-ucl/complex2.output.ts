@@ -1,9 +1,7 @@
 import { Box as UCLBox } from '@rbilabs/universal-components';
 import { primitive } from 'styles/constants/primitives';
 
-export const CartItemEditContainer = UCLBox.withConfig<{
-  color: string
-}>(p => ({
+export const CartItemEditContainer = UCLBox.withConfig<{ color: string }>(p => ({
   _text: {
     color: p.color,
   },
@@ -11,7 +9,7 @@ export const CartItemEditContainer = UCLBox.withConfig<{
 TODO: RN - unsupported CSS
 Some attributes were not converted.
 
-export const CartItemEditContainer = styled.div`
+export const CartItemEditContainer = styled.div<{ color: string }>`
   color: ${props => props.color};
   button {
     background-color: ${Styles.color.cardBackground};

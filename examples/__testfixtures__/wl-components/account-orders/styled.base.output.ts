@@ -10,7 +10,9 @@ export const ScrollContainer = Box.withConfig({
   // height: 'calc(100% - 164px)',
 
   paddingTop: '124px',
-  overflowY: 'auto',
+
+  // TODO: RN - unsupported CSS
+  // overflowY: 'auto',
 });
 
 export const TrackOrderLink = Link.withConfig({
@@ -191,12 +193,12 @@ export const CateringPendingApproval = Text.withConfig({
   margin: 0,
 });
 
-export const NumItems = Text.withConfig({
+export const NumItems = Box.withConfig({
   marginLeft: '$1',
 });
 
 export const Items = Text.withConfig({
-  lineHeight: 24,
+  lineHeight: 'lg',
   maxHeight: 48,
   paddingRight: '$4',
   overflow: 'hidden',
@@ -255,6 +257,7 @@ export const RecentOrderTitle = Header.withConfig({
   // TODO: This should not be like this
   color: '__2substitution__ !important',
   textAlign: 'center',
+  variant: 'headerTwo',
 
   fontSize: {
     base: 36,
