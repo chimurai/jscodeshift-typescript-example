@@ -1,4 +1,4 @@
-import { Box } from '@rbilabs/component-library';
+import { Box } from '@rbilabs/components-library';
 
 <Box />
 
