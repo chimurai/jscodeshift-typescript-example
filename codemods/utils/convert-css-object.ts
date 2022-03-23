@@ -1,5 +1,6 @@
 import { JSCodeshift } from "jscodeshift";
 import {
+  checkForBetterMappingBasedOnProperties,
   IElementMapping,
   isATextProp,
   postToRNTransform,
@@ -27,16 +28,26 @@ interface IConvertCssObject {
 
 export const convertCssObject = ({
   j,
-  obj,
-  activeElement,
+  obj: _currentObj,
+  activeElement: _activeElement,
   substitutionMap = {},
   localImportNames = [],
 }: IConvertCssObject) => {
   let properties = [];
   let hasExpressionError = false;
+  let obj = _currentObj;
+  let activeElement = _activeElement;
   const localVars = [];
 
   const addToLocalVars = (v) => localVars.push(v);
+
+  // Check for better mapping. Clean object
+  const {
+    newMapping,
+    newObject,
+  } = checkForBetterMappingBasedOnProperties(activeElement, obj);
+  obj = newObject;
+  activeElement = newMapping;
 
   _.map((key: string) => {
     let value = obj[key];
