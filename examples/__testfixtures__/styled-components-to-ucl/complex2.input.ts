@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { primitive } from 'styles/constants/primitives';
 
-export const CartItemEditContainer = styled.div`
+export const CartItemEditContainer = styled.div<{ color: string }>`
   color: ${props => props.color};
   button {
     background-color: ${Styles.color.cardBackground};

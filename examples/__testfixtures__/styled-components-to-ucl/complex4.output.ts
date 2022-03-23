@@ -5,9 +5,7 @@ import { ModalHeading } from 'components/modal';
 import { Text } from './somthing';
 import theme from './theme';
 
-export const AnotherOne = Box.withConfig<{
-  secondary: boolean
-}>(p => ({
+export const AnotherOne = Box.withConfig<{ secondary: boolean }>(p => ({
   width: '$10',
   height: '$16',
   top: p.secondary ? '5vh' : '10vh',

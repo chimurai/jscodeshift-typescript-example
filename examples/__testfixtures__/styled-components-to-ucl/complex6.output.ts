@@ -8,9 +8,7 @@ export interface IMethodContainer {
   $isClickable?: boolean;
 }
 
-export const MethodTypeWrapper = Box.withConfig<{
-  $isClickable: boolean
-}>(p => ({
+export const MethodTypeWrapper = Box.withConfig<IMethodContainer>(p => ({
   justifyContent: 'center',
   paddingTop: 0,
   paddingRight: '$2',

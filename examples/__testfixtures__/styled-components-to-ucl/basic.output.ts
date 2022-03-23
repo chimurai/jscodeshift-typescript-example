@@ -5,7 +5,7 @@ import Modal from './modal';
  * Spreads children horizontally and centers them vertically
  */
 export const Basic = Box.withConfig<{
-  color: string,
+  color: string;
   backgroundColor: string
 }>(p => ({
   alignSelf: 'center',
@@ -55,9 +55,7 @@ export const Header = UCLHeader.withConfig({
   variant: 'headerOne',
 });
 
-export const Conditional = Box.withConfig<{
-  reversed: boolean
-}>(p => ({
+export const Conditional = Box.withConfig<{ reversed: boolean }>(p => ({
   _text: {
     color: p.reversed ? '__legacyToken.text-reversed' : '__legacyToken.text-default',
   },

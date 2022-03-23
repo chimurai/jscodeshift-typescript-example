@@ -16,12 +16,12 @@ export const ItemOfferHeading = styled.span<{ $isApplied: boolean }>`
   color: ${({ $isApplied }) => ($isApplied ? Styles.color.black : Styles.color.red)};
 `
 
-export const Y = styled.div<{ center: boolean }>`
+export const Y = styled.div<{ center: boolean, $isApplied: boolean }>`
   color: ${({ $isApplied }) => ($isApplied ? Styles.color.black : Styles.color.red)};
   align-items: ${props => (props.center ? 'center' : 'flex-end')};
 `;
 
-export const Z = styled.div<{ center: boolean }>`
+export const Z = styled.div<{ center: boolean, $isApplied: boolean }>`
   align-items: ${props => (props.center ? 'center' : 'flex-end')};
   align-self: ${({ center }) => (center ? 'center' : 'flex-end')};
   color: ${({ $isApplied }) => ($isApplied ? Styles.color.black : Styles.color.red)};

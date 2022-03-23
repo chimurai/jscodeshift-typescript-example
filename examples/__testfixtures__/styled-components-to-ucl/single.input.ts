@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const Box = styled.div`
+export const Box = styled.div<{secondary: boolean}>`
   width: 40;
   height: 4rem;
   top: ${p => (p.secondary ? '5vh' : '10vh')};

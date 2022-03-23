@@ -4,7 +4,10 @@ import Modal from './modal';
 /**
  * Spreads children horizontally and centers them vertically
  */
-export const Basic = styled.div`
+export const Basic = styled.div<{
+  color: string;
+  backgroundColor: string
+}>`
   display: flex;
   position: relative;
   margin: 0 auto;
@@ -34,7 +37,7 @@ export const Header = styled.h1`
   text-decoration: none;
 `;
 
-export const Conditional = styled.div`
+export const Conditional = styled.div<{ reversed: boolean }>`
   color: ${p => (p.reversed ? p.theme.token('text-reversed') : p.theme.token('text-default'))};
   background-color: ${p => (p.reversed ? Styles.color.white : p.theme.token('text-default'))};
 `;
