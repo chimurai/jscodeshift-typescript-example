@@ -9,7 +9,8 @@ export interface IMethodContainer {
 }
 
 export const MethodTypeWrapper = Box.withConfig<IMethodContainer>(p => ({
-  justifyContent: 'center',
+  flexDirection: 'row',
+  alignItems: 'center',
   paddingTop: 0,
   paddingRight: '$2',
   paddingBottom: 0,

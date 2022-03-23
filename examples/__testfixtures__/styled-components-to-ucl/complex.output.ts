@@ -54,5 +54,6 @@ export const StyledContainer = Box.withConfig({
 });
 
 export const FlexRemapping = Box.withConfig({
-  alignItems: 'center',
+  flexDirection: 'row',
+  justifyContent: 'center',
 });

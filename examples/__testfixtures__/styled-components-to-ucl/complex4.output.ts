@@ -70,6 +70,7 @@ export const LoadingText = UCLText.withConfig({
 });
 
 export const LoadingGraphicWrapper = Box.withConfig({
+  flexDirection: 'row',
   height: '240px',
   width: '240px',
   borderTopLeftRadius: '50%',
@@ -80,8 +81,8 @@ export const LoadingGraphicWrapper = Box.withConfig({
   marginTop: '$4',
   backgroundColor: IMAGE_BACKGROUND_COLOR,
   overflow: 'hidden',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
 });
 
 export const GraphicTextWrapper = Box.withConfig({

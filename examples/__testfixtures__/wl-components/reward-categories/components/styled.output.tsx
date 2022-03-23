@@ -12,10 +12,11 @@ import { RewardsStyleVariant, WithStyleVariant } from '../types';
 import { CategoryDropdownProps, OptionsContainerProps } from './types';
 
 export const CategoryTitle = Header.withConfig<WithStyleVariant>(p => ({
+  flexDirection: 'row',
   height: '$12',
   flexWrap: 'wrap',
   margin: 0,
-  justifyContent: 'center',
+  alignItems: 'center',
 
   color: p.variant
     ? '__legacyToken.text-reversed'
@@ -106,8 +107,9 @@ export const TitleContainer = Box.withConfig({
 });
 
 export const Title = ClickableContainer.withConfig<{ isUsingTabNavigation: boolean; showBorder: boolean; bold: boolean } & WithStyleVariant>(p => ({
-  alignItems: 'space-between',
-  justifyContent: 'center',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
   borderBottomWidth: 1,
   borderBottomColor: p.showBorder ? '1px' : '0px',
   borderBottomStyle: 'solid',

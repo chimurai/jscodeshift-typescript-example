@@ -243,6 +243,10 @@ export const addProperties = ({
   let parent = _parent;
   let newPropertyName = _newPropertyName;
 
+  if (!parent && _needFlexRemapping) {
+    properties.push(j.property('init', j.identifier('flexDirection'), j.literal('row')));
+  }
+
   // If the initialValue is an object, iterate over the keys
   if (_.isObject(initialValue)) {
     // Check for supported object properties
@@ -264,7 +268,7 @@ export const addProperties = ({
         parent: parent,
         newPropertyName: k,
         originalPropertyNewName: null,
-        needsFlexRemapping: needsFlexRemapping(obj),
+        needsFlexRemapping: false,
         localImportNames,
       });
     });
@@ -291,7 +295,7 @@ export const addProperties = ({
     value: _value,
     isSupported,
     isRemovable,
-  } = postToRNTransform(identifier, value.value, _needFlexRemapping);
+  } = postToRNTransform(identifier, value.value);
 
   let isChangingIdentifier = identifier !== _identifier;
   value.value = _value;
