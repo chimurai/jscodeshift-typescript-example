@@ -98,11 +98,13 @@ const removePropertyValuePairs = [
   { property: /^flexDirection/, value: /^column/ },
   { property: /^flex-direction/, value: /^column/ },
   { property: /^display/, value: /^flex/ },
+  { property: /^overflow$/, value: /^(?!.*(hidden|none)).*/ },
 ];
 
 // Props only
 const removeProperties = [
   /^animation/,
+  /^appearance/,
   /^transition/,
   /^text-shadow$/,
   /^textShadow$/,
@@ -110,6 +112,10 @@ const removeProperties = [
   /^textShadowOffset$/,
   /^fontStretch$/,
   /^font-stretch$/,
+  /^textOverflow$/,
+  /^text-overflow$/,
+  /^whiteSpace/,
+  /^white-space/,
 ];
 
 // Unsupported
@@ -132,12 +138,20 @@ const unsupportedProperties = [
   /^list-style$/,
   /^listStyle$/,
   /^overflow-x$/,
+  /^grid/,
   /^overflowX$/,
   /^overflowY$/,
-  /^grid/,
 ];
 
 const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
+
+// Skipable
+// Properties that we are handling in pre-processing
+// We don't need the to be processed by css-to-react-native
+// -----------
+const skipablePropertyValuePairs = [];
+const skipableProperties = [/^isTruncated$/];
+const skipableValue = [];
 
 const _isInReg = (test, regex) => _.some(re => re.test(test), regex);
 
@@ -183,6 +197,26 @@ export const _isSupported = (property: string, value: string) => {
   return true;
 };
 
+export const _isSkipable = (property: string, value: string) => {
+  // skipable by property and value matches
+  const found = _.some(({ property: _p, value: _v }) => _p.test(property) && _v.test(value))(
+    skipablePropertyValuePairs
+  );
+
+  if (found) {
+    return true;
+  }
+  // skipable by property
+  if (_isInReg(property, skipableProperties)) {
+    return true;
+  }
+  // skipable by value
+  if (_isInReg(value, skipableValue)) {
+    return true;
+  }
+  return false;
+};
+
 // Css Processing order
 // -------------------
 
@@ -203,26 +237,32 @@ export const checkForBetterMappingBasedOnProperties = (
 ): {
   newObject: object;
   newMapping: IElementMapping;
-  hasBetterMapping: boolean;
 } => {
-  let newObject = null;
-  let hasBetterMapping = false;
-  let newMapping = currentMapping;
+  let newObject = obj;
+  let to = currentMapping.to;
+  let from = currentMapping.from;
 
   // Based on properties
   _.flow(
-    _.entries
-    // _.forEach((key, value) => {
-    //   console.log(`key, value: `, key, value);
-    // }),
-  )(obj);
+    _.entries,
+    _.forEach(([key, value]) => {
+      switch (key) {
+        case 'whiteSpace':
+        case 'textOverflow':
+          newObject = _.assign(newObject, {
+            isTruncated: true,
+          });
+          break;
 
-  return { newObject, newMapping, hasBetterMapping };
+        default:
+          break;
+      }
+    })
+  )(newObject);
+
+  const newMapping = getElementMapping(from, to);
+  return { newObject, newMapping };
 };
-
-function isFloat(n) {
-  return Number(n) === n && n % 1 !== 0;
-}
 
 const lineHeightArray = [
   // note: ignoring anything smaller then 1.0
@@ -332,7 +372,8 @@ export const preToRNTransform = (identifier, value, obj) => {
   let v = value;
   let isSupported = _isSupported(identifier, value);
   let isRemovable = _isRemovable(identifier, value);
-  let isSkipable = false;
+  let isSkipable = _isSkipable(identifier, value);
+  // let isSkipable = false;
 
   // Mappings
   // --------
@@ -411,6 +452,8 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
   }
 
   if (needsFlexRemapping) {
+    // TODO push
+    // flexDirection: 'row',
     switch (identifier) {
       case 'justifyContent':
         i = 'alignItems';
@@ -427,19 +470,6 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
     isSupported,
     isRemovable,
   };
-};
-
-const stylesToValue = (j: JSCodeshift, group, value) => {
-  console.log(`group: `, group);
-  console.log(`value: `, value);
-  switch (group) {
-    case 'color':
-      return j.stringLiteral(styleColorMap[value]);
-
-    default:
-      break;
-  }
-  return;
 };
 
 export const valueToType = (j: JSCodeshift, value) => {
@@ -488,10 +518,6 @@ const LinkImport = {
 };
 
 const BoxPostProcessing = obj => {
-  // const res = _.pickBy((_value, key) => {
-  //   const shouldKeep = _isInReg(key, [/^width/, /^padding/, /^margin/]);
-  //   return shouldKeep;
-  // })(obj);
   let hasText = false;
   Object.keys(obj).map(k => {
     if (!isATextProp(k)) {
@@ -499,7 +525,7 @@ const BoxPostProcessing = obj => {
     }
     const v = obj[k];
     hasText = true;
-    // Mvoe
+    // Move
     obj._text = obj._text = {};
     obj._text[k] = v;
     // remove the property
@@ -508,11 +534,21 @@ const BoxPostProcessing = obj => {
   return obj;
 };
 
+const DividerPostProcessing = obj => {
+  const res = _.pickBy((_value, key) => {
+    const shouldKeep = _isInReg(key, [/^width/, /^padding/, /^margin/]);
+    return shouldKeep;
+  })(obj);
+
+  // @ts-ignore
+  res.thickness = '1';
+  return res;
+};
+
 export const elementArray: Array<IElementMapping> = [
   {
     from: 'div',
     to: 'Box',
-    // customPreProcessing: BoxPostProcessing,
     customPostProcessing: BoxPostProcessing,
   },
   {
@@ -532,17 +568,7 @@ export const elementArray: Array<IElementMapping> = [
   {
     from: 'hr',
     to: 'Divider',
-    // remove most properties and set the default thickness
-    customPostProcessing: obj => {
-      const res = _.pickBy((_value, key) => {
-        const shouldKeep = _isInReg(key, [/^width/, /^padding/, /^margin/]);
-        return shouldKeep;
-      })(obj);
-
-      // @ts-ignore
-      res.thickness = '1';
-      return res;
-    },
+    customPostProcessing: DividerPostProcessing,
   },
   {
     from: 'h1',
@@ -665,13 +691,30 @@ export const elementArray: Array<IElementMapping> = [
     to: 'Svg',
     insertComments: 'This was a <svg> tag. Verify its styled properly',
   },
+  {
+    from: 'css',
+    to: 'noop',
+  },
 ];
 
-export const getElementMapping = (el: string, attr = 'from') => {
-  const found = elementArray.find(e => e[attr] === el);
+export const getElementMapping = (from: string, to?: string) => {
+  // `noop` are special case
+  // just return the values
+  if (from === 'noop' || to === 'noop') {
+    return { from, to };
+  }
+
+  const found = elementArray.find(e => {
+    const fromMatch = e.from === from;
+    const hasTo = to !== undefined;
+    if (hasTo) {
+      return fromMatch && e.to === to;
+    }
+    return fromMatch;
+  });
 
   if (!found) {
-    throw new Error('element not found: ' + el);
+    throw new Error(`Mapping not found. from: ${from} to: ${to}`);
   }
   return found;
 };

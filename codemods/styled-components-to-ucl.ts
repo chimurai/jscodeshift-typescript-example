@@ -95,7 +95,6 @@ export function transformStyledCompoentsToUCL(
       ) {
         // TODO: Replace node with mocked component, log manual work?
         throw new Error('Error #jj43');
-        return;
       }
 
       const elementPropName = nodePath.node.tag.property.name;
@@ -136,9 +135,8 @@ export function transformStyledCompoentsToUCL(
 
         logManualWork({
           filePath: fileInfo.path,
-          helpfulMessage: `The codemod to convert styled components to UCL nodes could not guarantee the correctness when encountering the variable for \`${
-            variable.id.name
-          }\`.
+          helpfulMessage: `The codemod to convert styled components to UCL nodes could not guarantee the correctness when encountering the variable for \`${variable.id.name
+            }\`.
 
 Please manually convert the following styled component code into UCL and replace the null arrow function.
 

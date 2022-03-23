@@ -1,6 +1,6 @@
-import { JSCodeshift } from "jscodeshift";
-import * as _ from "lodash/fp";
-import { brandFontMap, primitiveMap, valueToType } from "./mappings";
+import { JSCodeshift } from 'jscodeshift';
+import * as _ from 'lodash/fp';
+import { brandFontMap, primitiveMap, valueToType } from './mappings';
 
 const isType = (expression, t) =>
   expression?.type === t ||
@@ -12,32 +12,28 @@ const isName = (expression, n) =>
   expression?.object?.object?.name === n ||
   expression?.object?.object?.object?.name === n;
 
-export const parseExpression = (
-  j: JSCodeshift,
-  expression,
-  localImportNames?: string[],
-) => {
+export const parseExpression = (j: JSCodeshift, expression, localImportNames?: string[]) => {
   const finalVars = [];
 
   // console.log(`expression.type: `, expression.type);
-  if (expression.type === "MemberExpression") {
+  if (expression.type === 'MemberExpression') {
     let v = expression;
     let includeTypes = true;
 
     // check if the expession is an import
-    if (_.contains("theme", localImportNames)) {
+    if (_.contains('theme', localImportNames)) {
       includeTypes = false;
     }
 
-    const isMember = isType(expression, "MemberExpression");
-    const isPrimitive = isName(expression, "primitive");
+    const isMember = isType(expression, 'MemberExpression');
+    const isPrimitive = isName(expression, 'primitive');
 
     if (isPrimitive) {
       includeTypes = false;
     }
 
     // Local variables
-    if (expression?.object?.type === "Identifier") {
+    if (expression?.object?.type === 'Identifier') {
       if (isPrimitive) {
         const foundPrimitive = primitiveMap[expression.property.name];
         if (foundPrimitive) {
@@ -45,7 +41,7 @@ export const parseExpression = (
           includeTypes = false;
         }
       }
-      const isBrandFont = isName(expression, "brandFont");
+      const isBrandFont = isName(expression, 'brandFont');
       if (isBrandFont) {
         const foundPrimitive = brandFontMap[expression.property.name];
         if (foundPrimitive) {
@@ -57,7 +53,7 @@ export const parseExpression = (
 
     // TODO maps styles or maybe more this to a separate code mod
     // remove Styles
-    const isStyles = isName(expression, "Styles");
+    const isStyles = isName(expression, 'Styles');
 
     if (isMember && isStyles) {
       includeTypes = false;
@@ -81,13 +77,13 @@ export const parseExpression = (
       vars,
     };
   }
-  if (expression.type === "ArrowFunctionExpression") {
+  if (expression.type === 'ArrowFunctionExpression') {
     let exp;
     // @ts-ignore
-    if (expression?.params?.[0].type === "ObjectPattern") {
+    if (expression?.params?.[0].type === 'ObjectPattern') {
       // convert children to use `p.xxx`
-      const vars = expression.params[0].properties?.map((p) => p.key.name);
-      exp = j.memberExpression(j.identifier("p"), j.identifier(vars[0]));
+      const vars = expression.params[0].properties?.map(p => p.key.name);
+      exp = j.memberExpression(j.identifier('p'), j.identifier(vars[0]));
       // @ts-ignore
       if (expression?.body?.test) {
         expression.body.test = exp;
@@ -95,11 +91,11 @@ export const parseExpression = (
     }
 
     // And change `props` to `p`
-    if (expression.body?.object?.name === "props") {
-      expression.body.object.name = "p";
+    if (expression.body?.object?.name === 'props') {
+      expression.body.object.name = 'p';
     }
-    if (expression.body?.test?.object?.name === "props") {
-      expression.body.test.object.name = "p";
+    if (expression.body?.test?.object?.name === 'props') {
+      expression.body.test.object.name = 'p';
     }
     const { value, vars } = parseExpression(j, expression.body);
     expression.body = value;
@@ -110,13 +106,12 @@ export const parseExpression = (
     };
   }
 
-  if (expression.type === "ConditionalExpression") {
+  if (expression.type === 'ConditionalExpression') {
     const consequent = parseExpression(j, expression.consequent);
     expression.consequent = consequent.value;
     const alternate = parseExpression(j, expression.alternate);
     expression.alternate = alternate.value;
-    const conditionalVar =
-      expression?.test?.property?.name || expression?.test?.name;
+    const conditionalVar = expression?.test?.property?.name || expression?.test?.name;
     let localVars = [];
     if (conditionalVar) {
       localVars.push({
@@ -126,23 +121,17 @@ export const parseExpression = (
     }
     return {
       value: expression,
-      vars: [
-        ...(localVars || []),
-        ...(consequent.vars || []),
-        ...(alternate.vars || []),
-      ],
+      vars: [...(localVars || []), ...(consequent.vars || []), ...(alternate.vars || [])],
     };
   }
 
-  if (expression.type === "CallExpression") {
+  if (expression.type === 'CallExpression') {
     // Check for tokens
-    if (expression?.callee?.property?.name === "token") {
+    if (expression?.callee?.property?.name === 'token') {
       // if one is found then we should return a string instead of an arrow function
       // We also don't care about types in that case
       return {
-        value: j.stringLiteral(
-          "__legacyToken." + expression.arguments[0]?.value,
-        ),
+        value: j.stringLiteral('__legacyToken.' + expression.arguments[0]?.value),
         vars: null,
       };
     } else {
@@ -161,19 +150,19 @@ export const parseExpression = (
     }
   }
 
-  if (expression.type === "StringLiteral") {
+  if (expression.type === 'StringLiteral') {
     return {
       value: j.stringLiteral(expression?.value),
       vars: null,
     };
   }
 
-  if (expression?.type === "Identifier") {
+  if (expression?.type === 'Identifier') {
     return {
       value: expression,
       vars: null,
     };
   }
 
-  throw new Error("Expression not implemented type: " + expression.type);
+  throw new Error('Expression not implemented type: ' + expression.type);
 };
