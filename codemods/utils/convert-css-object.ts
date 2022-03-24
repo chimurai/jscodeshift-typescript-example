@@ -238,10 +238,6 @@ const getExpressionFromMap = (substitutionMap, value) => {
       post: null,
     }
   }
-  // console.log(`p?.groups?.pre: `, p?.groups?.pre);
-  // console.log(`p?.groups?.post: `, p?.groups?.post);
-  // console.log(`substitutionMap.length: `, _.keys(substitutionMap).length);
-
   const foundExpressionKey = Object.keys(substitutionMap).find((key) => {
     if (p.groups.sub === key) {
       return true;
