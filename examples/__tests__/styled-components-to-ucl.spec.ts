@@ -30,9 +30,9 @@ describe("styled-components to UCL", () => {
 
 
   // rename-jsx-primitives
-  // defineTest(__dirname, '../codemods', null, 'rename-jsx-primitives/basic', { parser: 'tsx' });
+  defineTest(__dirname, '../codemods', null, 'rename-jsx-primitives/basic', { parser: 'tsx' });
 
-  // // WL components
-  // defineTest(__dirname, '../codemods', null, 'wl-components/reward-categories/components/styled', { parser: 'tsx' });
-  // defineTest(__dirname, '../codemods', null, 'wl-components/account-orders/styled.base', { parser: 'ts' });
+  // WL components
+  defineTest(__dirname, '../codemods', null, 'wl-components/reward-categories/components/styled', { parser: 'tsx' });
+  defineTest(__dirname, '../codemods', null, 'wl-components/account-orders/styled.base', { parser: 'ts' });
 });
