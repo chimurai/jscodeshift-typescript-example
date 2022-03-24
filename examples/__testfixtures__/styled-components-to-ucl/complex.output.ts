@@ -1,10 +1,10 @@
-import { Box } from '@rbilabs/universal-components';
+import { Box, makeUclComponent } from '@rbilabs/universal-components';
 
 import CloseButton from 'components/close-button';
 import { FIXED_STICKY_FOOTER_HEIGHT } from 'components/sticky-footer/constants';
 import { primitive } from 'styles/constants/primitives';
 
-export const ModalCloseButton = CloseButton.withConfig({
+export const ModalCloseButton = makeUclComponent(CloseButton).withConfig({
   paddingTop: '$20',
 
   // TODO: RN - unsupported CSS
