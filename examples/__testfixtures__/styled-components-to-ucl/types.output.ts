@@ -1,4 +1,4 @@
-import { Box } from '@rbilabs/universal-components';
+import { Box, makeUclComponent } from '@rbilabs/universal-components';
 import Modal from 'modal'
 
 type Baz = true
@@ -7,4 +7,4 @@ type Baz = true
 export const DivWithType = Box.withConfig<Baz>({})
 export const DivWithoutType = Box.withConfig({})
 export const DivWithInlineType = Box.withConfig<{key: 'property'}>({})
-export const DivFnWithInlineType = Modal.withConfig<{key: 'property'}>({})
+export const DivFnWithInlineType = makeUclComponent(Modal).withConfig<{key: 'property'}>({})

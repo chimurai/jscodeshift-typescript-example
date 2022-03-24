@@ -1,4 +1,4 @@
-import { Box, Header as UCLHeader } from '@rbilabs/universal-components';
+import { Box, Header as UCLHeader, makeUclComponent } from '@rbilabs/universal-components';
 import Modal from './modal';
 
 /**
@@ -64,6 +64,6 @@ export const Conditional = Box.withConfig<{ reversed: boolean }>(p => ({
   backgroundColor: p.reversed ? Styles.color.white : '__legacyToken.text-default',
 }));
 
-export const ModalExtended = Modal.withConfig({
+export const ModalExtended = makeUclComponent(Modal).withConfig({
   backgroundColor: '__legacyToken.background-pattern',
 });
