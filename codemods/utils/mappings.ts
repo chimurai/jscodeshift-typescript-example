@@ -435,7 +435,7 @@ export const preToRNTransform = (identifier, value, obj) => {
 
 // One-offs Post toRN
 // -------
-export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
+export const postToRNTransform = (identifier, value) => {
   let i = identifier;
   let v = value;
   let isSupported = _isSupported(identifier, value);
@@ -449,19 +449,6 @@ export const postToRNTransform = (identifier, value, needsFlexRemapping) => {
   // Objects are not supported
   if (_.isObject(value)) {
     isSupported = false;
-  }
-
-  if (needsFlexRemapping) {
-    // TODO push
-    // flexDirection: 'row',
-    switch (identifier) {
-      case 'justifyContent':
-        i = 'alignItems';
-        break;
-      case 'alignItems':
-        i = 'justifyContent';
-        break;
-    }
   }
 
   return {

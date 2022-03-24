@@ -8,6 +8,7 @@ export const Basic = Box.withConfig<{
   color: string;
   backgroundColor: string
 }>(p => ({
+  flexDirection: 'row',
   alignSelf: 'center',
 
   // TODO: RN - unsupported CSS
@@ -16,8 +17,8 @@ export const Basic = Box.withConfig<{
   // TODO: RN - unsupported CSS
   // boxShadow: 'inset 0px 1px 3px 0px rgba(0, 0, 0, 0.1)',
 
-  alignItems: 'space-between',
-  justifyContent: 'center',
+  justifyContent: 'space-between',
+  alignItems: 'center',
 
   _text: {
     textAlign: 'left',

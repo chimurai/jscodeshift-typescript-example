@@ -1,8 +1,9 @@
 import { Box, Text } from '@rbilabs/universal-components';
 
 export const TierLabel = Text.withConfig({
-  alignItems: 'center',
+  flexDirection: 'row',
   justifyContent: 'center',
+  alignItems: 'center',
   top: 0,
   left: 0,
   variant: 'headerTwo',

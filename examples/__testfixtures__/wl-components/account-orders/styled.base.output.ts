@@ -206,7 +206,8 @@ export const Items = Text.withConfig({
 });
 
 export const ItemNameContainer = Box.withConfig({
-  justifyContent: 'center',
+  flexDirection: 'row',
+  alignItems: 'center',
 })/*
 TODO: RN - unsupported CSS
 Some attributes were not converted.
@@ -223,8 +224,9 @@ export const ItemNameContainer = styled.div`
 */;
 
 export const Wrap = Box.withConfig({
-  justifyContent: 'center',
+  flexDirection: 'row',
   alignItems: 'center',
+  justifyContent: 'center',
 
   height: {
     lg: 'auto',
