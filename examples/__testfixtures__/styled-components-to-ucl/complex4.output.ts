@@ -1,4 +1,4 @@
-import { Box, Button, Text as UCLText } from '@rbilabs/universal-components';
+import { Box, Button, makeUclComponent, Text as UCLText } from '@rbilabs/universal-components';
 
 import { ModalContent } from '../styled';
 import { ModalHeading } from 'components/modal';
@@ -26,12 +26,12 @@ export const AnotherOne = Box.withConfig<{ secondary: boolean }>(p => ({
   backgroundColor: theme.backgroundColor,
 }));
 
-export const Container = ModalContent.withConfig({
+export const Container = makeUclComponent(ModalContent).withConfig({
   height: '100%',
   alignItems: 'center',
 });
 
-export const StyledModalHeader = ModalHeading.withConfig({
+export const StyledModalHeader = makeUclComponent(ModalHeading).withConfig({
   alignSelf: 'center',
   lineHeight: '3xl',
   paddingBottom: 0,

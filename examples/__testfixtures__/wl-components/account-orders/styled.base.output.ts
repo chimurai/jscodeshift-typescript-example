@@ -1,4 +1,4 @@
-import { Box, Button, Header, Text } from '@rbilabs/universal-components';
+import { Box, Button, Header, makeUclComponent, Text } from '@rbilabs/universal-components';
 
 import { Container as EmptyStateContainer } from 'components/empty-state';
 import { brandFont } from 'components/layout/brand-font';
@@ -15,7 +15,7 @@ export const ScrollContainer = Box.withConfig({
   // overflowY: 'auto',
 });
 
-export const TrackOrderLink = Link.withConfig({
+export const TrackOrderLink = makeUclComponent(Link).withConfig({
   borderWidth: 1,
   borderColor: '__legacyToken.border-color-button-secondary',
   borderStyle: 'solid',

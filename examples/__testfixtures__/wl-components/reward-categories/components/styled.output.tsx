@@ -1,4 +1,4 @@
-import { Box, FormControl, Header } from '@rbilabs/universal-components';
+import { Box, FormControl, Header, makeUclComponent } from '@rbilabs/universal-components';
 
 import { ClickableContainer } from 'components/clickable-container';
 import { brandFont } from 'components/layout/brand-font';
@@ -106,7 +106,7 @@ export const TitleContainer = Box.withConfig({
   width: '100%',
 });
 
-export const Title = ClickableContainer.withConfig<{ isUsingTabNavigation: boolean; showBorder: boolean; bold: boolean } & WithStyleVariant>(p => ({
+export const Title = makeUclComponent(ClickableContainer).withConfig<{ isUsingTabNavigation: boolean; showBorder: boolean; bold: boolean } & WithStyleVariant>(p => ({
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
