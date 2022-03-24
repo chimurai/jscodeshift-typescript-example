@@ -109,7 +109,7 @@ export const processElement = ({
           if (isRemovable) {
             return;
           }
-          if (!isSupported) {
+          if (!isSupported && !isSkipable) {
             try {
               properties = addProperty(j, properties, k, v, isSupported);
               return;
@@ -252,7 +252,7 @@ ${ct}
   if (includeTypes) {
     try {
       exprs.typeArguments = j.tsTypeParameterInstantiation([getTypeParameter(nodePath, j)]);
-    } catch (e) {}
+    } catch (e) { }
   }
   return exprs;
 };

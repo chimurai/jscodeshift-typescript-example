@@ -56,6 +56,9 @@ export const TextHalf = EqualHalves.withConfig({
     lg: 'flex-start',
   },
 
+  // TODO: RN - unsupported CSS
+  // order: 1,
+
   paddingLeft: {
     lg: 0,
   },
