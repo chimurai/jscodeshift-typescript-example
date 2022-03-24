@@ -124,7 +124,7 @@ const removeProperties = [
 const supportedPropertyValuePairs = [
   // anything but flex or none is not supported
   { property: /^display/, value: /(^none|^flex)/ },
-  { property: /^overflow/, value: /(^hidden)/ },
+  { property: /^overflow$/, value: /(^hidden)/ },
   { property: /^position/, value: /(^absolute|^relative)/ },
 ];
 
@@ -231,7 +231,6 @@ export const _isSkipable = (property: string, value: string) => {
   }
   // skipable by property
   if (_isInReg(property, skipableProperties)) {
-    console.log(`property: `, property, value);
     return true;
   }
   // skipable by value
