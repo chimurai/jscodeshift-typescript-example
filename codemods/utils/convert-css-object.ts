@@ -5,6 +5,7 @@ import {
   postToRNTransform,
   preToRNTransform,
   checkForBetterMappingBasedOnProperties,
+  subRegEx,
 } from './mappings';
 
 import { parseExpression } from './parse-expression';
@@ -226,6 +227,34 @@ export const addProperty = (
   return [...properties, prop];
 };
 
+const getExpressionFromMap = (substitutionMap, value) => {
+  // return substitutionMap[value];
+  const p = String(value).match(subRegEx);
+  // Not found
+  if (!p?.groups?.sub) {
+    return {
+      foundExpression: null,
+      pre: null,
+      post: null,
+    }
+  }
+  // console.log(`p?.groups?.pre: `, p?.groups?.pre);
+  // console.log(`p?.groups?.post: `, p?.groups?.post);
+  // console.log(`substitutionMap.length: `, _.keys(substitutionMap).length);
+
+  const foundExpressionKey = Object.keys(substitutionMap).find((key) => {
+    if (p.groups.sub === key) {
+      return true;
+    }
+  });
+  const foundExpression = substitutionMap[foundExpressionKey];
+  return {
+    foundExpression,
+    pre: p?.groups?.pre,
+    post: p?.groups?.post,
+  };
+}
+
 export const addProperties = ({
   j,
   properties,
@@ -238,6 +267,18 @@ export const addProperties = ({
   originalPropertyNewName,
   needsFlexRemapping: _needFlexRemapping,
   localImportNames,
+}: {
+  j: JSCodeshift,
+  properties: any[]
+  substitutionMap: any,
+  addToLocalVars: Function,
+  identifier: string,
+  initialValue: any,
+  parent?: string,
+  newPropertyName?: string,
+  originalPropertyNewName?: string,
+  needsFlexRemapping?: boolean,
+  localImportNames?: string[],
 }) => {
   let value = initialValue;
   let parent = _parent;
@@ -276,12 +317,20 @@ export const addProperties = ({
   }
 
   // If the value is is an expression
-  const foundExpression = substitutionMap[value];
-
+  const { foundExpression, pre, post } = getExpressionFromMap(substitutionMap, value);
   if (foundExpression) {
     const parsed = parseExpression(j, foundExpression, localImportNames);
 
     value = parsed.value;
+    if (pre || post) {
+      value = j.templateLiteral(
+        [
+          j.templateElement({ cooked: pre, raw: pre }, false),
+          j.templateElement({ cooked: post, raw: post }, false),
+        ],
+        [parsed.value]
+      )
+    }
     // These are variables that are used in Arrow functions
     if (parsed.vars?.length) {
       addToLocalVars(parsed.vars);
@@ -346,6 +395,7 @@ export const addProperties = ({
           originalValue
         );
         // Change the property name
+        // @ts-ignore
         builderProperty.key.name = newPropertyName;
         properties.push(
           j.property(
