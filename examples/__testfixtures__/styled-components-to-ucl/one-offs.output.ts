@@ -26,8 +26,6 @@ export const OverflowXY = Box.withConfig({
   // TODO: RN - unsupported CSS
   // overflowY: 'auto',
 
-  // TODO: RN - unsupported CSS
-  // overflowX: 'hidden',
-
+  overflowX: 'hidden',
   padding: '$4',
 });

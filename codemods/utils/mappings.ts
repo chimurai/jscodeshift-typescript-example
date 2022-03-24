@@ -118,39 +118,60 @@ const removeProperties = [
   /^white-space/,
 ];
 
-// Unsupported
+// Supported
 // -----------
-const unsupportedPropertyValuePairs = [
+
+const supportedPropertyValuePairs = [
   // anything but flex or none is not supported
-  { property: /^display/, value: /^(?!.*(^none|^flex)).*/ },
+  { property: /^display/, value: /(^none|^flex)/ },
+  { property: /^overflow/, value: /(^hidden)/ },
+  { property: /^position/, value: /(^absolute|^relative)/ },
 ];
 
-const unsupportedProperties = [
-  /^boxShadow$/,
-  /^box-shadow$/,
-  /^objectFit$/,
-  /^object-fit$/,
-  /^transform/,
-  /^content$/,
-  /^shadow-offset$/,
-  /^shadowOffset$/,
-  /^span$/,
-  /^list-style$/,
-  /^listStyle$/,
-  /^overflow-x$/,
-  /^grid/,
-  /^overflowX$/,
-  /^overflowY$/,
+const supportedProperties = [
+  /^alignContent/,
+  /^alignItems/,
+  /^alignSelf/,
+  /^background/,
+  /^backgroundColor/,
+  /^border/,
+  /^bottom/,
+  /^color/,
+  /^cursor/,
+  /^flex/,
+  /^flexDirection/,
+  /^font/,
+  /^fontFamily/,
+  /^fontSize/,
+  /^height/,
+  /^isTruncated/,
+  /^justifyContent$/,
+  /^left/,
+  /^lineHeight/,
+  /^margin/,
+  /^maxHeight/,
+  /^maxWidth/,
+  /^minHeight/,
+  /^minWidth/,
+  /^padding/,
+  /^right/,
+  /^textAlign$/,
+  /^textTransform/,
+  /^thickness/, // TODO: We should need to include this here since it's in `skipableProperties`?
+  /^top/,
+  /^underline/,
+  /^width/,
+  /^zIndex/,
 ];
 
-const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/];
+const unsupportedValue = [/^calc/, /^max/, /^min/, /^relative$/, /^!important/];
 
 // Skipable
 // Properties that we are handling in pre-processing
 // We don't need the to be processed by css-to-react-native
 // -----------
 const skipablePropertyValuePairs = [];
-const skipableProperties = [/^isTruncated$/];
+const skipableProperties = [/^isTruncated$/, /^thickness$/];
 const skipableValue = [];
 
 const _isInReg = (test, regex) => _.some(re => re.test(test), regex);
@@ -180,21 +201,23 @@ export const _isRemovable = (property: string, value: string) => {
 export const _isSupported = (property: string, value: string) => {
   // Unsupported by property and value matches
   const found = _.some(({ property: _p, value: _v }) => _p.test(property) && _v.test(value))(
-    unsupportedPropertyValuePairs
+    supportedPropertyValuePairs
   );
-
   if (found) {
-    return false;
+    return true;
   }
-  // Unsupported by property
-  if (_isInReg(property, unsupportedProperties)) {
-    return false;
-  }
+
   // Unsupported by value
   if (_isInReg(value, unsupportedValue)) {
     return false;
   }
-  return true;
+
+  // supported by property
+  if (_isInReg(property, supportedProperties)) {
+    return true;
+  }
+
+  return false;
 };
 
 export const _isSkipable = (property: string, value: string) => {
@@ -208,6 +231,7 @@ export const _isSkipable = (property: string, value: string) => {
   }
   // skipable by property
   if (_isInReg(property, skipableProperties)) {
+    console.log(`property: `, property, value);
     return true;
   }
   // skipable by value
@@ -373,7 +397,6 @@ export const preToRNTransform = (identifier, value, obj) => {
   let isSupported = _isSupported(identifier, value);
   let isRemovable = _isRemovable(identifier, value);
   let isSkipable = _isSkipable(identifier, value);
-  // let isSkipable = false;
 
   // Mappings
   // --------

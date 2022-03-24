@@ -124,7 +124,8 @@ export const TertiaryButton = Button.withConfig({
 
 export const focusStyle = {
   // https://ghinda.net/article/mimic-native-focus-css/
-  outline: '2px solid Highlight',
+  // TODO: RN - unsupported CSS
+  // outline: '2px solid Highlight',
 }/*
 TODO: RN - unsupported CSS
 Some attributes were not converted.

@@ -31,7 +31,6 @@ export const TrackOrderLink = Link.withConfig({
   paddingLeft: '$3',
   fontSize: '0.7em',
   color: '__legacyToken.text-button-secondary',
-  appearance: 'none',
   fontWeight: '500',
   underline: false,
   textTransform: 'uppercase',
