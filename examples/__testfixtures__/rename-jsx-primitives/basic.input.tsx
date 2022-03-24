@@ -68,3 +68,7 @@ function ULLI() {
     </ul>
   )
 }
+
+function SelfClosing() {
+  return <input />
+}

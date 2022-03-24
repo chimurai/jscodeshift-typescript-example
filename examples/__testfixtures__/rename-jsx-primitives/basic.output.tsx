@@ -1,4 +1,4 @@
-import { Box, Divider, Header, Text } from '@rbilabs/universal-components';
+import { Box, Divider, Header, Input, Text } from '@rbilabs/universal-components';
 
 <Box />
 
@@ -69,5 +69,12 @@ function ULLI() {
       {/*TODO: RN - This was a <li> tag. Verify its styled properly*/
       }<Box>hi</Box>
     </Box>)
+  );
+}
+
+function SelfClosing() {
+  return (
+    // TODO: RN - This was a <input> tag. Verify its styled properly
+    <Input />
   );
 }

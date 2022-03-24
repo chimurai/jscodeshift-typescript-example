@@ -16,7 +16,7 @@ export function transformRenameJSXPrimitives(
       if (node.value.openingElement.name.type === 'JSXIdentifier') {
         node.value.openingElement.name.name = nodeName;
       }
-      if (node.value.closingElement.name.type === 'JSXIdentifier') {
+      if (node.value.closingElement?.name.type === 'JSXIdentifier') {
         node.value.closingElement.name.name = nodeName;
       }
 
