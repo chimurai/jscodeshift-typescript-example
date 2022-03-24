@@ -157,7 +157,7 @@ const supportedProperties = [
   /^right/,
   /^textAlign$/,
   /^textTransform/,
-  /^thickness/, // TODO: We should need to include this here since it's in `skipableProperties`?
+  /^thickness/, // TODO: We shouldn't need to include this here since it's in `skipableProperties`?
   /^top/,
   /^underline/,
   /^width/,
