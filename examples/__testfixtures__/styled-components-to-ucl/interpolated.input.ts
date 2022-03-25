@@ -1,12 +1,14 @@
 import styled from 'styled-components'
 
 const WIDTH_PX = 12;
-const HEIGHT_PX = 12;
+const HEIGHT_REM = 2;
+const PADDING_LEFT_PX = 4;
 
 export const InterpolatedVariables = styled.div`
   width: ${WIDTH_PX}px;
-  height: pre${HEIGHT_PX}rem;
-  padding: 10rem ${primitive.$spacing4};
+  height: ${HEIGHT_REM}rem;
+  padding-left: -${PADDING_LEFT_PX}px;
+  margin: 10rem ${primitive.$spacing4};
 `;
 
 export const ImplicitRowFlex = styled.div`
