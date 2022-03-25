@@ -20,6 +20,7 @@ export const Basic = styled.div<{
   background-color: ${p => p.backgroundColor};
   transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
   border-top: 1px solid ${Styles.color.primary};
+  padding: 0 !important;
 `;
 
 export const Tokens = styled.header`
