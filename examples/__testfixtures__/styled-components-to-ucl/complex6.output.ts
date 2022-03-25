@@ -22,7 +22,9 @@ export const MethodTypeWrapper = Box.withConfig<IMethodContainer>(p => ({
     color: '__legacyToken.text-default',
   },
 
-  cursor: p.$isClickable ? 'pointer' : 'auto',
+  _web: {
+    cursor: p.$isClickable ? 'pointer' : 'auto',
+  },
 }))/*
 TODO: RN - unsupported CSS
 Some attributes were not converted.

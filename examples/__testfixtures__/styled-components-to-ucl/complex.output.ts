@@ -57,3 +57,9 @@ export const FlexRemapping = Box.withConfig({
   flexDirection: 'row',
   justifyContent: 'center',
 });
+
+export const Cursor = Box.withConfig({
+  _web: {
+    cursor: 'pointer',
+  },
+})

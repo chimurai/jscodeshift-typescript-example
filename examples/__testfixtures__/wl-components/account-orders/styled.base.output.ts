@@ -162,7 +162,10 @@ export const MoreItems = Button.withConfig({
   borderColor: 'black',
   borderStyle: 'solid',
   padding: 0,
-  cursor: 'pointer',
+
+  _web: {
+    cursor: 'pointer',
+  },
 
   _hover: {
     underline: true,
