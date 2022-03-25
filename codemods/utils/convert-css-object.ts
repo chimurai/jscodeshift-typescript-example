@@ -11,6 +11,7 @@ import {
 import { parseExpression } from './parse-expression';
 import * as _ from 'lodash/fp';
 import toRN from 'css-to-react-native';
+import { parse } from 'postcss';
 
 const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
@@ -323,7 +324,7 @@ export const addProperties = ({
     value = parsed.value;
     if (pre || post) {
       if (post === 'rem') {
-        commentError = 'rem are not supported in the interpolated value: ' + initialValue;
+        commentError = 'rem are not supported in the interpolated value';
       }
       value = j.templateLiteral(
         [

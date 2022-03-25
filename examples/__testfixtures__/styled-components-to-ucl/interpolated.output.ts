@@ -8,7 +8,7 @@ export const InterpolatedVariables = Box.withConfig({
   width: `${WIDTH_PX}px`,
 
   // TODO: RN - unsupported CSS
-  // rem are not supported in the interpolated value: __1substitution__rem
+  // rem are not supported in the interpolated value
   // height: `${HEIGHT_REM}rem`,
 
   paddingLeft: `-${PADDING_LEFT_PX}px`,
