@@ -10,7 +10,7 @@ import {
 } from 'jscodeshift';
 import _ from 'lodash';
 import { _isRemovable, _isSupported } from '../utils/mappings';
-import { logManualWork, commitManualLogs } from '../../logger';
+import { logManualWork } from '../../logger';
 import { convertObjectProperties } from './convert-object-properties';
 
 export function transformInlineStyleProps(root: Collection<any>, j: JSCodeshift, file: FileInfo) {

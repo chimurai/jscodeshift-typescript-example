@@ -13,9 +13,7 @@ export const ModalCloseButton = makeUclComponent(CloseButton).withConfig({
   // TODO: RN - unsupported CSS
   // position: 'fixed',
 
-  // TODO: RN - unsupported CSS
-  // top: 'calc(1rem + env(safe-area-inset-top))',
-
+  top: 16,
   zIndex: Styles.zIndex.below,
   color: '__legacyToken.text-button-primary',
   backgroundColor: 'transparent',

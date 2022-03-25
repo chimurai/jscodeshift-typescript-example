@@ -405,14 +405,36 @@ const identifierMapping = {
   },
 };
 
+function pruneCalcAndEnv(value) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  try {
+    let newValue = value;
+    newValue = newValue.replace('calc(', '');
+    newValue = newValue.replace(/\s(\+|\-|\*|\/)\s/, '');
+    newValue = newValue.replace(/env\(safe-area-inset-(left|right|top|bottom)\)/, '');
+    newValue = newValue.replace(')', '');
+
+    if (!/^\d+(\%|[a-z]+)$/.test(newValue.trim())) {
+      throw new Error('value did not resolve to stable css');
+    }
+
+    return newValue.trim();
+  } catch (e) {
+    return value;
+  }
+}
+
 // One-offs Pre toRN
 // -------
 export const preToRNTransform = (identifier, value, obj) => {
   let i = identifier;
-  let v = value;
-  let isSupported = _isSupported(identifier, value);
-  let isRemovable = _isRemovable(identifier, value);
-  let isSkipable = _isSkipable(identifier, value);
+  let v = pruneCalcAndEnv(value);
+  let isSupported = _isSupported(identifier, v);
+  let isRemovable = _isRemovable(identifier, v);
+  let isSkipable = _isSkipable(identifier, v);
 
   // Mappings
   // --------

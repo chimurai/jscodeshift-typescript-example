@@ -5,6 +5,7 @@ import { defineTest } from 'jscodeshift/src/testUtils';
 describe("styled-components to UCL", () => {
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/bad', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/basic', { parser: 'ts' });
+  defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/calc', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/comments', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/complex', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/complex2', { parser: 'ts' });
