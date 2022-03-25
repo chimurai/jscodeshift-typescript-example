@@ -27,7 +27,7 @@ export const Background = Box.withConfig({
 
 export const AllModalContent = Box.withConfig({
   backgroundColor: '__legacyToken.background-pattern',
-  width: '100%',
+  width: 'full',
   height: '100%',
   justifyContent: 'space-between',
 });
