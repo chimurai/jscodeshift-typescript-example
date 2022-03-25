@@ -143,6 +143,10 @@ export const convertCssObject = ({
       parent = '_text';
     }
 
+    if (key === 'cursor') {
+      parent = '_web';
+    }
+
     if (isRemovable) {
       return;
     }

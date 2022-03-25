@@ -58,3 +58,7 @@ export const FlexRemapping = styled.div`
   display: flex;
   justify-content: center;
 `;
+
+export const Cursor = styled.div`
+  cursor: pointer;
+`
