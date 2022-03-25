@@ -13,6 +13,7 @@ describe("styled-components to UCL", () => {
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/complex5', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/complex6', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/css-template', { parser: 'ts' });
+  defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/interpolated', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/line-height', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/mapping-custom-processing', { parser: 'ts' });
   defineTest(__dirname, '../codemods', null, 'styled-components-to-ucl/media', { parser: 'ts' });

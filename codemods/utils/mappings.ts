@@ -1,6 +1,9 @@
 import { JSCodeshift } from 'jscodeshift';
 import * as _ from 'lodash/fp';
 
+const numberOrLengthRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)((?:px|rem|%))?$/i;
+export const subRegEx = /^(?<pre>.*?)(?<sub>__\d{1,}substitution__)(?<post>.*?)$/i;
+
 const styledComponentsImportsToRemove = ['keyframes'];
 export const styledComponentImportFunctionShouldBeRemove = name =>
   _.contains(name, styledComponentsImportsToRemove);
@@ -303,11 +306,8 @@ const lineHeightArray = [
   { key: 10000, value: '5xl' },
 ];
 
-const numberOrLengthRe = /^([+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?)((?:px|rem|%))?$/i;
-const subRe = /^(.*?)(substitution)(.*?)/i;
-
 export const parseValueToPx = value => {
-  if (String(value).match(subRe)) {
+  if (String(value).match(subRegEx)) {
     throw Error('cant parse ' + value);
   }
   let v = value;
