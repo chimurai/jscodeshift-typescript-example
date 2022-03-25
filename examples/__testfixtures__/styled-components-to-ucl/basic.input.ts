@@ -8,7 +8,6 @@ export const Basic = styled.div<{
   color: string;
   backgroundColor: string
 }>`
-  -moz-appearance: none;
   display: flex;
   position: relative;
   margin: 0 auto;
