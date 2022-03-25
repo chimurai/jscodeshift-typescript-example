@@ -29,7 +29,7 @@ export const EqualHalves = Box.withConfig({
 });
 
 export const ImageHalf = EqualHalves.withConfig({
-  width: '100%',
+  width: 'full',
   paddingTop: 0,
   paddingRight: 0,
   paddingBottom: 0,

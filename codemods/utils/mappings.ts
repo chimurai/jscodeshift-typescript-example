@@ -394,6 +394,15 @@ const identifierMapping = {
       isSupported: true,
     };
   },
+  width: (currentValue: string) => {
+    let newValue = currentValue === '100%' ? 'full' : currentValue;
+    return {
+      newValue,
+      isSupported: _isSupported('width', newValue),
+      isRemovable: _isRemovable('width', newValue),
+      isSkipable: _isSkipable('width', newValue),
+    };
+  },
 };
 
 // One-offs Pre toRN

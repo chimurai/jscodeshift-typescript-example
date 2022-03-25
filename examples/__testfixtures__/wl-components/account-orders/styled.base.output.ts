@@ -118,7 +118,7 @@ export const Tile = styled.div`
 
 export const Col = Box.withConfig({
   width: {
-    base: '100%',
+    base: 'full',
     lg: '48%',
   },
 

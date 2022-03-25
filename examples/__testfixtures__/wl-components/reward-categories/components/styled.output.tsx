@@ -85,7 +85,7 @@ export const Fieldset = FormControl.withConfig({
   borderTopStyle: 'solid',
   margin: 0,
   padding: 0,
-  width: '100%',
+  width: 'full',
 })/* TODO: RN - This was a <input> tag. Verify its styled properly*/;
 
 export const HiddenLegend = Box.withConfig({
@@ -93,7 +93,7 @@ export const HiddenLegend = Box.withConfig({
 })/* TODO: RN - This was a <legend> tag. Verify its styled properly*/;
 
 export const CategoryDropdownContainer = CategoryContainer.withConfig<Pick<CategoryDropdownProps, 'optionsVisible' | 'overlay'>>({
-  width: '100%',
+  width: 'full',
   padding: 0,
   // ${({ optionsVisible, overlay }) => overlay && optionsVisible && noBottomBorder};
 });
@@ -103,7 +103,7 @@ export const TitleContainer = Box.withConfig({
   paddingRight: '$4',
   paddingBottom: 0,
   paddingLeft: '$4',
-  width: '100%',
+  width: 'full',
 });
 
 export const Title = makeUclComponent(ClickableContainer).withConfig<{ isUsingTabNavigation: boolean; showBorder: boolean; bold: boolean } & WithStyleVariant>(p => ({
@@ -119,7 +119,7 @@ export const Title = makeUclComponent(ClickableContainer).withConfig<{ isUsingTa
     ? 'blackOpacity.30'
     : '__legacyToken.border-color-default',
 
-  width: '100%',
+  width: 'full',
   paddingBottom: '$2',
 }))/*
 TODO: RN - unsupported CSS

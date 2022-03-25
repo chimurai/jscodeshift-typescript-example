@@ -112,7 +112,7 @@ export const TertiaryButton = Button.withConfig({
 
   paddingX: '$4',
   paddingY: '9px',
-  width: '100%',
+  width: 'full',
 
   _hover: {
     borderTopColor: Styles.color.grey.three,

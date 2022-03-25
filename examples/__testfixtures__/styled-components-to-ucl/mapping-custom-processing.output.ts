@@ -5,7 +5,7 @@ export const Hr1 = Divider.withConfig({
 });
 
 export const Hr2 = Divider.withConfig({
-  width: '100%',
+  width: 'full',
   thickness: '1',
   marginX: 0,
   marginY: '$8',
