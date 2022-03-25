@@ -11,6 +11,14 @@ export const InterpolatedVariables = Box.withConfig({
   // rem are not supported in the interpolated value
   // height: `${HEIGHT_REM}rem`,
 
+  // TODO: RN - unsupported CSS
+  // vh are not supported in the interpolated value
+  // paddingTop: `${HEIGHT_REM}vh`,
+
+  // TODO: RN - unsupported CSS
+  // vw are not supported in the interpolated value
+  // paddingBottom: `${HEIGHT_REM}vw`,
+
   paddingLeft: `-${PADDING_LEFT_PX}px`,
   marginX: '$4',
   marginY: '$40',

@@ -325,8 +325,8 @@ export const addProperties = ({
 
     value = parsed.value;
     if (pre || post) {
-      if (post === 'rem') {
-        commentError = 'rem are not supported in the interpolated value';
+      if (['rem', 'vw', 'vh'].includes(post)) {
+        commentError = `${post} are not supported in the interpolated value`;
       }
       value = j.templateLiteral(
         [
