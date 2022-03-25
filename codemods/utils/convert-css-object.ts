@@ -48,6 +48,7 @@ export const convertCssObject = ({
 
   _.map((key: string) => {
     let value = obj[key];
+    value = typeof value === 'string' ? value.replace(' !important', '') : value;
     // Nested objects as values
     if (_.isObject(value)) {
       // Supported properties that can have objects as key
@@ -236,9 +237,9 @@ const getExpressionFromMap = (substitutionMap, value) => {
       foundExpression: null,
       pre: null,
       post: null,
-    }
+    };
   }
-  const foundExpressionKey = Object.keys(substitutionMap).find((key) => {
+  const foundExpressionKey = Object.keys(substitutionMap).find(key => {
     if (p.groups.sub === key) {
       return true;
     }
@@ -249,7 +250,7 @@ const getExpressionFromMap = (substitutionMap, value) => {
     pre: p?.groups?.pre,
     post: p?.groups?.post,
   };
-}
+};
 
 export const addProperties = ({
   j,
@@ -264,17 +265,17 @@ export const addProperties = ({
   needsFlexRemapping: _needFlexRemapping,
   localImportNames,
 }: {
-  j: JSCodeshift,
-  properties: any[]
-  substitutionMap: any,
-  addToLocalVars: Function,
-  identifier: string,
-  initialValue: any,
-  parent?: string,
-  newPropertyName?: string,
-  originalPropertyNewName?: string,
-  needsFlexRemapping?: boolean,
-  localImportNames?: string[],
+  j: JSCodeshift;
+  properties: any[];
+  substitutionMap: any;
+  addToLocalVars: Function;
+  identifier: string;
+  initialValue: any;
+  parent?: string;
+  newPropertyName?: string;
+  originalPropertyNewName?: string;
+  needsFlexRemapping?: boolean;
+  localImportNames?: string[];
 }) => {
   let value = initialValue;
   let parent = _parent;
@@ -325,14 +326,14 @@ export const addProperties = ({
           j.templateElement({ cooked: post, raw: post }, false),
         ],
         [parsed.value]
-      )
+      );
     }
     // These are variables that are used in Arrow functions
     if (parsed.vars?.length) {
       addToLocalVars(parsed.vars);
     }
   } else {
-    value = j.literal(initialValue);
+    value = j.literal(value);
   }
 
   const {

@@ -29,6 +29,7 @@ export const Basic = Box.withConfig<{
   borderTopWidth: 1,
   borderTopColor: Styles.color.primary,
   borderTopStyle: 'solid',
+  padding: 0,
 }));
 
 export const Tokens = Box.withConfig({

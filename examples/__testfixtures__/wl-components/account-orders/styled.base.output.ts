@@ -255,8 +255,7 @@ export const RecentOrderTitle = Header.withConfig({
   marginX: 0,
   marginY: '$8',
   marginBottom: '$5',
-  // TODO: This should not be like this
-  color: '__2substitution__ !important',
+  color: '__legacyToken.text-default',
   textAlign: 'center',
   variant: 'headerTwo',
 
