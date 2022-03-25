@@ -29,7 +29,10 @@ export const TrackOrderLink = makeUclComponent(Link).withConfig({
   paddingRight: '$3',
   paddingBottom: '$1',
   paddingLeft: '$3',
-  fontSize: '0.7em',
+
+  // TODO: RN - unsupported CSS
+  // fontSize: '0.7em',
+
   color: '__legacyToken.text-button-secondary',
   fontWeight: '500',
   underline: false,

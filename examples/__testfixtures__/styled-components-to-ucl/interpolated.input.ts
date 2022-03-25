@@ -21,3 +21,14 @@ export const ImplicitRowFlex = styled.div`
 export const NewPropsToDelete = styled.div`
   appearance: none;
 `;
+
+const i = 1;
+
+export const Units = styled.div`
+  height: ${i}rem;
+  width: ${i}px;
+  padding-top: ${i}em;
+  padding-bottom: ${i}vh;
+  padding-left: ${i}vw;
+  padding-right: ${i}%;
+`

@@ -111,7 +111,7 @@ export const processElement = ({
           }
           if (!isSupported && !isSkipable) {
             try {
-              properties = addProperty(j, properties, k, v, isSupported);
+              properties = addProperty(j, properties, k, v, isSupported, substitutionMap);
               return;
             } catch (e) {
               hasBailingError = true;
@@ -252,7 +252,7 @@ ${ct}
   if (includeTypes) {
     try {
       exprs.typeArguments = j.tsTypeParameterInstantiation([getTypeParameter(nodePath, j)]);
-    } catch (e) { }
+    } catch (e) {}
   }
   return exprs;
 };

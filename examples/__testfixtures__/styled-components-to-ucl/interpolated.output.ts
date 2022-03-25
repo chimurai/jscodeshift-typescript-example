@@ -30,3 +30,27 @@ export const ImplicitRowFlex = Box.withConfig({
 });
 
 export const NewPropsToDelete = Box.withConfig({});
+
+const i = 1;
+
+export const Units = Box.withConfig({
+  // TODO: RN - unsupported CSS
+  // rem are not supported in the interpolated value
+  // height: `${i}rem`,
+
+  width: `${i}px`,
+
+  // TODO: RN - unsupported CSS
+  // em are not supported in the interpolated value
+  // paddingTop: `${i}em`,
+
+  // TODO: RN - unsupported CSS
+  // vh are not supported in the interpolated value
+  // paddingBottom: `${i}vh`,
+
+  // TODO: RN - unsupported CSS
+  // vw are not supported in the interpolated value
+  // paddingLeft: `${i}vw`,
+
+  paddingRight: `${i}%`,
+})

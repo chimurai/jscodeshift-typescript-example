@@ -68,3 +68,19 @@ export const Conditional = Box.withConfig<{ reversed: boolean }>(p => ({
 export const ModalExtended = makeUclComponent(Modal).withConfig({
   backgroundColor: '__legacyToken.background-pattern',
 });
+
+export const Units = Box.withConfig({
+  height: '$4',
+  width: '1px',
+
+  // TODO: RN - unsupported CSS
+  // paddingTop: '1em',
+
+  // TODO: RN - unsupported CSS
+  // paddingBottom: '1vh',
+
+  // TODO: RN - unsupported CSS
+  // paddingLeft: '1vw',
+
+  paddingRight: '1%',
+})
