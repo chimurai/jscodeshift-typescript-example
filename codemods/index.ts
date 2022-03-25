@@ -8,6 +8,7 @@ import { transformRenameOnclick } from './rename-onclick';
 import { transformComponentLibImports } from './components-lib-imports';
 import { ConversionError } from './utils/conversion-error';
 import { transformWrapinMakeUcl } from './wrap-make-ucl';
+import { transformAria } from './aria';
 
 export const parser = 'tsx';
 export default function transformer(fileInfo: FileInfo, api: API) {
@@ -22,6 +23,7 @@ export default function transformer(fileInfo: FileInfo, api: API) {
     transformStyledCompoentsToUCL(root, j, fileInfo);
     transformRenameOnclick(root, j, fileInfo);
     transformWrapinMakeUcl(root, j, fileInfo);
+    transformAria(root, j, fileInfo);
   } catch (e) {
     if (e instanceof ConversionError) {
       console.error(e.reason);
