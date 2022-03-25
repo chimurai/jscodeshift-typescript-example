@@ -11,6 +11,7 @@ import {
 import { parseExpression } from './parse-expression';
 import * as _ from 'lodash/fp';
 import toRN from 'css-to-react-native';
+import { parse } from 'postcss';
 
 const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
@@ -238,6 +239,8 @@ const getExpressionFromMap = (substitutionMap, value) => {
       post: null,
     }
   }
+  const pre = p?.groups?.pre;
+  const post = p?.groups?.post;
   const foundExpressionKey = Object.keys(substitutionMap).find((key) => {
     if (p.groups.sub === key) {
       return true;
@@ -246,8 +249,8 @@ const getExpressionFromMap = (substitutionMap, value) => {
   const foundExpression = substitutionMap[foundExpressionKey];
   return {
     foundExpression,
-    pre: p?.groups?.pre,
-    post: p?.groups?.post,
+    pre,
+    post,
   };
 }
 
@@ -279,6 +282,7 @@ export const addProperties = ({
   let value = initialValue;
   let parent = _parent;
   let newPropertyName = _newPropertyName;
+  let commentError = null;
 
   if (!parent && _needFlexRemapping) {
     properties.push(j.property('init', j.identifier('flexDirection'), j.literal('row')));
@@ -319,6 +323,9 @@ export const addProperties = ({
 
     value = parsed.value;
     if (pre || post) {
+      if (post === 'rem') {
+        commentError = 'rem are not supported in the interpolated value';
+      }
       value = j.templateLiteral(
         [
           j.templateElement({ cooked: pre, raw: pre }, false),
@@ -357,14 +364,17 @@ export const addProperties = ({
   }
 
   // Comment the others
-  if (!isSupported) {
+  if (!isSupported || commentError) {
     identifier = '// ' + identifier;
   }
   const builderProperty = j.property('init', j.identifier(identifier), value);
 
-  if (!isSupported) {
+  if (!isSupported || commentError) {
     // Add comment
-    builderProperty.comments = [j.commentLine(' ' + TODO_RN_COMMENT, true)];
+    builderProperty.comments = [
+      j.commentLine(' ' + TODO_RN_COMMENT, true),
+      j.commentLine(' ' + commentError, true),
+    ];
   }
   if (parent) {
     // find the parent
