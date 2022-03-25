@@ -11,7 +11,6 @@ import {
 import { parseExpression } from './parse-expression';
 import * as _ from 'lodash/fp';
 import toRN from 'css-to-react-native';
-import { parse } from 'postcss';
 
 const TODO_RN_COMMENT = `TODO: RN - unsupported CSS`;
 const SHOULD_THROW_ON_CONVERSION_ISSUES = false;
@@ -71,7 +70,7 @@ export const convertCssObject = ({
               return;
             }
             if (!isSupported && !isSkipable) {
-              properties = addProperty(j, properties, k, v, isSupported);
+              properties = addProperty(j, properties, k, v, isSupported, substitutionMap);
               return;
             }
             if (isSkipable) {
@@ -151,7 +150,7 @@ export const convertCssObject = ({
       return;
     }
     if (!isSupported && !isSkipable) {
-      properties = addProperty(j, properties, key, value, isSupported);
+      properties = addProperty(j, properties, key, value, isSupported, substitutionMap);
       return;
     }
 
@@ -204,7 +203,7 @@ export const convertCssObject = ({
   // Add the custom properties
   if (activeElement.attributes) {
     activeElement.attributes.forEach(x => {
-      properties = addProperty(j, properties, x.name, x.value, true, x.comment);
+      properties = addProperty(j, properties, x.name, x.value, true, substitutionMap, x.comment);
     });
   }
 
@@ -223,10 +222,38 @@ export const addProperty = (
   identifier,
   value,
   isSupported,
+  substitutionMap,
   comment?: string
 ) => {
-  const prefix = !isSupported ? `// ${TODO_RN_COMMENT}\n// ` : '';
-  const prop = j.property('init', j.identifier(prefix + identifier), j.literal(value));
+  let unsupportedComment = '';
+  // replace substitution back into comment.
+  function literalBasedOnSupported() {
+    if (!isSupported) {
+      const { foundExpression, pre, post } = getExpressionFromMap(substitutionMap, value);
+      if (foundExpression) {
+        const parsed = parseExpression(j, foundExpression, []);
+
+        if (pre || post) {
+          if (['rem', 'vw', 'vh', 'em'].includes(post)) {
+            unsupportedComment = `\n// ${post} are not supported in the interpolated value`;
+          }
+          return j.templateLiteral(
+            [
+              j.templateElement({ cooked: pre, raw: pre }, false),
+              j.templateElement({ cooked: post, raw: post }, false),
+            ],
+            [parsed.value]
+          );
+        }
+      }
+    }
+
+    return j.literal(value);
+  }
+
+  const initValue = literalBasedOnSupported();
+  const prefix = !isSupported ? `// ${TODO_RN_COMMENT}${unsupportedComment}\n// ` : '';
+  const prop = j.property('init', j.identifier(prefix + identifier), initValue);
   if (comment) {
     prop.comments = [j.commentLine(' ' + comment)];
   }
@@ -329,8 +356,8 @@ export const addProperties = ({
 
     value = parsed.value;
     if (pre || post) {
-      if (post === 'rem') {
-        commentError = 'rem are not supported in the interpolated value';
+      if (['rem', 'vw', 'vh', 'em'].includes(post)) {
+        commentError = `${post} are not supported in the interpolated value`;
       }
       value = j.templateLiteral(
         [

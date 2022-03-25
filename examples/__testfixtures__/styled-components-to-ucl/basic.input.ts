@@ -46,3 +46,12 @@ export const Conditional = styled.div<{ reversed: boolean }>`
 export const ModalExtended = styled(Modal)`
   background-color: ${props => props.theme.token('background-pattern')};
 `;
+
+export const Units = styled.div`
+  height: 1rem;
+  width: 1px;
+  padding-top: 1em;
+  padding-bottom: 1vh;
+  padding-left: 1vw;
+  padding-right: 1%;
+`

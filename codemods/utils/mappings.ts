@@ -210,6 +210,10 @@ export const _isSupported = (property: string, value: string) => {
     return true;
   }
 
+  if (_hasUnsupportedCssUnits(value)) {
+    return false;
+  }
+
   // Unsupported by value
   if (_isInReg(value, unsupportedValue)) {
     return false;
@@ -305,6 +309,10 @@ const lineHeightArray = [
   // note: ignoring anything larger then 4.0
   { key: 10000, value: '5xl' },
 ];
+
+const _hasUnsupportedCssUnits = value => {
+  return /\d+(em|vh|vw)/.test(value) || /substitution__(em|vh|vw)/.test(value);
+};
 
 export const parseValueToPx = value => {
   if (String(value).match(subRegEx)) {
