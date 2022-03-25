@@ -1,6 +1,6 @@
 import { API, FileInfo } from 'jscodeshift';
 import * as _ from 'lodash/fp';
-import { transformInlineStyleProps } from './/inline-style-prop';
+import { transformInlineStyleProps } from './inline-style-prop';
 import { commitManualLogs, logManualWork } from '../logger';
 import { transformRenameJSXPrimitives } from './rename-jsx-primitives';
 import { transformStyledCompoentsToUCL } from './styled-components-to-ucl';

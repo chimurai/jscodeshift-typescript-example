@@ -7,6 +7,17 @@
   "scripts": {
     "test": "jest"
   },
+  "files": [
+    "index.js",
+    "codemods"
+  ],
+  "bin": {
+    "react-native-code-mod": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kfinley-rbi/jscodeshift-typescript-example.git"
+  },
   "dependencies": {
     "@types/lodash": "^4.14.178",
     "css-to-react-native": "kfinley-rbi/css-to-react-native",
