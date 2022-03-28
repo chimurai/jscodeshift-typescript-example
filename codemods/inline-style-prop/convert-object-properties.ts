@@ -6,7 +6,7 @@ import {
   SpreadElement,
   SpreadProperty,
 } from 'jscodeshift';
-import toRN from 'css-to-react-native';
+import toRN from '../css-to-react-native';
 import { _isRemovable, _isSupported } from '../utils/mappings';
 import { logManualWork } from '../../logger';
 
