@@ -3,7 +3,7 @@ import { IElementMapping, mediaPropertyNames, preToRNTransform } from './mapping
 import * as _ from 'lodash/fp';
 import * as postcss from 'postcss-scss';
 import * as postcssJs from 'postcss-js';
-import toRN from 'css-to-react-native';
+import toRN from '../css-to-react-native';
 import { logManualWork } from '../../logger';
 import {
   addProperties,

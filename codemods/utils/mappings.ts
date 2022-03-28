@@ -132,6 +132,8 @@ const supportedPropertyValuePairs = [
 ];
 
 const supportedProperties = [
+  /^flexGrow/,
+  /^flexShrink/,
   /^alignContent/,
   /^alignItems/,
   /^alignSelf/,

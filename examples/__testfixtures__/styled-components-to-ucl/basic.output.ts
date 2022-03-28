@@ -84,3 +84,8 @@ export const Units = Box.withConfig({
 
   paddingRight: '1%',
 })
+
+export const FlexProps = Box.withConfig({
+  flexShrink: 1,
+  flexGrow: 2,
+})

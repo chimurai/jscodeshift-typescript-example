@@ -8,7 +8,6 @@ export const Basic = styled.div<{
   color: string;
   backgroundColor: string
 }>`
-  -moz-appearance: none;
   display: flex;
   position: relative;
   margin: 0 auto;
@@ -55,4 +54,9 @@ export const Units = styled.div`
   padding-bottom: 1vh;
   padding-left: 1vw;
   padding-right: 1%;
+`
+
+export const FlexProps = styled.div`
+  flex-shrink: 1;
+  flex-grow: 2;
 `

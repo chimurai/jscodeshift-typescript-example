@@ -50,6 +50,7 @@ export const ImageHalf = EqualHalves.withConfig({
 });
 
 export const TextHalf = EqualHalves.withConfig({
+  zIndex: 100,
   paddingTop: '$12',
 
   justifyContent: {
@@ -66,19 +67,4 @@ export const TextHalf = EqualHalves.withConfig({
   paddingBottom: {
     lg: '$20',
   },
-})/*
-TODO: RN - unsupported CSS
-Some attributes were not converted.
-
-export const TextHalf = styled(EqualHalves)`
-  z-index: 100;
-  padding-top: ${primitive.$spacing9};
-  ${Styles.desktop`
-    justify-content: flex-start;
-    order: 1;
-    padding-left: 0;
-    padding-bottom: ${primitive.$spacing11};
-  `}
-`;
-
-*/;
+});

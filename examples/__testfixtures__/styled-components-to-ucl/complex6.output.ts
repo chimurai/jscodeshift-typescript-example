@@ -25,6 +25,11 @@ export const MethodTypeWrapper = Box.withConfig<IMethodContainer>(p => ({
   _web: {
     cursor: p.$isClickable ? 'pointer' : 'auto',
   },
+
+  flexGrow: {
+    base: 2,
+    lg: 3,
+  },
 }))/*
 TODO: RN - unsupported CSS
 Some attributes were not converted.
