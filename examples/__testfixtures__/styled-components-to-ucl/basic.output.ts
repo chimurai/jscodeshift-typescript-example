@@ -28,7 +28,7 @@ export const Basic = Box.withConfig<{
   backgroundColor: p.backgroundColor,
   borderTopWidth: 1,
   borderTopColor: Styles.color.primary,
-  borderTopStyle: 'solid',
+  borderStyle: 'solid',
   padding: 0,
 }));
 

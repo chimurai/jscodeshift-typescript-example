@@ -159,7 +159,7 @@ var border = function border(prefix) {
       (_ref = {}),
       (_ref['border' + prefix + 'Width'] = borderWidth),
       (_ref['border' + prefix + 'Color'] = borderColor),
-      (_ref['border' + prefix + 'Style'] = borderStyle),
+      (_ref['borderStyle'] = borderStyle),
       _ref
     );
   };

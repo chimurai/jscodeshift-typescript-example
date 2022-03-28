@@ -82,7 +82,6 @@ export const Fieldset = FormControl.withConfig({
   borderStyle: 'solid',
   borderTopWidth: 1,
   borderTopColor: '__legacyToken.border-color-default',
-  borderTopStyle: 'solid',
   margin: 0,
   padding: 0,
   width: 'full',
@@ -112,7 +111,7 @@ export const Title = makeUclComponent(ClickableContainer).withConfig<{ isUsingTa
   alignItems: 'center',
   borderBottomWidth: 1,
   borderBottomColor: p.showBorder ? '1px' : '0px',
-  borderBottomStyle: 'solid',
+  borderStyle: 'solid',
 
   // This should be commented out i think and kept
   borderBottomColor: p.variant
