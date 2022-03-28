@@ -85,7 +85,7 @@ const LinkStyles = {
     lg: 'black',
   },
 
-  borderBottomStyle: {
+  borderStyle: {
     base: 'solid',
     lg: 'solid',
   },

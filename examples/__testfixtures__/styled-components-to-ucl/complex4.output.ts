@@ -37,7 +37,7 @@ export const StyledModalHeader = makeUclComponent(ModalHeading).withConfig({
   paddingBottom: 0,
   borderBottomWidth: 0,
   borderBottomColor: 'black',
-  borderBottomStyle: 'solid',
+  borderStyle: 'solid',
 
   paddingTop: {
     lg: 0,

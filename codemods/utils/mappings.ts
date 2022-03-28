@@ -106,6 +106,10 @@ const removePropertyValuePairs = [
 
 // Props only
 const removeProperties = [
+  /^borderBottomStyle/,
+  /^borderTopStyle/,
+  /^borderLeftStyle/,
+  /^borderRightStyle/,
   /^animation/,
   /^appearance/,
   /^transition/,
