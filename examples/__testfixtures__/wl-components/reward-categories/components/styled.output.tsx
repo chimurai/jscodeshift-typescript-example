@@ -26,7 +26,7 @@ export const CategoryTitle = Header.withConfig<WithStyleVariant>(p => ({
   variant: 'headerFive',
 
   fontSize: {
-    lg: 19,
+    lg: 'xl',
   },
 }));
 

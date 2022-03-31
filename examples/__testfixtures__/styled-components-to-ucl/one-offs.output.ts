@@ -5,19 +5,19 @@ export const One = Box.withConfig({
 });
 
 export const WhiteSpace = Header.withConfig({
-  fontSize: 12,
+  fontSize: 'xs',
   isTruncated: true,
   variant: 'headerTwo',
 })
 
 export const TextOverflow = Header.withConfig({
-  fontSize: 12,
+  fontSize: 'xs',
   isTruncated: true,
   variant: 'headerTwo',
 })
 
 export const Overflow = Header.withConfig({
-  fontSize: 12,
+  fontSize: 'xs',
   overflow: 'hidden',
   variant: 'headerTwo',
 })

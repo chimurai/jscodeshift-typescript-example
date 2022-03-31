@@ -14,7 +14,7 @@ export const UnauthenticatedContainer = Box.withConfig<{ center: boolean }>(p =>
 
 export const ItemOfferHeading = Box.withConfig<{ $isApplied: boolean }>(p => ({
   _text: {
-    fontSize: 10,
+    fontSize: '2xs',
     textTransform: 'uppercase',
     color: p.$isApplied ? Styles.color.black : Styles.color.red,
   },

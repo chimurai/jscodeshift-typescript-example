@@ -34,7 +34,7 @@ export const TrackOrderLink = makeUclComponent(Link).withConfig({
   // fontSize: '0.7em',
 
   color: '__legacyToken.text-button-secondary',
-  fontWeight: '500',
+  fontWeight: 400,
   underline: false,
   textTransform: 'uppercase',
 
@@ -187,7 +187,7 @@ export const SubtitleContainer = Text.withConfig({
   // TODO: RN - unsupported CSS
   // display: 'inline-flex',
 
-  fontWeight: 'bold',
+  fontWeight: 700,
   alignItems: 'center',
   color: '__legacyToken.text-default',
 });
@@ -266,8 +266,8 @@ export const RecentOrderTitle = Header.withConfig({
   variant: 'headerTwo',
 
   fontSize: {
-    base: 36,
-    lg: 56,
+    base: '4xl',
+    lg: '6xl',
   },
 });
 

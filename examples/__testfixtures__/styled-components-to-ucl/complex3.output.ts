@@ -26,7 +26,7 @@ export const TierLabel = Text.withConfig({
   color: '__legacyToken.text-button-secondary',
   zIndex: Styles.zIndex.below,
   height: '$8',
-  fontSize: 16,
+  fontSize: 'md',
 });
 
 export const ShortCodeErrorContainer = Box.withConfig({

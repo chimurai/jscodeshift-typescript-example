@@ -17,7 +17,7 @@ export const Pixel = Text.withConfig({
 });
 
 export const PixelNoFontSize = Text.withConfig({
-  fontSize: 16,
+  fontSize: 'md',
   lineHeight: '2xs',
 });
 

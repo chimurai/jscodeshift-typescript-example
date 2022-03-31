@@ -62,7 +62,7 @@ export const StyledModalHeader = styled(ModalHeading)`
 
 export const LoadingText = UCLText.withConfig({
   textAlign: 'center',
-  fontSize: 15,
+  fontSize: 'md',
   lineHeight: 'md',
   fontFamily: Styles.fontFamily.body,
   paddingX: '$10',
@@ -107,7 +107,7 @@ export const TertiaryButton = Button.withConfig({
   _text: {
     color: Styles.color.black,
     fontFamily: Styles.fontFamily.body,
-    fontSize: 15,
+    fontSize: 'md',
   },
 
   paddingX: '$4',

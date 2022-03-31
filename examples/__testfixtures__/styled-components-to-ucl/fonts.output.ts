@@ -32,13 +32,9 @@ export const Five = Header.withConfig({
 
 export const Unsupported = Header.withConfig({
   fontSize: 'lg',
+
+  // TODO: RN - unsupported CSS
+  // fontWeight: 'fake',
+
   variant: 'headerTwo',
-})/*
-TODO: RN - unsupported CSS
-Some attributes were not converted.
-
-
-  font-size: 18px;
-  font-weight: fake;
-
-*/;
+});
