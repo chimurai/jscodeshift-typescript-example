@@ -73,6 +73,10 @@ export const convertCssObject = ({
               properties = addProperty(j, properties, k, v, isSupported, substitutionMap);
               return;
             }
+            if (!isSupported) {
+              properties = addProperty(j, properties, k, v, isSupported, substitutionMap);
+              return;
+            }
             if (isSkipable) {
               convertedObj = { [k]: v };
             } else {
@@ -150,6 +154,10 @@ export const convertCssObject = ({
       return;
     }
     if (!isSupported && !isSkipable) {
+      properties = addProperty(j, properties, key, value, isSupported, substitutionMap);
+      return;
+    }
+    if (!isSupported) {
       properties = addProperty(j, properties, key, value, isSupported, substitutionMap);
       return;
     }

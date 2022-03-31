@@ -319,6 +319,45 @@ const lineHeightArray = [
 const _hasUnsupportedCssUnits = value => {
   return /\d+(em|vh|vw)/.test(value) || /substitution__(em|vh|vw)/.test(value);
 };
+const fontSizeArray = [
+  { value: '2xs', key: '10' },
+  { value: 'xs', key: '12' },
+  { value: 'sm', key: '14' },
+  { value: 'md', key: '16' },
+  { value: 'lg', key: '18' },
+  { value: 'xl', key: '20' },
+  { value: '2xl', key: '24' },
+  { value: '3xl', key: '30' },
+  { value: '4xl', key: '36' },
+  { value: '5xl', key: '48' },
+  { value: '6xl', key: '60' },
+  { value: '7xl', key: '72' },
+  { value: '8xl', key: '96' },
+  { value: '9xl', key: '128' },
+];
+
+const fontWeightArray = [
+  { key: 'hairline', value: 400 },
+  { key: 100, value: 400 },
+  { key: 'thin', value: 400 },
+  { key: 200, value: 400 },
+  { key: 'light', value: 400 },
+  { key: 300, value: 400 },
+  { key: 'normal', value: 400 },
+  { key: 400, value: 400 },
+  { key: 'medium', value: 400 },
+  { key: 500, value: 400 },
+  { key: 'semibold', value: 400 },
+  { key: 600, value: 700 },
+  { key: 'bold', value: 700 },
+  { key: 700, value: 700 },
+  { key: 'extrabold', value: 700 },
+  { key: 800, value: 700 },
+  { key: 'black', value: 700 },
+  { key: 900, value: 700 },
+  { key: 'extraBlack', value: 700 },
+  { key: 950, value: 700 },
+];
 
 export const parseValueToPx = value => {
   if (String(value).match(subRegEx)) {
@@ -390,6 +429,66 @@ const identifierMapping = {
       isSkipable: true,
       isRemovable: false,
       isSupported: true,
+    };
+  },
+  fontSize: (currentValue: string, obj: object) => {
+    let newValue = currentValue;
+    let valueAsPx;
+    if (_.isNumber(currentValue)) {
+      valueAsPx = currentValue;
+    }
+    const p = String(currentValue).match(numberOrLengthRe);
+    if (!p) {
+      console.log(`not > p: `, p, newValue);
+      return {
+        newValue,
+        isSkipable: true,
+        isRemovable: false,
+        isSupported: false,
+      };
+    }
+    if (p && p[1]) {
+      if (p[2] === 'rem') {
+        valueAsPx = parseValueToPx(currentValue);
+      }
+      if (p[2] === 'px') {
+        valueAsPx = Number(p[1]);
+      }
+    }
+    const res = _.find((l: { key: string; value: string }) => valueAsPx <= l.key)(fontSizeArray);
+    if (res) {
+      newValue = res.value;
+    }
+    return {
+      newValue,
+      isSkipable: true,
+      isRemovable: false,
+      isSupported: true,
+    };
+  },
+  fontWeight: (currentValue: string, obj: object) => {
+    if (String(currentValue).match(subRegEx)) {
+      return {
+        newValue: currentValue,
+        isSkipable: true,
+        isRemovable: false,
+        isSupported: true,
+      }
+    }
+    let isSupported = false;
+    let newValue = currentValue;
+    const str = String(currentValue);
+    const res = _.find((l: { key: string; value: string }) =>
+      str == l.key)(fontWeightArray);
+    if (res?.value) {
+      isSupported = true;
+      newValue = res.value;
+    }
+    return {
+      newValue,
+      isSkipable: true,
+      isRemovable: false,
+      isSupported,
     };
   },
   textDecoration: (currentValue: string, obj: object) => {
