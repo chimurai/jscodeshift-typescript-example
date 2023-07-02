@@ -784,9 +784,9 @@
     recast "^0.20.3"
 
 "@types/node@*":
-  version "20.3.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.3.1.tgz#e8a83f1aa8b649377bb1fb5d7bac5cb90e784dfe"
-  integrity sha512-EhcH/wvidPy1WeML3TtYFGR83UzjxeWRen9V402T8aUGYsCHOmfoisV3ZSg03gAFIbLq8TnWOJ0f4cALtnSEUg==
+  version "20.3.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.3.3.tgz#329842940042d2b280897150e023e604d11657d6"
+  integrity sha512-wheIYdr4NYML61AjC8MKj/2jrR/kDQri/CIpVoZwldwhnIrD/j9jIU5bJ8yBKuB2VhpFV7Ab6G2XkBjv9r9Zzw==
 
 "@types/prettier@^2.1.5":
   version "2.7.3"
@@ -1023,9 +1023,9 @@ camelcase@^6.2.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001503:
-  version "1.0.30001508"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001508.tgz#4461bbc895c692a96da399639cc1e146e7302a33"
-  integrity sha512-sdQZOJdmt3GJs1UMNpCCCyeuS2IEGLXnHyAo9yIO5JJDjbjoVRij4M1qep6P6gFpptD1PqIYgzM+gwJbOi92mw==
+  version "1.0.30001510"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001510.tgz#077b7ceba430473142ffd47ed89a78bd7b10075f"
+  integrity sha512-z35lD6xjHklPNgjW4P68R30Er5OCIZE0C1bUf8IMXSh34WJYXfIy+GxIEraQXYJ2dvTU8TumjYAeLrPhpMlsuw==
 
 chalk@^2.0.0:
   version "2.4.2"
@@ -1176,9 +1176,9 @@ diff-sequences@^29.4.3:
   integrity sha512-ofrBgwpPhCD85kMKtE9RYFFq6OC1A89oW2vvgWZNCwxrUpRUILopY7lsYyMDSjc8g6U6aiO0Qubg6r4Wgt5ZnA==
 
 electron-to-chromium@^1.4.431:
-  version "1.4.440"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.440.tgz#d3b1eeb36b717eb479a240c0406ac1fa67901762"
-  integrity sha512-r6dCgNpRhPwiWlxbHzZQ/d9swfPaEJGi8ekqRBwQYaR3WmA5VkqQfBWSDDjuJU1ntO+W9tHx8OHV/96Q8e0dVw==
+  version "1.4.447"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.447.tgz#ac69d3a7b3713e9ae94bb30ba65c3114e4d76a38"
+  integrity sha512-sxX0LXh+uL41hSJsujAN86PjhrV/6c79XmpY0TvjZStV6VxIgarf8SRkUoUTuYmFcZQTemsoqo8qXOGw5npWfw==
 
 emittery@^0.13.1:
   version "0.13.1"
@@ -1297,9 +1297,9 @@ find-up@^4.0.0, find-up@^4.1.0:
     path-exists "^4.0.0"
 
 flow-parser@0.*:
-  version "0.209.1"
-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.209.1.tgz#b3ea7566469113abc660b4833a38ae8c599f0719"
-  integrity sha512-7YdhWfCsLRn31or7oK9M7Svd4WFk1qfj6VIFY/9S6HRyzBBiLlobNbUbitZHfdi0nhkik5S498UmF3phdzM6ug==
+  version "0.210.2"
+  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.210.2.tgz#6a61f699676fec37b95a5e125a82e1cbd1184830"
+  integrity sha512-kQiVau1WnXMCxJziuOF9wk4EoE/sPTU5H7dWOJN+7lsh+tmUh6LXz1dcLE44D+ouVIg8RRnfRZQymZqzKfh5fA==
 
 for-each@^0.3.3:
   version "0.3.3"
@@ -2565,9 +2565,9 @@ ts-jest@29.1.0:
     yargs-parser "^21.0.1"
 
 tslib@^2.0.1:
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.5.3.tgz#24944ba2d990940e6e982c4bea147aba80209913"
-  integrity sha512-mSxlJJwl3BMEQCUNnxXBU9jP4JBktcEGhURcPR6VQVlnP0FdDEsIaz0C35dXNGLyRfrATNofF0F5p2KPxQgB+w==
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.0.tgz#b295854684dbda164e181d259a22cd779dcd7bc3"
+  integrity sha512-7At1WUettjcSRHXCyYtTselblcHl9PJFFVKiCAy/bY97+BPZXSQ2wbq0P9s8tK2G7dFQfNnlJnPAiArVBVBsfA==
 
 type-detect@4.0.8:
   version "4.0.8"
