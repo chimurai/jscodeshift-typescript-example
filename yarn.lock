@@ -765,10 +765,10 @@
     expect "^29.0.0"
     pretty-format "^29.0.0"
 
-"@types/jscodeshift@0.11.7":
-  version "0.11.7"
-  resolved "https://registry.yarnpkg.com/@types/jscodeshift/-/jscodeshift-0.11.7.tgz#3c320f58af9f5b22226cc80d44a3f93abbe9e7aa"
-  integrity sha512-YJ+dQlL2a8dR+iNExYVxiFMa4nhoUgIhYN47rCCdwkRPYdURkee4bCskMhNNCUNo14wbjVf7C0iIKL5tQ9jecw==
+"@types/jscodeshift@0.11.9":
+  version "0.11.9"
+  resolved "https://registry.yarnpkg.com/@types/jscodeshift/-/jscodeshift-0.11.9.tgz#0d5c8f40b5188ed23981cd94dc1fe908b1bc96b4"
+  integrity sha512-4BrPdC7z/IFmrQM0YsF2DY7tdDGVU99DYYwvyC/Iz9bF4L0lyv8iJAeb+soQs7/UZSJ831VaVMLEdXPmAfBpnQ==
   dependencies:
     ast-types "^0.14.1"
     recast "^0.20.3"
