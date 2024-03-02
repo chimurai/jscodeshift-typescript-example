@@ -4,7 +4,7 @@
 tasks:
   - init: |
       yarn install
-      yarn test
+      yarn test --maxWorkers=30%
 github:
   # https://www.gitpod.io/docs/prebuilds/#configure-prebuilds
   prebuilds:
