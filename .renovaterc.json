@@ -1,19 +1,20 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "lockFileMaintenance": {
     "enabled": true,
-    "recreateClosed": true
+    "recreateWhen": "always"
   },
-  "pinVersions": false,
+  "rangeStrategy": "replace",
   "groupName": "all",
-  "masterIssue": true,
-  "stabilityDays": 7,
+  "dependencyDashboard": true,
+  "minimumReleaseAge": "7 days",
   "prCreation": "not-pending",
-  "separateMajorMinor": "true",
-  "rebaseStalePrs": true,
-  "schedule": ["every weekend"],
+  "separateMajorMinor": true,
+  "rebaseWhen": "behind-base-branch",
+  "schedule": [
+    "every weekend"
+  ],
   "timezone": "Europe/Amsterdam"
 }
-
