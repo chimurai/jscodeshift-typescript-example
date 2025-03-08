@@ -5,16 +5,6 @@ tasks:
   - init: |
       yarn install
       yarn test --maxWorkers=30%
-github:
-  # https://www.gitpod.io/docs/prebuilds/#configure-prebuilds
-  prebuilds:
-    master: true
-    branches: true
-    pullRequests: true
-    pullRequestsFromForks: true
-    addCheck: true
-    addComment: false
-    addBadge: true
 
 vscode:
   extensions:
