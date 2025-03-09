@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { createTestTransform } from './test-kit';
 import transformer from './simple-rename';
 
