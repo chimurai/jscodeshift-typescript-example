@@ -4,7 +4,7 @@
 tasks:
   - init: |
       yarn install
-      yarn test --maxWorkers=30%
+      yarn test run
 
 vscode:
   extensions:
@@ -14,4 +14,5 @@ vscode:
     - EditorConfig.EditorConfig
     - esbenp.prettier-vscode
     - streetsidesoftware.code-spell-checker
+    - vitest.explorer
     - yzhang.markdown-all-in-one

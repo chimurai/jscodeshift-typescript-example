@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import outdent from 'outdent';
 import { createTestTransform } from './test-kit';
 import transformer from './reverse-identifiers';
