@@ -53,6 +53,22 @@ Use the [pre-configured VSCode launcher](https://github.com/chimurai/jscodeshift
 
 ![debugger](https://raw.githubusercontent.com/chimurai/jscodeshift-typescript-example/main/docs/debugger.gif)
 
+## Vibe Code Your `jscodeshift` Codemod 🤖
+
+With [`.github/copilot-instructions.md`](.github/copilot-instructions.md) you can vibe code a new jscodeshift codemod.
+
+Example prompt to create a new transform with tests:
+
+```prompt
+Create a new transform to add a post-fix "funny" to class name
+
+before:
+class Foo {}
+
+after:
+class FooFunny {}
+```
+
 ## Behind the scenes
 
 Use `@babel/parser` in [https://astexplorer.net](https://astexplorer.net) when working with the jscodeshift's [default parser](https://github.com/facebook/jscodeshift#usage-cli) (default: `babel`).
