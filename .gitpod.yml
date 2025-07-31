@@ -3,8 +3,8 @@
 
 tasks:
   - init: |
-      yarn install
-      yarn test run
+      npm install
+      npm test run
 
 vscode:
   extensions:
