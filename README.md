@@ -29,7 +29,7 @@ Strongly typed code and code completion with `@types/jscodeshift`
 
 ## Vibe Code Your `jscodeshift` Codemod 🤖
 
-With [`.github/copilot-instructions.md`](.github/copilot-instructions.md) you can vibe code your jscodeshift codemod.
+With [`.github/copilot-instructions.md`](.github/copilot-instructions.md) and [`.github/prompts/new-transformer.prompt.md`](.github/prompts/new-transformer.prompt.md) you can vibe code your jscodeshift codemod.
 
 Example prompt to create a new transform with tests:
 
