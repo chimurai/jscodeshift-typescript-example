@@ -49,12 +49,6 @@ class FooFunny {}
 npm i
 ```
 
-or
-
-```shell
-yarn
-```
-
 ## Run a codemod
 
 ```shell
@@ -67,12 +61,6 @@ npx jscodeshift -t ./examples/simple-rename.ts --extensions=ts --parser=ts './**
 
 ```shell
 npm test
-```
-
-or
-
-```shell
-yarn test
 ```
 
 ## Debug
