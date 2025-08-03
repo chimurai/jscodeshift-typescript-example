@@ -33,15 +33,20 @@ With [`.github/copilot-instructions.md`](.github/copilot-instructions.md) and [`
 
 Example prompt to create a new transform with tests:
 
-```prompt
+``````prompt
 Create a new transform to add a post-fix "funny" to class name
 
 before:
+```ts
 class Foo {}
+```
 
 after:
+```ts
 class FooFunny {}
 ```
+
+``````
 
 ## Installation
 
