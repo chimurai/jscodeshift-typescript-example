@@ -71,7 +71,9 @@ Use the [pre-configured VSCode launcher](https://github.com/chimurai/jscodeshift
 
 ## Behind the scenes
 
-Use `@babel/parser` in [https://astexplorer.net](https://astexplorer.net) when working with the jscodeshift's [default parser](https://github.com/facebook/jscodeshift#usage-cli) (default: `babel`).
+Use `@typescript-eslint/parser` in [https://astexplorer.net](https://astexplorer.net) when working with the jscodeshift's `parser="ts"`
+
+By default jscodeshift will use the [`babel` parser](https://github.com/facebook/jscodeshift#usage-cli) (`@babel/parser`)
 
 ## Resources & Inspiration
 
