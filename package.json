@@ -8,7 +8,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "jscodeshift": "^17.0.0"
+    "jscodeshift": "^17.3.0"
   },
   "devDependencies": {
     "@types/jscodeshift": "17.3.0",
