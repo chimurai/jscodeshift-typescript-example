@@ -28,3 +28,6 @@ The examples can be found in the `examples` directory along with their correspon
 
 # Git
 - Use conventional commits for commit messages.
+
+# GitHub Pull Requests
+- Use conventional commits style to describe PR titles
