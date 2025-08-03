@@ -11,6 +11,12 @@ The examples can be found in the `examples` directory along with their correspon
 # Writing Transformations
 - `jscodeshift` transformations are written in the `examples` directory.
 - Use `simple-rename.ts` and `simple-rename.spec.ts` as a template for writing new transformations.
+- Always export parser as `export const parser: TestOptions['parser'] = 'ts';` to ensure TypeScript parsing.
+
+# Abstract Syntax Tree (AST)
+- Use `jscodeshift` to traverse and manipulate the AST.
+- Use TypeScript ESTree (`typescript-eslint`) for transformations when `parser='ts'`.
+- Use #context7-mcp to understand the different AST nodes
 
 # Testing Transformations
 - Write tests with Vitest.

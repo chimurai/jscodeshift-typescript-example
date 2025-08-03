@@ -10,6 +10,7 @@
  * identifiers.
  */
 import type { API, FileInfo } from 'jscodeshift';
+import type { TestOptions } from 'jscodeshift/src/testUtils';
 
 export default function transformer(file: FileInfo, api: API) {
   const j = api.jscodeshift;
@@ -21,3 +22,6 @@ export default function transformer(file: FileInfo, api: API) {
     )
     .toSource();
 }
+
+// Use TypeScript parser for transformations
+export const parser: TestOptions['parser'] = 'ts';
