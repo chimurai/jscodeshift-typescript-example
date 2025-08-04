@@ -9,14 +9,16 @@ The examples can be found in the `examples` directory along with their correspon
 - Use Vitest for testing the transformations.
 
 # Writing Transformations
+- Use `jscodeshift` with TypeScript parser (`parser: 'ts'`) for all transformations.
 - `jscodeshift` transformations are written in the `examples` directory.
 - Use `simple-rename.ts` and `simple-rename.spec.ts` as a template for writing new transformations.
 - Always export parser as `export const parser: TestOptions['parser'] = 'ts';` to ensure TypeScript parsing.
 
 # Abstract Syntax Tree (AST)
-- Use `jscodeshift` to traverse and manipulate the AST.
-- Use TypeScript ESTree (`typescript-eslint`) for transformations when `parser='ts'`.
-- Use #context7-mcp to understand the different AST nodes
+- Use TypeScript ESTree node types (e.g., `VariableDeclaration`, `Identifier`) instead of generic AST types to access nodes.
+- Access TypeScript-specific nodes like interfaces, type aliases, and decorators using TSESTree types (e.g., `TSInterfaceDeclaration`, `TSTypeAliasDeclaration`, `Decorator`).
+- For TypeScript-specific syntax (generics, type annotations), use TSESTree node properties
+- Use #context7-mcp (`typescript-eslint/typescript-eslint`) to get more information about ESTree and TSESTree node types.
 
 # Testing Transformations
 - Write tests with Vitest.
