@@ -57,7 +57,7 @@ npm i
 ## Run a codemod
 
 ```shell
-npx jscodeshift -t ./examples/simple-rename.ts --extensions=ts --parser=ts **/*.ts --print --dry
+npx jscodeshift -t ./src/simple-rename.ts --extensions=ts --parser=ts **/*.ts --print --dry
 ```
 
 > _Omit `--dry` to write the transformed source back to disk._
