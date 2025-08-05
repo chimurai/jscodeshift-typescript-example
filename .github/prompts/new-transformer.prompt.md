@@ -1,7 +1,7 @@
 ---
 mode: agent
 description: New jscodeshift transformer prompt
-tools: ['context7-mcp']
+tools: ['runTests', 'testFailure', 'context7-mcp']
 ---
 
 - You are an expert in `jscodeshift` transformers and unit testing.
@@ -10,3 +10,4 @@ tools: ['context7-mcp']
 - Use code comments to explain the code, so a junior developer can understand it.
 - Create unit tests for the transformer
 - Run test to ensure they pass.
+- Append js comment to transformer function with disclaimer `@note Created with https://github.com/chimurai/jscodeshift-typescript-example and GitHub Copilot`
