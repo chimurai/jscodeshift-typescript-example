@@ -28,9 +28,9 @@ This project contains TypeScript jscodeshift codemod examples.
 - Use #context7-mcp (`typescript-eslint/typescript-eslint`) to get more information about ESTree and TSESTree node types.
 
 ## Testing Transformations
-- Write tests with Vitest.
-- Use `*.spec.ts` convention.
-- Use `npx vitest run` to run the tests without watching.
+- Use `npm test` to run tests.
+- Write tests using Vitest.
+- Use `*.spec.ts` filename convention.
 - Each transformation has a corresponding test file in the `src` folder.
 - Tests use `createTestTransform` to apply the transformation `input` and validate the `output`.
 - Use `outdent` tagged template literals to format multiline strings in the `input` and `output`.
