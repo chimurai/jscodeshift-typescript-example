@@ -10,4 +10,5 @@ tools: ['runTests', 'testFailure', 'context7-mcp']
 - Use code comments to explain the code, so a junior developer can understand it.
 - Create unit tests for the transformer
 - Run test to ensure they pass.
-- Append js comment to transformer function with disclaimer `@note Created with https://github.com/chimurai/jscodeshift-typescript-example and GitHub Copilot`
+- Append js comment with instruction to run transformer "@note Run this transformer with jscodeshift: `npx jscodeshift -t {transformerFilePath} <path/glob-to-files> --print --dry`"
+- Append js comment to transformer function with disclaimer "@note Created with https://github.com/chimurai/jscodeshift-typescript-example"
