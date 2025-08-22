@@ -6,7 +6,7 @@
 - [Installation](#installation)
 - [Run a codemod](#run-a-codemod)
 - [Test](#test)
-- [Debug](#debug)
+- [Test and Debug with Vitest](#test-and-debug-with-vitest)
 - [Behind the scenes](#behind-the-scenes)
 - [Resources \& Inspiration](#resources--inspiration)
 - [Awesome lists](#awesome-lists)
@@ -68,11 +68,11 @@ npx jscodeshift -t ./src/simple-rename.ts --extensions=ts --parser=ts **/*.ts --
 npm test
 ```
 
-## Debug
+## Test and Debug with Vitest
 
-Use the [pre-configured VSCode launcher](https://github.com/chimurai/jscodeshift-typescript-example/blob/main/.vscode/launch.json) to run tests and debug your transformer.
+Install the [Vitest VSCode extension](https://marketplace.visualstudio.com/items?itemName=vitest.explorer) to test and debug your transformer.
 
-![debugger](https://raw.githubusercontent.com/chimurai/jscodeshift-typescript-example/main/docs/debugger.gif)
+![jscodeshift-vitest](https://raw.githubusercontent.com/chimurai/jscodeshift-typescript-example/main/docs/jscodeshift-vitest.gif)
 
 ## Behind the scenes
 
