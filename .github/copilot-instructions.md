@@ -9,9 +9,10 @@ This project contains TypeScript jscodeshift codemod examples.
 ## Dependencies
 - Use `npm` as the package manager.
 - Use `jscodeshift` for code transformations.
-- Use #context7-mcp to get more information about `jscodeshift` library.
+- Use #context7-mcp to find `jscodeshift` documentation.
 - Use `outdent` for formatting multiline strings in tests.
 - Use Vitest for testing the transformations.
+- Do NOT install dependencies.
 
 ## Writing Transformations
 - Use `jscodeshift` with TypeScript parser (`parser: 'ts'`) for all transformations.
@@ -20,12 +21,13 @@ This project contains TypeScript jscodeshift codemod examples.
 - Always export parser as `export const parser: TestOptions['parser'] = 'ts';` to ensure TypeScript parsing.
 - Fix all TypeScript Type errors.
 - Use Type Narrowing if necessary to ensure type safety.
+- Set jscodeshift's `.toSource()` options to match the code style of the examples
 
 ## Abstract Syntax Tree (AST)
 - Use TypeScript ESTree node types (e.g., `VariableDeclaration`, `Identifier`) instead of generic AST types to access nodes.
 - Access TypeScript-specific nodes like interfaces, type aliases, and decorators using TSESTree types (e.g., `TSInterfaceDeclaration`, `TSTypeAliasDeclaration`, `Decorator`).
 - For TypeScript-specific syntax (generics, type annotations), use TSESTree node properties
-- Use #context7-mcp (`typescript-eslint/typescript-eslint`) to get more information about ESTree and TSESTree node types.
+- Use #context7-mcp to find ESTree and TSESTree node types from `typescript-eslint/typescript-eslint`.
 
 ## Testing Transformations
 - Use `npm test` to run tests.
