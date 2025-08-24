@@ -24,6 +24,7 @@ This project contains TypeScript jscodeshift codemod examples.
 - Set jscodeshift's `.toSource()` options to match the code style of the examples
 
 ## Abstract Syntax Tree (AST)
+- Use `jscodeshift` API to traverse and manipulate the AST.
 - Use TypeScript ESTree node types (e.g., `VariableDeclaration`, `Identifier`) instead of generic AST types to access nodes.
 - Access TypeScript-specific nodes like interfaces, type aliases, and decorators using TSESTree types (e.g., `TSInterfaceDeclaration`, `TSTypeAliasDeclaration`, `Decorator`).
 - For TypeScript-specific syntax (generics, type annotations), use TSESTree node properties
