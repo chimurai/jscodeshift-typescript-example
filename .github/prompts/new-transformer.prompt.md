@@ -8,6 +8,7 @@ tools: ['runTests', 'testFailure', 'context7-mcp']
 - Create plan to implement the new jscodeshift transformer before proceeding.
 - Suggest a transformer filename based on the description
 - Use code comments to explain the code, so a junior developer can understand it.
+- Create {transformerFile}.prompt.md file with the original prompt.
 - Create unit tests for the transformer
 - Run test to ensure they pass.
 - Update JSDoc block transformer and add:
