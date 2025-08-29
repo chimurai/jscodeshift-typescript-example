@@ -11,5 +11,6 @@ tools: ['runTests', 'testFailure', 'context7-mcp']
 - Create unit tests for the transformer
 - Run test to ensure they pass.
 - Update JSDoc block transformer and add:
-  - "@note Created with https://github.com/chimurai/jscodeshift-typescript-example"
-  - "@note Run this transformer with jscodeshift: `npx jscodeshift -t {transformerFilePath} <path/glob-to-files> --print --dry`"
+  - "@license MIT"
+  - "@copyright 2025 - Created with https://github.com/chimurai/jscodeshift-typescript-example"
+  - "@description Run this transformer with jscodeshift: `npx jscodeshift -t {transformerFilePath} <path/glob-to-files> --print --dry`"

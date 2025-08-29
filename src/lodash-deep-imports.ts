@@ -13,8 +13,9 @@ import type { TestOptions } from 'jscodeshift/src/testUtils';
  * This transformation helps with tree-shaking and reduces bundle size by only
  * importing the specific lodash functions needed.
  *
- * @note Created with https://github.com/chimurai/jscodeshift-typescript-example
- * @note Run this transformer with jscodeshift: `npx jscodeshift -t src/lodash-deep-imports.ts <path/glob-to-files> --print --dry`
+ * @license MIT
+ * @copyright 2025 - Created with https://github.com/chimurai/jscodeshift-typescript-example
+ * @description Run this transformer with jscodeshift: `npx jscodeshift -t src/lodash-deep-imports.ts <path/glob-to-files> --print --dry`
  */
 export default function transformer(file: FileInfo, api: API) {
   const j = api.jscodeshift;
