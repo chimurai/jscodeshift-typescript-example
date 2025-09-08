@@ -10,3 +10,4 @@ import { pluck } from 'lodash';
 after:
 ```ts
 import pluck from 'lodash/pluck';
+```
