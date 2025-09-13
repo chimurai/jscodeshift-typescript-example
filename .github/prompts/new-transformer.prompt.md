@@ -14,4 +14,4 @@ tools: ['runTests', 'testFailure', 'context7-mcp']
 - Update JSDoc block transformer and add:
   - "@license MIT"
   - "@copyright 2025 - Created with https://github.com/chimurai/jscodeshift-typescript-example"
-  - "@description Run this transformer with jscodeshift: `npx jscodeshift -t {transformerFilePath} <path/glob-to-files> --print --dry`"
+  - "@description Run this transformer with jscodeshift: `npx jscodeshift -t {transformerFilePath} **/*.ts --print --dry`"
