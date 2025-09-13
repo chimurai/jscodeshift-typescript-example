@@ -38,9 +38,3 @@ This project contains TypeScript jscodeshift codemod examples.
 - Tests use `createTestTransform` to apply the transformation `input` and validate the `output`.
 - Use `outdent` tagged template literals to format multiline strings in the `input` and `output`.
 - Update `expected` transformation output in case of whitespace formatting issue in test
-
-## Git
-- Use conventional commits for commit messages.
-
-## GitHub Pull Requests
-- Use conventional commits style to describe PR titles
