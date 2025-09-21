@@ -29,7 +29,7 @@ This project contains TypeScript jscodeshift codemod examples.
 - Use TypeScript ESTree node types (e.g., `VariableDeclaration`, `Identifier`) instead of generic AST types to access nodes.
 - Access TypeScript-specific nodes like interfaces, type aliases, and decorators using TSESTree types (e.g., `TSInterfaceDeclaration`, `TSTypeAliasDeclaration`, `Decorator`).
 - For TypeScript-specific syntax (generics, type annotations), use TSESTree node properties
-- Use #context7-mcp to find ESTree and TSESTree node types from `typescript-eslint/typescript-eslint`.
+- Use #context7-mcp to find ESTree and TSESTree node types from `@typescript-eslint/parser`.
 
 ## Testing Transformations
 - Use `npm test` to run tests.
@@ -38,4 +38,4 @@ This project contains TypeScript jscodeshift codemod examples.
 - Each transformation has a corresponding test file in the `src` folder.
 - Tests use `createTestTransform` to apply the transformation `input` and validate the `output`.
 - Use `outdent` tagged template literals to format multiline strings in the `input` and `output`.
-- Update `expected` transformation output in case of whitespace formatting issue in test
+- Update `expected` transformation output in case of formatting issue in test output.
