@@ -21,6 +21,10 @@ jscodeshift-typescript-example is a project with `jscodeshift` example codemods 
 - Use Vitest for unit testing
 - Test files:  `*.spec.ts`
 
+## Debug JSCodeShift Transformer
+- add console.log statements to debug the AST
+- remove console.log when debugging is done
+
 ## Git Workflow
 - ALWAYS remove temporary and debug files before committing
 - ALWAYS run `npm test` before committing
