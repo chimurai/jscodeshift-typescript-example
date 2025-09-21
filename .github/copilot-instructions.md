@@ -22,6 +22,7 @@ This project contains TypeScript jscodeshift codemod examples.
 - Fix all TypeScript Type errors.
 - Use Type Narrowing if necessary to ensure type safety.
 - Set jscodeshift's `.toSource()` options to match the code style of the examples
+- Use explicit `return file.source;` when no transformation is needed, instead of using `toSource()`.
 
 ## Abstract Syntax Tree (AST)
 - Use `jscodeshift` API to traverse and manipulate the AST.
