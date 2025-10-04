@@ -10,9 +10,6 @@ tools: ['runCommands', 'edit', 'search', 'testFailure', 'runTests', 'context7-mc
 - Use code comments to explain the code, so a junior developer can understand it.
 - Create unit tests for the transformer
 - Run tests to ensure they pass.
-- Update spec.md when:
-  - spec.md AST node types are incorrect after debugging the transformer
-  - New requirements or use cases are provided
 - Update JSDoc block transformer and add:
   - "@license MIT"
   - "@copyright 2025 - Created with https://github.com/chimurai/jscodeshift-typescript-example"
