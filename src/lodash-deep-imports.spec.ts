@@ -8,15 +8,15 @@ describe('lodash-deep-imports', () => {
 
   it('should convert single named import to deep import', () => {
     const source = outdent`
-      import { pluck } from 'lodash';
+      import { map } from 'lodash';
 
-      const result = pluck(data, 'name');
+      const result = map(data, fn);
     `;
 
     const expected = outdent`
-      import pluck from 'lodash/pluck';
+      import map from 'lodash/map';
 
-      const result = pluck(data, 'name');
+      const result = map(data, fn);
     `;
 
     expect(transform({ source })).toEqual(expected);
@@ -57,6 +57,26 @@ describe('lodash-deep-imports', () => {
     expect(transform({ source })).toEqual(expected);
   });
 
+  it('should handle mixed import types correctly', () => {
+    const source = outdent`
+      import _, { map, filter } from 'lodash';
+
+      const result1 = _.reduce(data, fn);
+      const result2 = map(data, fn);
+    `;
+
+    const expected = outdent`
+      import map from 'lodash/map';
+      import filter from 'lodash/filter';
+      import _ from 'lodash';
+
+      const result1 = _.reduce(data, fn);
+      const result2 = map(data, fn);
+    `;
+
+    expect(transform({ source })).toEqual(expected);
+  });
+
   it('should preserve existing imports and add lodash deep imports before them', () => {
     const source = outdent`
       import React from 'react';
@@ -73,6 +93,37 @@ describe('lodash-deep-imports', () => {
       import { Component } from '@angular/core';
 
       const debouncedFn = debounce(fn, 300);
+    `;
+
+    expect(transform({ source })).toEqual(expected);
+  });
+
+  it('should handle complex lodash functions', () => {
+    const source = outdent`
+      import { chain, map, filter, value, cloneDeep, merge } from 'lodash';
+
+      const result = chain(data)
+        .map(item => item.value)
+        .filter(value => value > 0)
+        .value();
+
+      const merged = merge(cloneDeep(obj1), obj2);
+    `;
+
+    const expected = outdent`
+      import chain from 'lodash/chain';
+      import map from 'lodash/map';
+      import filter from 'lodash/filter';
+      import value from 'lodash/value';
+      import cloneDeep from 'lodash/cloneDeep';
+      import merge from 'lodash/merge';
+
+      const result = chain(data)
+        .map(item => item.value)
+        .filter(value => value > 0)
+        .value();
+
+      const merged = merge(cloneDeep(obj1), obj2);
     `;
 
     expect(transform({ source })).toEqual(expected);
@@ -315,26 +366,6 @@ describe('lodash-deep-imports', () => {
     expect(transform({ source })).toEqual(source);
   });
 
-  it('should handle mixed import types correctly', () => {
-    const source = outdent`
-      import _, { map, filter } from 'lodash';
-
-      const result1 = _.reduce(data, fn);
-      const result2 = map(data, fn);
-    `;
-
-    const expected = outdent`
-      import map from 'lodash/map';
-      import filter from 'lodash/filter';
-      import _ from 'lodash';
-
-      const result1 = _.reduce(data, fn);
-      const result2 = map(data, fn);
-    `;
-
-    expect(transform({ source })).toEqual(expected);
-  });
-
   it('should work with TypeScript files', () => {
     const source = outdent`
       import { map, filter } from 'lodash';
@@ -391,26 +422,43 @@ describe('lodash-deep-imports', () => {
     expect(transform({ source })).toEqual(expected);
   });
 
-  it('should preserve function calls and usage patterns', () => {
+  it('should be idempotent - running multiple times produces same result', () => {
     const source = outdent`
-      import { chain, map, filter, value } from 'lodash';
+      import { map, filter } from 'lodash';
 
-      const result = chain(data)
-        .map(item => item.value)
-        .filter(value => value > 0)
-        .value();
+      const result = map(data, filter);
     `;
 
     const expected = outdent`
-      import chain from 'lodash/chain';
       import map from 'lodash/map';
       import filter from 'lodash/filter';
-      import value from 'lodash/value';
 
-      const result = chain(data)
-        .map(item => item.value)
-        .filter(value => value > 0)
-        .value();
+      const result = map(data, filter);
+    `;
+
+    // Run transformation twice
+    const firstRun = transform({ source });
+    const secondRun = transform({ source: firstRun });
+
+    expect(firstRun).toEqual(expected);
+    expect(secondRun).toEqual(expected);
+  });
+
+  it('should only transform exact lodash package imports', () => {
+    const source = outdent`
+      import { map } from 'lodash';
+      import { somethingElse } from 'lodash-es';
+      import { anotherThing } from 'my-lodash-utils';
+
+      const result = map(data, fn);
+    `;
+
+    const expected = outdent`
+      import map from 'lodash/map';
+      import { somethingElse } from 'lodash-es';
+      import { anotherThing } from 'my-lodash-utils';
+
+      const result = map(data, fn);
     `;
 
     expect(transform({ source })).toEqual(expected);
