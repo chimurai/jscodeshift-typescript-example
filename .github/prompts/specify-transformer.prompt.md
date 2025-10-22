@@ -1,7 +1,7 @@
 ---
 mode: agent
 description: Specify jscodeshift transformer requirements
-tools: ['edit', 'search', 'context7-mcp']
+tools: ['context7-mcp/*', 'edit', 'search']
 ---
 
 - Create new specification document as {transformerFile}.spec.md in the `./src` folder.
@@ -13,5 +13,5 @@ tools: ['edit', 'search', 'context7-mcp']
 - Ensure the specification document covers edge cases and complex use cases.
 - Include JSCodeshift AST node types (@typescript-eslint/parser) for the examples in the specification document.
 - DO NOT create your own AST node types.
-- Use #context7-mcp to look up AST node types.
-- Use #context7-mcp to look up additional context.
+- Use #context7-mcp/* to look up AST node types.
+- Use #context7-mcp/* to look up additional context.

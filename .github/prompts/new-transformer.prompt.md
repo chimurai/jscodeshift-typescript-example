@@ -1,7 +1,7 @@
 ---
 mode: agent
 description: New jscodeshift transformer prompt
-tools: ['runCommands', 'edit', 'search', 'testFailure', 'runTests', 'context7-mcp']
+tools: ['runCommands', 'edit', 'search', 'context7-mcp/*', 'testFailure']
 ---
 
 - You are an expert in `jscodeshift` transformers and unit testing.
