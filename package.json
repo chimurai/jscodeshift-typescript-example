@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "main": "index.js",
   "license": "MIT",
-  "packageManager": "npm@11.7.0",
+  "packageManager": "npm@11.8.0",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest watch"
