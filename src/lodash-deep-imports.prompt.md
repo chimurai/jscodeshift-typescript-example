@@ -1,6 +1,6 @@
-Use deep imports for lodash functions
+/jscodeshift
 
-Use #context7-mcp to find lodash functions to create extensive test suite
+Create new codemod to migrate lodash imports to use deep imports
 
 before:
 ```ts
