@@ -2,7 +2,7 @@
 
 - [TypeScript all the way 🚀](#typescript-all-the-way-)
 - [TypeScript transformer](#typescript-transformer)
-- [Vibe Code Your `jscodeshift` Codemod 🤖](#vibe-code-your-jscodeshift-codemod-)
+- [Use `/jscodeshift` SKILL to create your codemod 🤖](#use-jscodeshift-skill-to-create-your-codemod-)
 - [Installation](#installation)
 - [Run a codemod](#run-a-codemod)
 - [Test](#test)
@@ -27,23 +27,23 @@ Strongly typed code and code completion with `@types/jscodeshift`
 
 ![code-completion](https://raw.githubusercontent.com/chimurai/jscodeshift-typescript-example/main/docs/code-completion.gif)
 
-## Vibe Code Your `jscodeshift` Codemod 🤖
+## Use `/jscodeshift` SKILL to create your codemod 🤖
 
-With [`.github/copilot-instructions.md`](.github/copilot-instructions.md) and [`.github/prompts/new-transformer.prompt.md`](.github/prompts/new-transformer.prompt.md) you can vibe code your jscodeshift codemod.
-
-Example prompt to create a new transform with tests:
+Start in [**Plan Mode**](https://code.visualstudio.com/docs/agents/planning) and use example prompt to create a new transform with tests:
 
 ``````prompt
-Create a new transform to add a post-fix "funny" to class name
+/jscodeshift
+
+Create new codemod to migrate lodash imports to use deep imports
 
 before:
 ```ts
-class Foo {}
+import { pluck } from 'lodash';
 ```
 
 after:
 ```ts
-class FooFunny {}
+import pluck from 'lodash/pluck';
 ```
 
 ``````
