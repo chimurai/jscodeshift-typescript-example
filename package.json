@@ -14,9 +14,9 @@
   },
   "devDependencies": {
     "@types/jscodeshift": "17.3.0",
-    "@vitest/coverage-v8": "5.0.1",
+    "@vitest/coverage-v8": "5.0.2",
     "outdent": "0.8.0",
     "typescript": "7.0.2",
-    "vitest": "5.0.1"
+    "vitest": "5.0.2"
   }
 }
