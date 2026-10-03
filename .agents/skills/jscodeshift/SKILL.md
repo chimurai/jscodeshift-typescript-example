@@ -56,7 +56,7 @@ scope → requirements → prd → implement → review → retro
 ### PRD
 - Create or update `src/[transformer].PRD.md`.
 - Ensure each requirement and edge case is uniquely labeled.
-- Include relevant [learnings](./docs/LEARNINGS.md) to prevent the same mistakes in implementation.
+- Include relevant [learnings](./docs/LEARNINGS.md) to prevent the previous mistakes in implementation.
 
 ### Implement
 
