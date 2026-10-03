@@ -19,9 +19,9 @@ Always produce or update these files for the target codemod transformer:
 
 Use these reference assets when creating or updating transformer files:
 
-- [assets/[transformer].PRD.md](./assets/[transformer].PRD.md)
-- [assets/[transformer].spec.ts](./assets/[transformer].spec.ts)
-- [assets/[transformer].ts](./assets/[transformer].ts)
+- [references/[transformer].PRD.md](./references/[transformer].PRD.md)
+- [references/[transformer].spec.ts](./references/[transformer].spec.ts)
+- [references/[transformer].ts](./references/[transformer].ts)
 
 When updating an existing transformer, ensure these files exist and stay aligned.
 Update the PRD, PRD changelog, and tests before updating the transformer implementation.
