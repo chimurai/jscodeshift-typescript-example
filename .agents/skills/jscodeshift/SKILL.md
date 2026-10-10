@@ -56,12 +56,12 @@ scope → requirements → prd → implement → review → retro
 ### PRD
 - Create or update `src/[transformer].PRD.md`.
 - Ensure each requirement and edge case is uniquely labeled.
-- Include relevant [learnings](./docs/LEARNINGS.md) to prevent the previous mistakes in implementation.
 
 ### Implement
 
-Implement with TDD.
-Flow: Write transformer tests → Implement transformer → Validate implementation
+- Read [learnings](./docs/LEARNINGS.md) to prevent the previous mistakes in implementation.
+- Implement with TDD.
+- Flow: Write transformer tests → Implement transformer → Validate implementation
 
 #### Write Tests
 - Start from tests in `src/[transformer].spec.ts`:
